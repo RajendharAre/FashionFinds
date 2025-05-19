@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.product_name }} - Product Details{% endblock %}
+
+{% block content %}
+<style>
+    .size-value {
+        width: 40px;
+        font-weight: 500;
+    }
+
+    .quantity-value {
+        width: 40px;
+    }
+
+    .low-stock {
+        color: #e53935;
+    }
+
+    .in-stock {
+        color: #43a047;
+    }
+</style>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6 text-center">
+        </div>
+        {% if product.product_picture %}
+        <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" 
+             alt="{{ product.product_name }}" 
+             width="250" 
+             height="250">
+         {% else %}
+        No Image
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>{{ product.product_name }}</h2>
+            <p>{{ product.description }}</p>
+            <p class="text-danger fw-bold">
+                <span class="text-muted small"><s>₹{{ product.previous_price }}</s></span> ₹{{ product.current_price }}
+            </p>
+            <p><strong>Category:</strong> {{ product.category }}</p>
+            <p><strong>Color:</strong> {{ product.color }}</p>
+            <!-- <p><strong>Stock:</strong> {{ product.stock }}</p> -->
+            <p><strong>Stock:</strong> 
+                {% for sizes in product.quantity_size %}
+                    <tr>
+                        <td class="size-value">{{ sizes.size }}</td> -
+                        <td class="quantity-value {% if sizes.quantity < 10 %}low-stock{% else %}in-stock{% endif %}">
+                            {{ sizes.quantity }}
+                        </td> {% if product.quantity_size | length > 1 %} | {% endif %}
+                    </tr>
+                {% endfor %}
+            </p>
+
+
+          
+
+            <!-- ❤️ Add to Wishlist Form -->
+            <form action="{{ url_for('views.wishlist_add', product_id=product.id) }}" method="POST">
+                <button type="submit" class="btn btn-outline-danger mt-2">❤️ Add to Wishlist</button>
+            </form>
+
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

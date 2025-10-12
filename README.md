@@ -403,15 +403,18 @@ print(secrets.token_hex(32))
 
 ```markdown
 ### Homepage
-![Homepage](screenshots/Screenshot%20(310).png)
+![Homepage](FashionFinds/screenshots
+/homepage.png)
 *Browse through our extensive collection of fashion products with category filters*
 
 ### Product Details
-![Product Details](screenshots/Screenshot%20(311).png)
+![Product Details](FashionFinds/screenshots
+/homepage.png)
 *Detailed product information with size selection and cart options*
 
 ### Admin Dashboard
-![Admin Dashboard](screenshots/Screenshot%20(312).png)
+![Admin Dashboard](FashionFinds/screenshots
+/homepage.png)
 *Complete admin panel for managing products, users, and orders*
 ```
 
@@ -496,5 +499,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ⭐ Star this repo if you find it helpful!
 
 </div>
+
 
 

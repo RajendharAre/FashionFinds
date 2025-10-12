@@ -404,11 +404,11 @@ print(secrets.token_hex(32))
 *Browse through our extensive collection of fashion products with category filters*
 
 ### Product Details
-![Product Details](screenshots/admin_page.png)
+![Product Details](screenshots/admin_dashboard.png)
 *Detailed product information with size selection and cart options*
 
 ### Admin Dashboard
-![Admin Dashboard](screenshots/admin.png)
+![Admin Dashboard](screenshots/account.png)
 *Complete admin panel for managing products, users, and orders*
 
 ---
@@ -492,6 +492,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ⭐ Star this repo if you find it helpful!
 
 </div>
+
 
 
 

@@ -399,24 +399,17 @@ print(secrets.token_hex(32))
 
 ## 📸 Screenshots
 
-> Here is are some of the screenshots..
-
-```markdown
 ### Homepage
-![Homepage](FashionFinds/screenshots
-/homepage.png)
+![Homepage](screenshots/homepage.png)
 *Browse through our extensive collection of fashion products with category filters*
 
 ### Product Details
-![Product Details](FashionFinds/screenshots
-/homepage.png)
+![Product Details](screenshots/admin_page.png)
 *Detailed product information with size selection and cart options*
 
 ### Admin Dashboard
-![Admin Dashboard](FashionFinds/screenshots
-/homepage.png)
+![Admin Dashboard](screenshots/admin.png)
 *Complete admin panel for managing products, users, and orders*
-```
 
 ---
 
@@ -499,6 +492,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ⭐ Star this repo if you find it helpful!
 
 </div>
+
 
 
 

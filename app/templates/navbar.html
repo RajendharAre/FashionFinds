@@ -3,90 +3,387 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FASHION FINDS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
 </head>
-
-    <div class="nav-container">
-        <nav class="navbar">
-            <div class="logo">FASHION FINDS</div>
-            <div class="main-nav">
-                <a href="/" class="nav-item active">
-                    <i class="fas fa-home"></i>
-                    <span>Home</span>
-                </a>
-                <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="nav-item">
-              
-                    <i class="fas fa-male"></i>
-                    <span>Men</span>
-                </a>
-                <a href="{{ url_for('views.products_by_category', category_name='Kids') }}" class="nav-item">
-                    <i class="fas fa-child"></i>
-                    <span>Kids</span>
-                </a>
-                <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="nav-item">
-                    <i class="fas fa-female"></i>
-                    <span>Women</span>
-                </a>
-                <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}" class="nav-item">
-                    <i class="fas fa-bag-shopping"></i>
-                    <span>Accessories</span>
-                </a>
-                <a href="{{ url_for('views.products_by_category', category_name='Shoes') }}" class="nav-item">
-                    <i class="fas fa-shoe-prints"></i>
-                    <span>Shoes</span>
-                </a>
+<body>
+<div class="nav-container">
+    <nav class="navbar">
+        <!-- Logo -->
+        <a href="/" class="logo">
+            <i class="fas fa-shopping-bag"></i>
+            FASHION FINDS
+        </a>
+        
+        <!-- Main Navigation -->
+        <div class="main-nav">
+            <a href="/" class="nav-item" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="nav-item">
+                <i class="fas fa-male"></i>
+                <span>Men</span>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="nav-item">
+                <i class="fas fa-female"></i>
+                <span>Women</span>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Kids') }}" class="nav-item">
+                <i class="fas fa-child"></i>
+                <span>Kids</span>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}" class="nav-item">
+                <i class="fas fa-bag-shopping"></i>
+                <span>Accessories</span>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Shoes') }}" class="nav-item">
+                <i class="fas fa-shoe-prints"></i>
+                <span>Shoes</span>
+            </a>
+        </div>
+        
+        <!-- Search Bar -->
+        <form action="{{ url_for('views.search') }}" method="GET" class="search-container">
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    name="query" 
+                    class="search-input" 
+                    placeholder="Search products, brands..." 
+                    autocomplete="off"
+                    id="searchInput"
+                >
+                <button type="submit" class="search-button" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
+            <!-- Search Suggestions Dropdown -->
+            <div id="searchSuggestions" class="search-suggestions" style="display: none;"></div>
+        </form>
+        
+        <!-- User Actions -->
+        <div class="nav-actions">
+            <!-- Wishlist -->
+            <a href="/wishlist" class="nav-item nav-icon" title="Wishlist">
+                <i class="far fa-heart"></i>
+                <span class="badge" id="wishlistCount">0</span>
+            </a>
             
-                <div class="search-container">
-                    <form action="{{ url_for('views.search') }}" method="GET" class="search-bar">
-                        <input type="text" 
-                               name="query" 
-                               class="search-input" 
-                               placeholder="Search products, brands, and categories..." 
-                               required>
-                        <button type="submit" class="search-button">
-                            <svg class="search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                            </svg>
-                        </button>
-                    </form>
-                </div>
+            <!-- Cart -->
+            <a href="/cart" class="nav-item nav-icon" title="Cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="badge" id="cartCount">0</span>
+            </a>
             
-
-            <div class="nav-actions">
-                <a href="/wishlist" class="nav-item">
-                    <i class="far fa-heart"></i>
-                    <span>Wishlist</span>
+            <!-- Account Dropdown -->
+            <div class="dropdown">
+                <a href="{{ url_for('auth.account') }}" class="nav-item">
+                    <i class="far fa-user"></i>
+                    <span>{% if current_user %}{{ current_user.name.split()[0] }}{% else %}Account{% endif %}</span>
+                    <i class="fas fa-chevron-down"></i>
                 </a>
-                <a href="/cart" class="nav-item">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>Cart</span>
-                </a>
-                <div class="dropdown">
-                    <a href="{{url_for('auth.account')}}" class="nav-item">
-                        <i class="far fa-user"></i>
-                        <span>Account</span>
-                    </a>
-                    <div class="dropdown-content">
-                        <!-- <div class="dropdown-item">Discover Your Style</div>
-                        <div class="dropdown-item">Explore Showroom</div>
-                        <div class="dropdown-divider"></div> -->
-                        <a href="{{url_for('auth.account')}}" class="dropdown-item">Your Account</a>
-                        <a href="{{url_for('views.my_orders')}}" class="dropdown-item">Your Orders</a>
-                        <a href="/cart" class="dropdown-item">Your Cart</a>
-                        <a href="/wishlist" class="dropdown-item">Your Wish List</a>
-                        <!-- <a href="/recommendations" class="dropdown-item">Your Recommendations</a> -->
+                <div class="dropdown-content">
+                    {% if current_user %}
+                        <a href="{{ url_for('auth.account') }}" class="dropdown-item">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        <a href="/orders" class="dropdown-item">
+                            <i class="fas fa-box"></i> My Orders
+                        </a>
+                        <a href="/wishlist" class="dropdown-item">
+                            <i class="fas fa-heart"></i> Wishlist
+                        </a>
                         <div class="dropdown-divider"></div>
-                        {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.logout') }}" class="dropdown-item">Logout</a>
-                        {% else %}
-                            <a href="{{ url_for('auth.login') }}" class="dropdown-item">Login</a>
-                            <a href="{{ url_for('auth.register') }}" class="dropdown-item">Register</a>
+                        {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('admin.admin_dashboard') }}" class="dropdown-item">
+                                <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                            </a>
                         {% endif %}
-                    </div>
+                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="dropdown-item">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="dropdown-item">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    {% endif %}
                 </div>
             </div>
-        </nav>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="/" class="mobile-menu-item">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="mobile-menu-item">
+            <i class="fas fa-male"></i> Men
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="mobile-menu-item">
+            <i class="fas fa-female"></i> Women
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Kids') }}" class="mobile-menu-item">
+            <i class="fas fa-child"></i> Kids
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}" class="mobile-menu-item">
+            <i class="fas fa-bag-shopping"></i> Accessories
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Shoes') }}" class="mobile-menu-item">
+            <i class="fas fa-shoe-prints"></i> Shoes
+        </a>
     </div>
+</div>
+
+<style>
+/* Enhanced Navbar Styles */
+.nav-icon {
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #F44336;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: white;
+    min-width: 220px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #F5F5F5;
+    color: #C4877A;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #E0E0E0;
+    margin: 8px 0;
+}
+
+/* Search Suggestions */
+.search-container {
+    position: relative;
+}
+
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+    background: #F5F5F5;
+}
+
+.suggestion-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Mobile Menu */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.mobile-menu {
+    display: none;
+    background: #2C2C2C;
+    padding: 16px;
+}
+
+.mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: background 0.2s;
+}
+
+.mobile-menu-item:hover {
+    background: rgba(196, 135, 122, 0.2);
+}
+
+@media (max-width: 1024px) {
+    .main-nav {
+        display: none;
+    }
+    
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    .mobile-menu.active {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-item span {
+        display: none;
+    }
+    
+    .search-container {
+        order: 3;
+        flex: 1 0 100%;
+        margin-top: 12px;
+    }
+    
+    .search-bar {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+// Enhanced JavaScript for navbar functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+    }
+    
+    // Active page highlighting
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('href') === currentPath) {
+            item.classList.add('active');
+        }
+    });
+    
+    // Search suggestions (placeholder - implement with AJAX)
+    const searchInput = document.getElementById('searchInput');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    
+    if (searchInput) {
+        let debounceTimer;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchSuggestions.style.display = 'none';
+                return;
+            }
+            
+            debounceTimer = setTimeout(() => {
+                // TODO: Implement AJAX search
+                // fetchSearchSuggestions(query);
+            }, 300);
+        });
+        
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target)) {
+                searchSuggestions.style.display = 'none';
+            }
+        });
+    }
+    
+    // Update cart and wishlist counts
+    function updateBadgeCounts() {
+        // TODO: Fetch from backend
+        // For now, get from localStorage or session
+        const cartCount = localStorage.getItem('cartCount') || 0;
+        const wishlistCount = localStorage.getItem('wishlistCount') || 0;
+        
+        const cartBadge = document.getElementById('cartCount');
+        const wishlistBadge = document.getElementById('wishlistCount');
+        
+        if (cartBadge) cartBadge.textContent = cartCount;
+        if (wishlistBadge) wishlistBadge.textContent = wishlistCount;
+    }
+    
+    updateBadgeCounts();
+});
+</script>
+</body>
+</html>

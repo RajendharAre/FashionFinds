@@ -1,139 +1,662 @@
 {% extends 'base.html' %}
 
+{% block title %}FashionFinds - Your Ultimate Fashion Destination{% endblock %}
+
 {% block content %}
-
-<section class="responsive-slider">
+<!-- Hero Slider -->
+<section class="hero-slider">
     <div class="slider-container">
-        <div class="slider-track">
-            <div class="slide">   
-                <img src="{{ url_for('static', filename='images/slaider img1.png') }}" alt="Slider Image">
+        <div class="slider-track" id="heroSlider">
+            <div class="slide">
+                <img src="{{ url_for('static', filename='images/slaider img1.png') }}" alt="Fashion Collection 1">
+                <div class="slide-content">
+                    <h1 class="slide-title">Summer Collection 2024</h1>
+                    <p class="slide-subtitle">Discover the latest trends</p>
+                    <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="slide-btn">Shop Now</a>
+                </div>
             </div>
             <div class="slide">
-                <img src="{{ url_for('static', filename='images/slaider img2.png') }}" alt="Slider Image">
+                <img src="{{ url_for('static', filename='images/slaider img2.png') }}" alt="Fashion Collection 2">
+                <div class="slide-content">
+                    <h1 class="slide-title">Exclusive Deals</h1>
+                    <p class="slide-subtitle">Up to 50% off on selected items</p>
+                    <a href="{{ url_for('views.search') }}" class="slide-btn">Explore Deals</a>
+                </div>
             </div>
             <div class="slide">
-                <img src="{{ url_for('static', filename='images/slaider img4.png') }}" alt="Slider Image">
+                <img src="{{ url_for('static', filename='images/slaider img4.png') }}" alt="Fashion Collection 3">
+                <div class="slide-content">
+                    <h1 class="slide-title">New Arrivals</h1>
+                    <p class="slide-subtitle">Fresh styles just for you</p>
+                    <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="slide-btn">Discover More</a>
+                </div>
             </div>
         </div>
     </div>
-    <button class="arrow-btn prev-btn" aria-label="Previous slide">◀</button>
-    <button class="arrow-btn next-btn" aria-label="Next slide">▶</button>
-    <div class="slider-controls"></div>
-</section>    
+    <button class="arrow-btn prev-btn" aria-label="Previous slide">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="arrow-btn next-btn" aria-label="Next slide">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    <div class="slider-controls" id="sliderDots"></div>
+</section>
 
-<h2 class="mb-2">Featured Products</h2>
-<div class="product-container">
-    {% for product in products %}
-    <div class="card">
-        <div class="product-card">
-            {% if product.product_picture %}
-            <div class="card-image">
-                <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" 
-                     alt="{{ product.product_name }}" 
-                     class="responsive-img">
+<!-- Category Quick Access -->
+<section class="category-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Shop by Category</h2>
+            <p>Find exactly what you're looking for</p>
+        </div>
+        <div class="category-grid">
+            <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="category-card">
+                <div class="category-image">
+                    <i class="fas fa-male"></i>
+                </div>
+                <h3>Men's Fashion</h3>
+                <p>Explore Collection</p>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="category-card">
+                <div class="category-image">
+                    <i class="fas fa-female"></i>
+                </div>
+                <h3>Women's Fashion</h3>
+                <p>Explore Collection</p>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Kids') }}" class="category-card">
+                <div class="category-image">
+                    <i class="fas fa-child"></i>
+                </div>
+                <h3>Kids Fashion</h3>
+                <p>Explore Collection</p>
+            </a>
+            <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}" class="category-card">
+                <div class="category-image">
+                    <i class="fas fa-gem"></i>
+                </div>
+                <h3>Accessories</h3>
+                <p>Explore Collection</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Brands -->
+<section class="brands-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Featured Brands</h2>
+            <p>Shop from your favorite brands</p>
+        </div>
+        <div class="brand-container">
+            {% for brand in brands %}
+            <a href="{{ url_for('views.brand_info', brand_id=brand.id) }}" class="brand-card">
+                <div class="brand-image">
+                    <img src="{{ url_for('static', filename=brand.logo) }}" alt="{{ brand.name }}" loading="lazy">
+                </div>
+                <div class="brand-overlay">
+                    <h3>{{ brand.name }}</h3>
+                    <span class="brand-badge">Up to 60% OFF</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="products-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Trending Now</h2>
+            <p>Most popular products this week</p>
+            <a href="{{ url_for('views.search') }}" class="view-all-btn">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="product-container" id="productsGrid">
+            {% for product in products %}
+            <div class="product-card" data-product-id="{{ product.id }}">
+                {% if product.discount > 0 %}
+                <span class="discount-badge">-{{ product.discount }}%</span>
+                {% endif %}
+                
+                <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})" aria-label="Add to wishlist">
+                    <i class="far fa-heart"></i>
+                </button>
+                
+                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
+                    <div class="product-image">
+                        <img src="{{ url_for('static', filename=product.product_picture) }}" alt="{{ product.product_name }}" loading="lazy">
+                    </div>
+                </a>
+                
+                <div class="product-info">
+                    <h3 class="product-title">{{ product.product_name }}</h3>
+                    
+                    <div class="product-rating">
+                        {% for i in range(5) %}
+                            <i class="fas fa-star {% if i >= product.rating %}star-empty{% endif %}"></i>
+                        {% endfor %}
+                        <span class="rating-count">({{ product.count }})</span>
+                    </div>
+                    
+                    <div class="price-container">
+                        <span class="discounted-price">₹{{ product.current_price }}</span>
+                        {% if product.previous_price > product.current_price %}
+                        <span class="original-price">₹{{ product.previous_price }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="product-actions">
+                        <button class="btn btn-primary btn-sm" onclick="addToCart({{ product.id }})">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn btn-secondary btn-sm">
+                            View Details
+                        </a>
+                    </div>
+                </div>
             </div>
-            {% else %}
-            <div class="card-image no-image">No Image</div>
-            {% endif %}
-            <div class="card-content">
-                <h5 class="card-title">{{ product.product_name }}</h5>
-                <p class="card-price">Rs. {{ product.current_price }}</p>
-                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="view-btn">View Details</a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Special Offers Banner -->
+<section class="offers-banner">
+    <div class="container">
+        <div class="offers-grid">
+            <div class="offer-card offer-primary">
+                <div class="offer-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3>Free Shipping</h3>
+                <p>On orders above ₹999</p>
+            </div>
+            <div class="offer-card offer-secondary">
+                <div class="offer-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Secure Payment</h3>
+                <p>100% secure transactions</p>
+            </div>
+            <div class="offer-card offer-tertiary">
+                <div class="offer-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <h3>Easy Returns</h3>
+                <p>30-day return policy</p>
+            </div>
+            <div class="offer-card offer-quaternary">
+                <div class="offer-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>24/7 Support</h3>
+                <p>Dedicated customer service</p>
             </div>
         </div>
     </div>
-    {% endfor %}
-</div>
+</section>
 
+{% endblock %}
+
+{% block extra_css %}
 <style>
-    /* Button styles */
-    .view-btn {
-        background-color: #C4877A;
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 30px;
-        cursor: pointer;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.9rem;
+    /* Hero Slider Enhancements */
+    .hero-slider {
         position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        display: inline-block;
-        text-decoration: none;
-        text-align: center;
+        margin-bottom: var(--space-3xl);
     }
-    
-    .view-btn:hover {
-        background-color: #B3796D;
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+
+    .slide {
+        position: relative;
     }
-    
-    .view-btn:active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .view-btn::after {
-        content: '';
+
+    .slide-content {
         position: absolute;
         top: 50%;
-        left: 50%;
-        width: 5px;
-        height: 5px;
-        background: rgba(255, 255, 255, 0.5);
-        opacity: 0;
-        border-radius: 100%;
-        transform: scale(1, 1) translate(-50%);
-        transform-origin: 50% 50%;
+        left: 10%;
+        transform: translateY(-50%);
+        color: white;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        max-width: 500px;
     }
-    
-    .view-btn:focus:not(:active)::after {
-        animation: ripple 0.6s ease-out;
+
+    .slide-title {
+        font-size: clamp(2rem, 5vw, 4rem);
+        font-family: var(--font-heading);
+        margin-bottom: var(--space-md);
+        animation: fadeInUp 0.8s ease-out;
     }
-    
-    @keyframes ripple {
-        0% {
-            transform: scale(0, 0);
-            opacity: 0.5;
-        }
-        100% {
-            transform: scale(20, 20);
+
+    .slide-subtitle {
+        font-size: clamp(1rem, 2vw, 1.5rem);
+        margin-bottom: var(--space-xl);
+        animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+
+    .slide-btn {
+        display: inline-block;
+        padding: var(--space-md) var(--space-2xl);
+        background: var(--primary);
+        color: white;
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        transition: all 0.3s;
+        animation: fadeInUp 0.8s ease-out 0.4s backwards;
+    }
+
+    .slide-btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(196, 135, 122, 0.4);
+    }
+
+    @keyframes fadeInUp {
+        from {
             opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
-    
-    /* Pulse animation on hover */
-    .view-btn:hover::before {
-        content: '';
+
+    /* Section Headers */
+    .section-header {
+        text-align: center;
+        margin-bottom: var(--space-2xl);
+        position: relative;
+    }
+
+    .section-header h2 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        color: var(--dark);
+        margin-bottom: var(--space-sm);
+    }
+
+    .section-header p {
+        color: var(--gray-600);
+        font-size: 1.125rem;
+    }
+
+    .view-all-btn {
         position: absolute;
-        top: 0;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        transition: all 0.3s;
+    }
+
+    .view-all-btn:hover {
+        gap: var(--space-md);
+    }
+
+    /* Category Cards */
+    .category-section {
+        padding: var(--space-3xl) 0;
+        background: var(--gray-100);
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-xl);
+    }
+
+    .category-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--space-2xl);
+        text-align: center;
+        transition: all 0.3s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .category-image {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-lg);
+        font-size: 3rem;
+        color: white;
+    }
+
+    .category-card h3 {
+        font-size: 1.25rem;
+        color: var(--dark);
+        margin-bottom: var(--space-sm);
+    }
+
+    .category-card p {
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    /* Brand Cards */
+    .brands-section {
+        padding: var(--space-3xl) 0;
+    }
+
+    .brand-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius-lg);
+        aspect-ratio: 1;
+        transition: all 0.3s;
+    }
+
+    .brand-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .brand-image {
+        width: 100%;
+        height: 100%;
+    }
+
+    .brand-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+    .brand-card:hover .brand-image img {
+        transform: scale(1.1);
+    }
+
+    .brand-overlay {
+        position: absolute;
+        bottom: 0;
         left: 0;
         right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 30px;
-        animation: pulse 1.5s infinite;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        padding: var(--space-lg);
+        color: white;
+        transform: translateY(100%);
+        transition: transform 0.3s;
     }
-    
-    @keyframes pulse {
-        0% {
-            transform: scale(0.95);
-            opacity: 1;
+
+    .brand-card:hover .brand-overlay {
+        transform: translateY(0);
+    }
+
+    .brand-overlay h3 {
+        font-size: 1.25rem;
+        margin-bottom: var(--space-sm);
+    }
+
+    .brand-badge {
+        display: inline-block;
+        padding: var(--space-xs) var(--space-md);
+        background: var(--primary);
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    /* Product Cards Enhanced */
+    .products-section {
+        padding: var(--space-3xl) 0;
+    }
+
+    .product-card {
+        position: relative;
+    }
+
+    .wishlist-btn {
+        position: absolute;
+        top: var(--space-md);
+        right: var(--space-md);
+        width: 40px;
+        height: 40px;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        z-index: 10;
+        box-shadow: var(--shadow-md);
+    }
+
+    .wishlist-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .wishlist-btn.active i {
+        font-weight: 900;
+        color: var(--error);
+    }
+
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+        margin-bottom: var(--space-sm);
+    }
+
+    .product-rating i {
+        color: #FFC107;
+        font-size: 0.875rem;
+    }
+
+    .product-rating .star-empty {
+        color: var(--gray-300);
+    }
+
+    .rating-count {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: var(--space-sm);
+        margin-top: var(--space-md);
+    }
+
+    .product-actions .btn {
+        flex: 1;
+    }
+
+    /* Offers Banner */
+    .offers-banner {
+        padding: var(--space-3xl) 0;
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    }
+
+    .offers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-xl);
+    }
+
+    .offer-card {
+        background: white;
+        padding: var(--space-2xl);
+        border-radius: var(--radius-lg);
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .offer-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .offer-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--primary-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-lg);
+        font-size: 2rem;
+        color: var(--primary);
+    }
+
+    .offer-card h3 {
+        color: var(--dark);
+        margin-bottom: var(--space-sm);
+    }
+
+    .offer-card p {
+        color: var(--gray-600);
+    }
+
+    @media (max-width: 768px) {
+        .slide-content {
+            left: 5%;
+            max-width: 90%;
         }
-        70% {
-            transform: scale(1.05);
-            opacity: 0.7;
+
+        .view-all-btn {
+            position: static;
+            transform: none;
+            margin-top: var(--space-md);
+            justify-content: center;
         }
-        100% {
-            transform: scale(0.95);
-            opacity: 1;
+
+        .product-actions {
+            flex-direction: column;
         }
     }
 </style>
+{% endblock %}
 
+{% block extra_js %}
+<script>
+    // Add to Cart Functionality
+    async function addToCart(productId) {
+        try {
+            const response = await fetch(`/add_to_cart/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (response.ok) {
+                showNotification('Product added to cart!', 'success');
+                updateCartCount();
+            } else {
+                showNotification('Failed to add product to cart', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
+        }
+    }
+
+    // Add to Wishlist Functionality
+    async function addToWishlist(productId) {
+        const btn = event.currentTarget;
+        
+        try {
+            const response = await fetch(`/add_to_wishlist/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (response.ok) {
+                btn.classList.add('active');
+                showNotification('Added to wishlist!', 'success');
+                updateWishlistCount();
+            } else {
+                showNotification('Failed to add to wishlist', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
+        }
+    }
+
+    function showNotification(message, type) {
+        // Reuse the flash message system
+        const container = document.querySelector('.flash-messages-container') || createFlashContainer();
+        const notification = document.createElement('div');
+        notification.className = `flash-message flash-${type}`;
+        notification.innerHTML = `
+            <div class="flash-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="flash-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    function createFlashContainer() {
+        const container = document.createElement('div');
+        container.className = 'flash-messages-container';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    function updateCartCount() {
+        // TODO: Fetch actual count from server
+        const badge = document.getElementById('cartCount');
+        if (badge) {
+            const current = parseInt(badge.textContent) || 0;
+            badge.textContent = current + 1;
+        }
+    }
+
+    function updateWishlistCount() {
+        // TODO: Fetch actual count from server
+        const badge = document.getElementById('wishlistCount');
+        if (badge) {
+            const current = parseInt(badge.textContent) || 0;
+            badge.textContent = current + 1;
+        }
+    }
+
+    // Lazy Loading Images
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+</script>
 {% endblock %}

@@ -1,48 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Fashion Finds</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body class="body-class">
-    <div class="containerX">
-        <div class="left-container">
-            <h1>Fashion Finds</h1>
-            <img src="{{ url_for('static', filename='images/log-img.gif') }}" alt="fashion-finds" class="login-image">
-            <p>Discover the latest trends in fashion and explore your style.</p>
+{% extends 'base.html' %}
+
+{% block title %}Login - Fashion Finds{% endblock %}
+
+{% block content %}
+<!-- Login Header -->
+<section class="auth-header">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Login to Your Account</h2>
+            <p>Access your Fashion Finds account</p>
         </div>
-        <div class="right-container">
-            <form method="POST">
-                <div class="login-container">
-                    <h2 class="login">Login</h2>
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            <div class="messages">
-                                {% for category, message in messages %}
-                                    <div class="message-container">
-                                        <p class="{{ category }}">{{ message }}</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="auth-container">
+        <div class="auth-image">
+            <img src="{{ url_for('static', filename='images/log-img.gif') }}" alt="Fashion Finds" class="auth-gif">
+        </div>
+        
+        <div class="auth-form">
+            <form method="POST" class="login-form">
+                <h3 class="form-title">Welcome Back</h3>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">
+                                    <div class="flash-content">
+                                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'warning' else 'times-circle' if category == 'error' else 'info-circle' }}"></i>
+                                        <span>{{ message }}</span>
                                     </div>
-                                {% endfor %}
-                                
-                            </div>
-                        {% endif %}
-                    {% endwith %}
-                   
-                    <label for="email" class="email">Email ID:</label>
-                    <input type="email" id="email" name="email" class="field" required>
-        
-                    <label for="password" class="password">Password:</label>
-                    <input type="password" id="password" name="password" class="field" required>
-        
-                    <button type="submit" class="button">Login</button>
-                    <p>Don't have an account? <a href="{{ url_for('auth.register') }}"><span class="register-link">Register here</span></a></p>
-                    <p><a href="{{ url_for('auth.forgot_password') }}" class="forget-link">Forgot Password?</a></p>
+                                    <button class="flash-close" onclick="this.parentElement.remove()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+                
+                <div class="auth-links">
+                    <p>Don't have an account? <a href="{{ url_for('auth.register') }}" class="auth-link">Register here</a></p>
+                    <p><a href="{{ url_for('auth.forgot_password') }}" class="auth-link">Forgot Password?</a></p>
                 </div>
             </form>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/functionality.js') }}"></script>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xl);
+        padding: var(--space-xl) 0;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .auth-image {
+        flex: 1;
+        min-width: 300px;
+        text-align: center;
+    }
+    
+    .auth-gif {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .auth-form {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .login-form {
+        background: var(--white);
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .form-title {
+        text-align: center;
+        margin-bottom: var(--space-xl);
+        color: var(--dark);
+    }
+    
+    .form-group {
+        margin-bottom: var(--space-lg);
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: var(--space-sm);
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+    
+    .auth-links {
+        text-align: center;
+        margin-top: var(--space-lg);
+    }
+    
+    .auth-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .auth-link:hover {
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+        .auth-container {
+            flex-direction: column;
+        }
+        
+        .auth-image, .auth-form {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

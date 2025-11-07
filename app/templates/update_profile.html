@@ -1,57 +1,149 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Profile - Fashion Finds</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body class="body-class">
-    <div class="update-profile-container">
-        <form id="updateProfileForm" method="POST">
+{% extends 'base.html' %}
+
+{% block title %}Update Profile - Fashion Finds{% endblock %}
+
+{% block content %}
+<!-- Update Profile Header -->
+<section class="auth-header">
+    <div class="container">
+        <div class="section-header text-center">
             <h2>Update Profile</h2>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="messages">
-                        {% for category, message in messages %}
-                            <p class="{{ category }}">{{ message }}</p>
-                            <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
-
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
-
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" value="{{ current_user.phone }}" required>
-
-            <label for="email">Email ID:</label>
-            <input type="email" id="email" name="email" value="{{ current_user.email }}" required readonly disabled>
-
-            <label for="address">Address:</label>
-            <textarea id="address" name="address" required>{{ current_user.address }}</textarea>
-
-            <label for="state">State:</label>
-            <select id="state" name="state" required>
-                <option value="">Select State</option>
-            </select>
-
-            <label for="city">City:</label>
-            <select id="city" name="city" required>
-                <option value="">Select City</option>
-            </select>
-
-            <label for="pincode">Pincode:</label>
-            <input type="text" id="pincode" name="pincode" value="{{ current_user.pincode }}" required>
-
-            <button type="submit">Update Profile</button>
-            <p><a href="{{ url_for('views.homepage') }}">Back to Home</a></p>
-        </form>
+            <p>Manage your account information</p>
+        </div>
     </div>
+</section>
 
-    <script src="{{ url_for('static', filename='js/state_city.js') }}"></script>
-</body>
-</html>
+<div class="container">
+    <div class="auth-container">
+        <div class="auth-form">
+            <form id="updateProfileForm" method="POST" class="update-profile-form">
+                <h3 class="form-title">Edit Your Profile</h3>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">
+                                    <div class="flash-content">
+                                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'warning' else 'times-circle' if category == 'error' else 'info-circle' }}"></i>
+                                        <span>{{ message }}</span>
+                                    </div>
+                                    <button class="flash-close" onclick="this.parentElement.remove()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="form-group">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" id="name" name="name" value="{{ current_user.name }}" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="{{ current_user.phone }}" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ current_user.email }}" class="form-control" required readonly disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea id="address" name="address" class="form-control" required>{{ current_user.address }}</textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="state" class="form-label">State</label>
+                        <select id="state" name="state" class="form-control" required>
+                            <option value="">Select State</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city" class="form-label">City</label>
+                        <select id="city" name="city" class="form-control" required>
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pincode" class="form-label">Pincode</label>
+                    <input type="text" id="pincode" name="pincode" value="{{ current_user.pincode }}" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">Update Profile</button>
+                
+                <div class="auth-links">
+                    <p><a href="{{ url_for('views.homepage') }}" class="auth-link">Back to Home</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        padding: var(--space-xl) 0;
+    }
+    
+    .auth-form {
+        width: 100%;
+        max-width: 600px;
+    }
+    
+    .update-profile-form {
+        background: var(--white);
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .form-title {
+        text-align: center;
+        margin-bottom: var(--space-xl);
+        color: var(--dark);
+    }
+    
+    .form-group {
+        margin-bottom: var(--space-lg);
+    }
+    
+    .form-row {
+        display: flex;
+        gap: var(--space-md);
+        flex-wrap: wrap;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: var(--space-sm);
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/state_city.js') }}"></script>
+{% endblock %}

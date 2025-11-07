@@ -3,6 +3,19 @@ from datetime import datetime, timezone,timedelta
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from flask_login import UserMixin
 
+# Brand Model
+class Brand(db.Model):
+    __tablename__ = 'brands'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    
+    # Relationship with products
+    products = db.relationship('Product', backref='brand', lazy=True, cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<Brand {self.name}>"
+
+
 # User Model
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -55,16 +68,16 @@ class Product(db.Model):
     rating = db.Column(db.Integer, default=0)
     sale = db.Column(db.Boolean, default=False)
     discount = db.Column(db.Integer, nullable=True, default=0)
+    count = db.Column(db.Integer, nullable=False, default=0)  # Inventory count
 
-    brand = db.Column(db.String(100), nullable=True)
+    brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'), nullable=True)
     category = db.Column(db.String(100), nullable=False)  # ✅ Now category is a string field
     
-
-
     quantity_size = db.relationship('ProductSize', backref='product', lazy=True, cascade="all, delete-orphan")
     carts = db.relationship('Cart', backref='cart_product', lazy=True, cascade="all, delete-orphan")
     wishlists = db.relationship('Wishlist', backref='wishlist_product', lazy=True, cascade="all, delete-orphan")
     order_items = db.relationship('OrderItem', backref='product', lazy=True, cascade="all, delete-orphan")
+    
     def __repr__(self):
         return f"<Product {self.product_name}, Price: {self.current_price}, Category: {self.category}>"
 
@@ -122,7 +135,9 @@ class Order(db.Model):
     mail = db.Column(db.String(50), nullable=False)
 
     def calculate_total_price(self):
-        self.total_price = sum(item.subtotal for item in self.order_items)
+        # Access order items through the relationship
+        # Type ignore needed for linter compatibility with SQLAlchemy relationships
+        self.total_price = sum(item.subtotal for item in self.order_items)  # type: ignore
         db.session.commit()
 
     def __repr__(self):

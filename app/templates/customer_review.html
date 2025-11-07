@@ -1,49 +1,132 @@
 {% extends "base.html" %}
+
+{% block title %}Rate Products for Order #{{ order.id }}{% endblock %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/customer_review.css') }}">
-    <title>Rate Products for Order #{{ order.id }}</title>
-</head>
-<body>
-  <div class="product-rating-container">
-    {% if not order.has_rated and order.status == "Delivered" %}
-      <h2>Review Your Order #{{ order.id }}</h2>
-      <form method="POST" action="{{ url_for('delivery.customer_review', user_id=user.id, order_id=order.id, token=token) }}">
-        {% for product in products %}
-          <div class="card">
-            <img src="{{ url_for('admin.get_image', filename=product.product_picture) }}"
-                 alt="{{ product.product_name }}" class="product-image">
-            <h3>Rate {{ product.product_name }}</h3>
-            <div class="star-rating">
-              <input id="star5_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="5" required>
-              <label for="star5_{{ product.id }}" title="5 stars"></label>
-              <input id="star4_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="4">
-              <label for="star4_{{ product.id }}" title="4 stars"></label>
-              <input id="star3_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="3">
-              <label for="star3_{{ product.id }}" title="3 stars"></label>
-              <input id="star2_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="2">
-              <label for="star2_{{ product.id }}" title="2 stars"></label>
-              <input id="star1_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="1">
-              <label for="star1_{{ product.id }}" title="1 star"></label>
+<!-- Customer Review Header -->
+<section class="review-header">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Review Your Order #{{ order.id }}</h2>
+            <p>Share your experience with the products you purchased</p>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="review-container">
+        {% if not order.has_rated and order.status == "Delivered" %}
+        <form method="POST" action="{{ url_for('delivery.customer_review', user_id=user.id, order_id=order.id, token=token) }}" class="review-form">
+            <div class="product-reviews">
+                {% for product in products %}
+                <div class="review-card">
+                    <div class="product-info">
+                        <img src="{{ url_for('admin.get_image', filename=product.product_picture) }}" 
+                             alt="{{ product.product_name }}" class="product-image">
+                        <h3>{{ product.product_name }}</h3>
+                    </div>
+                    
+                    <div class="star-rating">
+                        <input id="star5_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="5" required>
+                        <label for="star5_{{ product.id }}" title="5 stars">★</label>
+                        <input id="star4_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="4">
+                        <label for="star4_{{ product.id }}" title="4 stars">★</label>
+                        <input id="star3_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="3">
+                        <label for="star3_{{ product.id }}" title="3 stars">★</label>
+                        <input id="star2_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="2">
+                        <label for="star2_{{ product.id }}" title="2 stars">★</label>
+                        <input id="star1_{{ product.id }}" type="radio" name="rating_{{ product.id }}" value="1">
+                        <label for="star1_{{ product.id }}" title="1 star">★</label>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-          </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary">Submit Ratings</button>
-      </form>
-    {% else %}
-      <p>This order has either been rated or is not yet delivered.</p>
-    {% endif %}
-  </div>
-  <script>
+            
+            <button type="submit" class="btn btn-primary w-100">Submit Ratings</button>
+        </form>
+        {% else %}
+        <div class="text-center py-5">
+            <h3>Review Not Available</h3>
+            <p class="text-muted">This order has either been rated or is not yet delivered.</p>
+            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Continue Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .review-container {
+        padding: var(--space-xl) 0;
+    }
+    
+    .review-form {
+        background: var(--white);
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .product-reviews {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: var(--space-lg);
+        margin-bottom: var(--space-xl);
+    }
+    
+    .review-card {
+        background: var(--gray-50);
+        padding: var(--space-lg);
+        border-radius: var(--radius-md);
+        text-align: center;
+    }
+    
+    .product-info {
+        margin-bottom: var(--space-lg);
+    }
+    
+    .product-image {
+        width: 100%;
+        max-width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-md);
+    }
+    
+    .star-rating {
+        display: flex;
+        justify-content: center;
+        gap: var(--space-sm);
+        direction: rtl;
+    }
+    
+    .star-rating input {
+        display: none;
+    }
+    
+    .star-rating label {
+        font-size: 2rem;
+        color: var(--gray-300);
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: var(--warning);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
     document.querySelectorAll('.star-rating input').forEach(star => {
-      star.addEventListener('change', () => {
-        console.log('Rating selected for product:', star.name, 'Value:', star.value);
-      });
+        star.addEventListener('change', () => {
+            console.log('Rating selected for product:', star.name, 'Value:', star.value);
+        });
     });
-  </script>
-</body>
-</html>
+</script>
 {% endblock %}

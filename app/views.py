@@ -1,9 +1,14 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session, flash, send_from_directory
 from app.models import Product, Brand, Cart, Wishlist, User, Order, OrderItem, ProductSize, db
 from sqlalchemy import func, or_, desc
 import random
+import os
 
 views = Blueprint('views', __name__)
+
+# Define UPLOAD_FOLDER for views (same as in admin)
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "app", "media")
 
 # ============= HOMEPAGE =============
 @views.route('/')
@@ -643,3 +648,13 @@ def api_wishlist_count():
     
     count = Wishlist.query.filter_by(user_id=session['user_id']).count()
     return jsonify({'count': count})
+
+
+# Add get_image route for serving product images
+@views.route('/media/<path:filename>')
+def get_image(filename):
+    """Serve product images from the media folder"""
+    file_path = os.path.join(UPLOAD_FOLDER, filename).replace("\\", "/")
+    if not os.path.exists(file_path):
+        return "File not found", 404
+    return send_from_directory(UPLOAD_FOLDER, filename)

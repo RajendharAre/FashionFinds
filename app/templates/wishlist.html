@@ -1,77 +1,123 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h4 class="fw-bold text-start" style="margin-left: 40px;">
-        My <span class="text-primary">Wishlist</span> {{ wishlist_items|length }} items
-    </h4>
-    
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-3">
+<!-- Wishlist Header -->
+<section class="wishlist-header">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>My Wishlist</h2>
+            <p>{{ wishlist_items|length }} items in your wishlist</p>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    {% if wishlist_items %}
+    <div class="product-container">
         {% for item in wishlist_items %}
-        <div class="col d-flex justify-content-center">
-            <div class="card shadow-sm border-0" style="width: 18rem;">
-                <div class="position-relative">
-                    <img src="{{ url_for('views.get_image', filename=item['product'].product_picture) }}" 
-                    alt="{{ item['product'].product_name }}" 
-                    width="250" 
-                    height="250">
-                    <button class="btn btn-light position-absolute top-0 end-0 m-2" onclick="removeFromWishlist({{ item['product'].id }})">&times;</button>
+        <div class="product-card" data-product-id="{{ item['product'].id }}">
+            <form action="{{ url_for('views.remove_from_wishlist', product_id=item['product'].id) }}" method="POST" class="wishlist-form">
+                <button type="submit" class="wishlist-btn active" aria-label="Remove from wishlist">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </form>
+            
+            <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="product-image-link">
+                <div class="product-image">
+                    <img src="{{ url_for('views.get_image', filename=item['product'].product_picture) }}" alt="{{ item['product'].product_name }}">
                 </div>
-                <div class="card-body text-center d-flex flex-column gap-2">
-                    <h6 class="card-title text-truncate">{{ item['product'].product_name }}</h6>
-                    <p style="background-color: #C4877A; color: white;">Rs.{{ item['product'].current_price }}</p>
-                    <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="btn btn-outline-dark btn-sm w-100">View Details</a>
-                    <form action="{{ url_for('views.move_to_cart', product_id=item['product'].id) }}" method="post" class="d-inline w-100">
-                        <button type="submit" class="btn btn-sm w-100" style="background-color: #C4877A; color: white;">Move to Bag</button>
+            </a>
+            
+            <div class="product-info">
+                <h3 class="product-title">{{ item['product'].product_name }}</h3>
+                
+                <div class="price-container">
+                    <span class="discounted-price">₹{{ item['product'].current_price }}</span>
+                </div>
+                
+                <div class="product-actions">
+                    <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="btn btn-secondary btn-sm">
+                        View Details
+                    </a>
+                    <form action="{{ url_for('views.move_to_cart', product_id=item['product'].id) }}" method="post" class="move-to-cart-form">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Move to Cart
+                        </button>
                     </form>
-                    
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="text-center py-5">
+        <h3>Your wishlist is empty ❤️</h3>
+        <p class="text-muted">Add some products to your wishlist</p>
+        <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Continue Shopping</a>
+    </div>
+    {% endif %}
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    function removeFromWishlist(productId) {
-        fetch(`/remove_from_wishlist/${productId}`, {
-            method: 'POST',
-        }).then(response => {
+    // Add to Cart Functionality
+    async function addToCart(productId) {
+        try {
+            const response = await fetch(`/add_to_cart/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
             if (response.ok) {
-                window.location.reload();
+                showNotification('Product added to cart!', 'success');
+                updateCartCount();
             } else {
-                alert('Failed to remove item from wishlist.');
+                showNotification('Failed to add product to cart', 'error');
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
+        }
+    }
+
+    function showNotification(message, type) {
+        // Reuse the flash message system
+        const container = document.querySelector('.flash-messages-container') || createFlashContainer();
+        const notification = document.createElement('div');
+        notification.className = `flash-message flash-${type}`;
+        notification.innerHTML = `
+            <div class="flash-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="flash-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    function createFlashContainer() {
+        const container = document.createElement('div');
+        container.className = 'flash-messages-container';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    function updateCartCount() {
+        // TODO: Fetch actual count from server
+        const badge = document.getElementById('cartCount');
+        if (badge) {
+            const current = parseInt(badge.textContent) || 0;
+            badge.textContent = current + 1;
+        }
     }
 </script>
-
-<style>
-    .fixed-image {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
-    }
-
-    .card {
-        border-radius: 10px;
-        transition: transform 0.2s ease-in-out;
-        margin: 30px;
-    }
-
-    .card:hover {
-        transform: scale(1.02);
-    }
-
-    .container {
-        gap: 80px;
-    }
-
-    .gap-3 {
-        gap: 12px !important;
-    }
-</style>
-
 {% endblock %}

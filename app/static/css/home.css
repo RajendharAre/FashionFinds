@@ -1,0 +1,429 @@
+/* =============================
+   HOME PAGE STYLES (Final Clean Version)
+   ============================= */
+
+/* ========== GENERAL FIX ========== */
+.hero-slider,
+.category-section,
+.brands-section,
+.products-section,
+.offers-banner {
+  overflow-x: hidden; /* Prevent any horizontal scrolls */
+}
+
+/* ========== HERO SLIDER ========== */
+.hero-slider {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 80vh;
+  max-height: 700px;
+}
+
+.slider-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.8s ease-in-out;
+  height: 100%;
+  will-change: transform;
+}
+
+.slide {
+  min-width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(80%);
+  transition: transform 3s ease;
+  display: block;
+}
+
+.slide:hover img {
+  transform: scale(1.05);
+}
+
+.slide-content {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  color: var(--white);
+  z-index: 2;
+  animation: fadeInUp 1s ease both;
+}
+
+.slide-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 4vw, 4rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-md);
+}
+
+.slide-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-lg);
+  color: var(--primary-light);
+}
+
+.slide-btn {
+  display: inline-block;
+  padding: var(--space-md) var(--space-2xl);
+  background: var(--primary);
+  color: var(--white);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.slide-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(196, 135, 122, 0.4);
+}
+
+/* Arrows */
+.arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: var(--white);
+  padding: var(--space-md);
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+  transition: background 0.3s;
+}
+
+.arrow-btn:hover {
+  background: var(--primary);
+}
+
+.prev-btn {
+  left: 20px;
+}
+.next-btn {
+  right: 20px;
+}
+
+/* Dots */
+.slider-controls {
+  position: absolute;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.slider-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.slider-dot.active {
+  background: var(--white);
+  transform: scale(1.2);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== CATEGORY SECTION ========== */
+.category-section {
+  padding: var(--space-3xl) 0;
+  background: var(--white);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-xl);
+}
+
+.category-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: var(--white);
+  text-align: center;
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.category-image {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+}
+
+.category-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.category-card p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* ========== BRANDS SECTION ========== */
+.brands-section {
+  padding: var(--space-3xl) 0;
+  background: var(--gray-100);
+}
+
+.brand-container-wrapper {
+  overflow: hidden; /* NEW WRAPPER TO PREVENT SCROLLBAR */
+}
+
+.brand-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-lg);
+}
+
+.brand-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  height: 240px;
+  transition: transform 0.4s ease, box-shadow 0.3s ease;
+}
+
+.brand-card:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.brand-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+.brand-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  max-width: none;
+}
+
+.brand-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: var(--space-lg);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  color: var(--white);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.brand-card:hover .brand-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.brand-badge {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  background: var(--primary);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+}
+
+/* ========== PRODUCTS SECTION ========== */
+.products-section {
+  padding: var(--space-3xl) 0;
+  background: var(--white);
+}
+
+.product-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-xl);
+}
+
+.product-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-xl);
+}
+
+.product-image img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.discount-badge {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  background: var(--error);
+  color: var(--white);
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.product-info {
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.product-title {
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: var(--space-sm);
+}
+
+.discounted-price {
+  color: var(--primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.original-price {
+  color: var(--gray-500);
+  text-decoration: line-through;
+  font-size: 0.9rem;
+}
+
+/* ========== OFFERS SECTION ========== */
+.offers-banner {
+  padding: var(--space-3xl) 0;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+}
+
+.offers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-xl);
+}
+
+.offer-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.offer-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+}
+
+.offer-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-lg);
+  font-size: 2rem;
+  color: var(--primary);
+  transition: transform 0.3s ease;
+}
+
+.offer-card:hover .offer-icon {
+  transform: rotate(10deg) scale(1.1);
+}
+
+/* ========== SCROLL ANIMATIONS ========== */
+.fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease;
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 992px) {
+  .hero-slider {
+    height: 65vh;
+  }
+  .brand-card {
+    height: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .slide-content {
+    left: 5%;
+  }
+  .category-grid {
+    gap: var(--space-lg);
+  }
+  .product-container {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  .slide-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .slide-title {
+    font-size: 1.5rem;
+  }
+  .slide-btn {
+    padding: var(--space-sm) var(--space-lg);
+  }
+  .brand-card {
+    height: 160px;
+  }
+}

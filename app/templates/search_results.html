@@ -1,174 +1,210 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<div class="search-container">
-    <h2>Search Results for "{{ query }}"</h2>
-    
-    <form method="GET" action="{{ url_for('views.search') }}" class="filter-form">
-        <input type="text" name="query" placeholder="Search products..." value="{{ query }}" class="filter-input">
-
-        <select name="category" class="filter-select">
-            <option value="">All Categories</option>
-            <option value="Shoes" {% if category=="Shoes" %}selected{% endif %}>Shoes</option>
-            <option value="Clothing" {% if category=="Clothing" %}selected{% endif %}>Clothing</option>
-        </select>
-
-        <!-- <select name="brand" class="filter-select">
-            <option value="">All Brands</option>
-            {% for brand in brands %}
-            <option value="{{ brand.name }}" {% if brand.name==brand %}selected{% endif %}>{{ brand.name }}</option>
-            {% endfor %}
-        </select> -->
-
-        <select name="color" class="filter-select">
-            <option value="">All Colors</option>
-            {% for c in colors %}
-            <option value="{{ c }}" {% if c==color %}selected{% endif %}>{{ c.capitalize() }}</option>
-            {% endfor %}
-        </select>
-
-        <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price or '' }}" class="filter-input">
-        <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price or '' }}" class="filter-input">
-
-        <button type="submit" class="filter-button">Apply Filters</button>
-    </form>
-</div>
-{% if products %}
-    <div class="product-grid">
-        {% for product in products %}
-            <div class="product-card">
-                <!-- Updated image tag to use get_image route -->
-                <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" 
-                     alt="{{ product.product_name }}" 
-                     width="250" 
-                     height="250">
-                <h3>{{ product.product_name }}</h3>
-                <p><strong>Color:</strong> {{ product.color }}</p>
-                <p><strong>Price:</strong> ₹{{ product.current_price }}</p>
-                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="view-details">View Details</a>
-            </div>
-        {% endfor %}
+<!-- Search Header -->
+<section class="search-header">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Search Results for "{{ query }}"</h2>
+            <p>Found {{ products|length }} products matching your search</p>
+        </div>
     </div>
-{% else %}
-    <p class="no-results">No products found matching your search.</p>
-{% endif %}
+</section>
 
-<style>
-    /* General Styling */
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 0;
+<!-- Search Filters -->
+<section class="search-filters">
+    <div class="container">
+        <form method="GET" action="{{ url_for('views.search') }}" class="filter-form">
+            <input type="hidden" name="query" value="{{ query }}">
+            
+            <div class="filter-row">
+                <select name="category" class="form-control filter-select">
+                    <option value="">All Categories</option>
+                    <option value="Men" {% if request.args.get('category') == 'Men' %}selected{% endif %}>Men</option>
+                    <option value="Women" {% if request.args.get('category') == 'Women' %}selected{% endif %}>Women</option>
+                    <option value="Kids" {% if request.args.get('category') == 'Kids' %}selected{% endif %}>Kids</option>
+                    <option value="Accessories" {% if request.args.get('category') == 'Accessories' %}selected{% endif %}>Accessories</option>
+                    <option value="Shoes" {% if request.args.get('category') == 'Shoes' %}selected{% endif %}>Shoes</option>
+                </select>
+                
+                <select name="color" class="form-control filter-select">
+                    <option value="">All Colors</option>
+                    {% for c in colors %}
+                    <option value="{{ c }}" {% if request.args.get('color') == c %}selected{% endif %}>{{ c.capitalize() }}</option>
+                    {% endfor %}
+                </select>
+                
+                <input type="number" name="min_price" placeholder="Min Price" value="{{ request.args.get('min_price') or '' }}" class="form-control filter-input">
+                <input type="number" name="max_price" placeholder="Max Price" value="{{ request.args.get('max_price') or '' }}" class="form-control filter-input">
+                
+                <button type="submit" class="btn btn-primary filter-button">Apply Filters</button>
+                <a href="{{ url_for('views.search', query=query) }}" class="btn btn-secondary filter-button">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Search Results -->
+<section class="search-results">
+    <div class="container">
+        {% if products %}
+        <div class="product-container">
+            {% for product in products %}
+            <div class="product-card" data-product-id="{{ product.id }}">
+                {% if product.discount > 0 %}
+                <span class="discount-badge">-{{ product.discount }}%</span>
+                {% endif %}
+                
+                <form action="{{ url_for('views.wishlist_add', product_id=product.id) }}" method="POST" class="wishlist-form">
+                    <button type="submit" class="wishlist-btn" aria-label="Add to wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </form>
+                
+                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
+                    <div class="product-image">
+                        <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" alt="{{ product.product_name }}" loading="lazy">
+                    </div>
+                </a>
+                
+                <div class="product-info">
+                    <h3 class="product-title">{{ product.product_name }}</h3>
+                    
+                    <div class="product-rating">
+                        {% for i in range(5) %}
+                            <i class="fas fa-star {% if i >= product.rating %}star-empty{% endif %}"></i>
+                        {% endfor %}
+                        <span class="rating-count">({{ product.count }})</span>
+                    </div>
+                    
+                    <div class="price-container">
+                        <span class="discounted-price">₹{{ product.current_price }}</span>
+                        {% if product.previous_price > product.current_price %}
+                        <span class="original-price">₹{{ product.previous_price }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="product-actions">
+                        <form action="{{ url_for('views.cart_add', product_id=product.id) }}" method="POST" class="add-to-cart-form">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </form>
+                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn btn-secondary btn-sm">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <h3>No products found matching your search</h3>
+            <p class="text-muted">Try different search terms or filters</p>
+            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Browse All Products</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Back to Home Button -->
+<div class="text-center mt-5">
+    <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Back to Home</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add to Cart Functionality
+    async function addToCart(productId) {
+        try {
+            const response = await fetch(`/add_to_cart/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (response.ok) {
+                showNotification('Product added to cart!', 'success');
+                updateCartCount();
+            } else {
+                showNotification('Failed to add product to cart', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
+        }
     }
 
-    .search-container {
-        text-align: center;
-        margin: 20px 0;
+    // Add to Wishlist Functionality
+    async function addToWishlist(productId) {
+        const btn = event.currentTarget;
+        
+        try {
+            const response = await fetch(`/add_to_wishlist/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (response.ok) {
+                btn.classList.add('active');
+                showNotification('Added to wishlist!', 'success');
+                updateWishlistCount();
+            } else {
+                showNotification('Failed to add to wishlist', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
+        }
     }
 
-    /* Filter Form */
-    .filter-form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-        padding: 15px;
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
+    function showNotification(message, type) {
+        // Reuse the flash message system
+        const container = document.querySelector('.flash-messages-container') || createFlashContainer();
+        const notification = document.createElement('div');
+        notification.className = `flash-message flash-${type}`;
+        notification.innerHTML = `
+            <div class="flash-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="flash-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
-    .filter-input, .filter-select, .filter-button {
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        font-size: 14px;
-        outline: none;
+    function createFlashContainer() {
+        const container = document.createElement('div');
+        container.className = 'flash-messages-container';
+        document.body.appendChild(container);
+        return container;
     }
 
-    .filter-button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        cursor: pointer;
-        transition: 0.3s;
-        font-weight: bold;
+    function updateCartCount() {
+        // TODO: Fetch actual count from server
+        const badge = document.getElementById('cartCount');
+        if (badge) {
+            const current = parseInt(badge.textContent) || 0;
+            badge.textContent = current + 1;
+        }
     }
 
-    .filter-button:hover {
-        background-color: #0056b3;
+    function updateWishlistCount() {
+        // TODO: Fetch actual count from server
+        const badge = document.getElementById('wishlistCount');
+        if (badge) {
+            const current = parseInt(badge.textContent) || 0;
+            badge.textContent = current + 1;
+        }
     }
-
-    /* Product Grid */
-    .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        padding: 20px;
-        max-width: 1200px;
-        margin: auto;
-    }
-
-    .product-card {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        text-align: center;
-        padding: 15px;
-        transition: transform 0.3s ease;
-    }
-
-    .product-card:hover {
-        transform: scale(1.05);
-    }
-
-    .product-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .product-card h3 {
-        margin: 10px 0;
-        font-size: 18px;
-        color: #333;
-    }
-
-    .product-card p {
-        color: #777;
-        font-size: 16px;
-    }
-
-    .view-details {
-        display: inline-block;
-        margin-top: 10px;
-        padding: 8px 15px;
-        background: #28a745;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 5px;
-        transition: background 0.3s;
-        font-weight: bold;
-    }
-
-    .view-details:hover {
-        background: #218838;
-    }
-
-    /* No Results */
-    .no-results {
-        text-align: center;
-        font-size: 18px;
-        color: #888;
-        margin-top: 20px;
-    }
-</style>
-
-
-
+</script>
 {% endblock %}

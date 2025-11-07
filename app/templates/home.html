@@ -2,9 +2,13 @@
 
 {% block title %}FashionFinds - Your Ultimate Fashion Destination{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
 {% block content %}
 <!-- Hero Slider -->
-<section class="hero-slider">
+<section class="hero-slider fade-up">
     <div class="slider-container">
         <div class="slider-track" id="heroSlider">
             <div class="slide">
@@ -43,7 +47,7 @@
 </section>
 
 <!-- Category Quick Access -->
-<section class="category-section">
+<section class="category-section fade-up">
     <div class="container">
         <div class="section-header">
             <h2>Shop by Category</h2>
@@ -83,30 +87,36 @@
 </section>
 
 <!-- Featured Brands -->
-<section class="brands-section">
-    <div class="container">
-        <div class="section-header">
-            <h2>Featured Brands</h2>
-            <p>Shop from your favorite brands</p>
-        </div>
-        <div class="brand-container">
-            {% for brand in brands %}
-            <a href="{{ url_for('views.brand_info', brand_id=brand.id) }}" class="brand-card">
-                <div class="brand-image">
-                    <img src="{{ url_for('static', filename=brand.logo) }}" alt="{{ brand.name }}" loading="lazy">
-                </div>
-                <div class="brand-overlay">
-                    <h3>{{ brand.name }}</h3>
-                    <span class="brand-badge">Up to 60% OFF</span>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
+<!-- Featured Brands -->
+<section class="brands-section fade-up">
+  <div class="container">
+    <div class="section-header">
+      <h2>Featured Brands</h2>
+      <p>Shop from your favorite brands</p>
     </div>
+
+    <!-- New Wrapper Added -->
+    <div class="brand-container-wrapper">
+      <div class="brand-container">
+        {% for brand in brands %}
+        <a href="{{ url_for('views.brand_info', brand_id=brand.id) }}" class="brand-card">
+          <div class="brand-image">
+            <img src="{{ url_for('static', filename=brand.logo) }}" alt="{{ brand.name }}" loading="lazy">
+          </div>
+          <div class="brand-overlay">
+            <h3>{{ brand.name }}</h3>
+            <span class="brand-badge">Up to 60% OFF</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </section>
 
+
 <!-- Featured Products -->
-<section class="products-section">
+<section class="products-section fade-up">
     <div class="container">
         <div class="section-header">
             <h2>Trending Now</h2>
@@ -120,13 +130,15 @@
                 <span class="discount-badge">-{{ product.discount }}%</span>
                 {% endif %}
                 
-                <button class="wishlist-btn" onclick="addToWishlist({{ product.id }})" aria-label="Add to wishlist">
-                    <i class="far fa-heart"></i>
-                </button>
+                <form method="POST" action="{{ url_for('views.wishlist_add', product_id=product.id) }}" class="wishlist-form">
+                    <button type="submit" class="wishlist-btn" aria-label="Add to wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </form>
                 
                 <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
                     <div class="product-image">
-                        <img src="{{ url_for('static', filename=product.product_picture) }}" alt="{{ product.product_name }}" loading="lazy">
+                        <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" alt="{{ product.product_name }}" loading="lazy">
                     </div>
                 </a>
                 
@@ -148,9 +160,11 @@
                     </div>
                     
                     <div class="product-actions">
-                        <button class="btn btn-primary btn-sm" onclick="addToCart({{ product.id }})">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
+                        <form method="POST" action="{{ url_for('views.cart_add', product_id=product.id) }}" class="add-to-cart-form">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </form>
                         <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn btn-secondary btn-sm">
                             View Details
                         </a>
@@ -163,31 +177,31 @@
 </section>
 
 <!-- Special Offers Banner -->
-<section class="offers-banner">
+<section class="offers-banner fade-up">
     <div class="container">
         <div class="offers-grid">
-            <div class="offer-card offer-primary">
+            <div class="offer-card">
                 <div class="offer-icon">
                     <i class="fas fa-truck"></i>
                 </div>
                 <h3>Free Shipping</h3>
                 <p>On orders above ₹999</p>
             </div>
-            <div class="offer-card offer-secondary">
+            <div class="offer-card">
                 <div class="offer-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <h3>Secure Payment</h3>
                 <p>100% secure transactions</p>
             </div>
-            <div class="offer-card offer-tertiary">
+            <div class="offer-card">
                 <div class="offer-icon">
                     <i class="fas fa-undo"></i>
                 </div>
                 <h3>Easy Returns</h3>
                 <p>30-day return policy</p>
             </div>
-            <div class="offer-card offer-quaternary">
+            <div class="offer-card">
                 <div class="offer-icon">
                     <i class="fas fa-headset"></i>
                 </div>
@@ -198,465 +212,66 @@
     </div>
 </section>
 
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    /* Hero Slider Enhancements */
-    .hero-slider {
-        position: relative;
-        margin-bottom: var(--space-3xl);
-    }
-
-    .slide {
-        position: relative;
-    }
-
-    .slide-content {
-        position: absolute;
-        top: 50%;
-        left: 10%;
-        transform: translateY(-50%);
-        color: white;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        max-width: 500px;
-    }
-
-    .slide-title {
-        font-size: clamp(2rem, 5vw, 4rem);
-        font-family: var(--font-heading);
-        margin-bottom: var(--space-md);
-        animation: fadeInUp 0.8s ease-out;
-    }
-
-    .slide-subtitle {
-        font-size: clamp(1rem, 2vw, 1.5rem);
-        margin-bottom: var(--space-xl);
-        animation: fadeInUp 0.8s ease-out 0.2s backwards;
-    }
-
-    .slide-btn {
-        display: inline-block;
-        padding: var(--space-md) var(--space-2xl);
-        background: var(--primary);
-        color: white;
-        border-radius: var(--radius-lg);
-        font-weight: 600;
-        transition: all 0.3s;
-        animation: fadeInUp 0.8s ease-out 0.4s backwards;
-    }
-
-    .slide-btn:hover {
-        background: var(--primary-hover);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(196, 135, 122, 0.4);
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Section Headers */
-    .section-header {
-        text-align: center;
-        margin-bottom: var(--space-2xl);
-        position: relative;
-    }
-
-    .section-header h2 {
-        font-size: clamp(1.75rem, 4vw, 2.5rem);
-        color: var(--dark);
-        margin-bottom: var(--space-sm);
-    }
-
-    .section-header p {
-        color: var(--gray-600);
-        font-size: 1.125rem;
-    }
-
-    .view-all-btn {
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--primary);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-        transition: all 0.3s;
-    }
-
-    .view-all-btn:hover {
-        gap: var(--space-md);
-    }
-
-    /* Category Cards */
-    .category-section {
-        padding: var(--space-3xl) 0;
-        background: var(--gray-100);
-    }
-
-    .category-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--space-xl);
-    }
-
-    .category-card {
-        background: white;
-        border-radius: var(--radius-xl);
-        padding: var(--space-2xl);
-        text-align: center;
-        transition: all 0.3s;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .category-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-xl);
-    }
-
-    .category-image {
-        width: 100px;
-        height: 100px;
-        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-lg);
-        font-size: 3rem;
-        color: white;
-    }
-
-    .category-card h3 {
-        font-size: 1.25rem;
-        color: var(--dark);
-        margin-bottom: var(--space-sm);
-    }
-
-    .category-card p {
-        color: var(--primary);
-        font-weight: 500;
-    }
-
-    /* Brand Cards */
-    .brands-section {
-        padding: var(--space-3xl) 0;
-    }
-
-    .brand-card {
-        position: relative;
-        overflow: hidden;
-        border-radius: var(--radius-lg);
-        aspect-ratio: 1;
-        transition: all 0.3s;
-    }
-
-    .brand-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: var(--shadow-xl);
-    }
-
-    .brand-image {
-        width: 100%;
-        height: 100%;
-    }
-
-    .brand-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s;
-    }
-
-    .brand-card:hover .brand-image img {
-        transform: scale(1.1);
-    }
-
-    .brand-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-        padding: var(--space-lg);
-        color: white;
-        transform: translateY(100%);
-        transition: transform 0.3s;
-    }
-
-    .brand-card:hover .brand-overlay {
-        transform: translateY(0);
-    }
-
-    .brand-overlay h3 {
-        font-size: 1.25rem;
-        margin-bottom: var(--space-sm);
-    }
-
-    .brand-badge {
-        display: inline-block;
-        padding: var(--space-xs) var(--space-md);
-        background: var(--primary);
-        border-radius: var(--radius-full);
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    /* Product Cards Enhanced */
-    .products-section {
-        padding: var(--space-3xl) 0;
-    }
-
-    .product-card {
-        position: relative;
-    }
-
-    .wishlist-btn {
-        position: absolute;
-        top: var(--space-md);
-        right: var(--space-md);
-        width: 40px;
-        height: 40px;
-        background: white;
-        border: none;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        z-index: 10;
-        box-shadow: var(--shadow-md);
-    }
-
-    .wishlist-btn:hover {
-        background: var(--primary);
-        color: white;
-        transform: scale(1.1);
-    }
-
-    .wishlist-btn.active i {
-        font-weight: 900;
-        color: var(--error);
-    }
-
-    .product-rating {
-        display: flex;
-        align-items: center;
-        gap: var(--space-xs);
-        margin-bottom: var(--space-sm);
-    }
-
-    .product-rating i {
-        color: #FFC107;
-        font-size: 0.875rem;
-    }
-
-    .product-rating .star-empty {
-        color: var(--gray-300);
-    }
-
-    .rating-count {
-        color: var(--gray-600);
-        font-size: 0.875rem;
-    }
-
-    .product-actions {
-        display: flex;
-        gap: var(--space-sm);
-        margin-top: var(--space-md);
-    }
-
-    .product-actions .btn {
-        flex: 1;
-    }
-
-    /* Offers Banner */
-    .offers-banner {
-        padding: var(--space-3xl) 0;
-        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-    }
-
-    .offers-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--space-xl);
-    }
-
-    .offer-card {
-        background: white;
-        padding: var(--space-2xl);
-        border-radius: var(--radius-lg);
-        text-align: center;
-        transition: all 0.3s;
-    }
-
-    .offer-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-xl);
-    }
-
-    .offer-icon {
-        width: 80px;
-        height: 80px;
-        background: var(--primary-light);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-lg);
-        font-size: 2rem;
-        color: var(--primary);
-    }
-
-    .offer-card h3 {
-        color: var(--dark);
-        margin-bottom: var(--space-sm);
-    }
-
-    .offer-card p {
-        color: var(--gray-600);
-    }
-
-    @media (max-width: 768px) {
-        .slide-content {
-            left: 5%;
-            max-width: 90%;
-        }
-
-        .view-all-btn {
-            position: static;
-            transform: none;
-            margin-top: var(--space-md);
-            justify-content: center;
-        }
-
-        .product-actions {
-            flex-direction: column;
-        }
-    }
-</style>
-{% endblock %}
-
-{% block extra_js %}
+<!-- JavaScript for Slider -->
 <script>
-    // Add to Cart Functionality
-    async function addToCart(productId) {
-        try {
-            const response = await fetch(`/add_to_cart/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok) {
-                showNotification('Product added to cart!', 'success');
-                updateCartCount();
-            } else {
-                showNotification('Failed to add product to cart', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    }
-
-    // Add to Wishlist Functionality
-    async function addToWishlist(productId) {
-        const btn = event.currentTarget;
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.getElementById('heroSlider');
+    const slides = slider.querySelectorAll('.slide');
+    const dotsContainer = document.getElementById('sliderDots');
+    let currentIndex = 0;
+    
+    // Create dots
+    slides.forEach((_, i) => {
+        const dot = document.createElement('span');
+        dot.classList.add('slider-dot');
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsContainer.appendChild(dot);
+    });
+    
+    const dots = dotsContainer.querySelectorAll('.slider-dot');
+    
+    function goToSlide(index) {
+        currentIndex = index;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
         
-        try {
-            const response = await fetch(`/add_to_wishlist/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok) {
-                btn.classList.add('active');
-                showNotification('Added to wishlist!', 'success');
-                updateWishlistCount();
-            } else {
-                showNotification('Failed to add to wishlist', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    }
-
-    function showNotification(message, type) {
-        // Reuse the flash message system
-        const container = document.querySelector('.flash-messages-container') || createFlashContainer();
-        const notification = document.createElement('div');
-        notification.className = `flash-message flash-${type}`;
-        notification.innerHTML = `
-            <div class="flash-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="flash-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    function createFlashContainer() {
-        const container = document.createElement('div');
-        container.className = 'flash-messages-container';
-        document.body.appendChild(container);
-        return container;
-    }
-
-    function updateCartCount() {
-        // TODO: Fetch actual count from server
-        const badge = document.getElementById('cartCount');
-        if (badge) {
-            const current = parseInt(badge.textContent) || 0;
-            badge.textContent = current + 1;
-        }
-    }
-
-    function updateWishlistCount() {
-        // TODO: Fetch actual count from server
-        const badge = document.getElementById('wishlistCount');
-        if (badge) {
-            const current = parseInt(badge.textContent) || 0;
-            badge.textContent = current + 1;
-        }
-    }
-
-    // Lazy Loading Images
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.add('loaded');
-                    observer.unobserve(img);
-                }
-            });
-        });
-
-        document.querySelectorAll('img[loading="lazy"]').forEach(img => {
-            imageObserver.observe(img);
+        // Update dots
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
         });
     }
+    
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % slides.length;
+        goToSlide(currentIndex);
+    }
+    
+    function prevSlide() {
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        goToSlide(currentIndex);
+    }
+    
+    // Auto slide
+    let slideInterval = setInterval(nextSlide, 5000);
+    
+    // Pause on hover
+    slider.addEventListener('mouseenter', () => clearInterval(slideInterval));
+    slider.addEventListener('mouseleave', () => {
+        slideInterval = setInterval(nextSlide, 5000);
+    });
+    
+    // Arrow buttons
+    document.querySelector('.prev-btn').addEventListener('click', () => {
+        prevSlide();
+        clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, 5000);
+    });
+    
+    document.querySelector('.next-btn').addEventListener('click', () => {
+        nextSlide();
+        clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, 5000);
+    });
+});
 </script>
 {% endblock %}

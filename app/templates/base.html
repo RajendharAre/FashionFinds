@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="FashionFinds - Your Ultimate Fashion E-Commerce Platform">
     <meta name="theme-color" content="#C4877A">
     
@@ -21,6 +21,20 @@
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ range(1, 1000) | random }}">
     
+    <!-- Navbar Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}?v={{ range(1, 1000) | random }}">
+
+    <!-- Home Page Stylesheet  -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v={{ range(1, 1000) | random }}">
+    <style>
+    html, body {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+    .nav-container, .navbar {
+        overflow: visible !important;
+    }
+    </style>
     <!-- Block for page-specific styles -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -53,11 +67,24 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" style="margin-top: 50px;">
         {% block content %}
         <!-- Page content goes here -->
         {% endblock %}
     </main>
+    
+    <style>
+        .main-content {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            padding-right: 0;
+            padding-left: 0;
+            margin-right: 0;
+            margin-left: 0;
+        }
+    </style>
 
     <!-- Footer -->
     {% include 'footer.html' %}
@@ -271,6 +298,19 @@
 
     <style>
         /* Additional Styles for Base Components */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+        
         .page-loader {
             position: fixed;
             top: 0;
@@ -678,5 +718,37 @@
             }
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const hamburger = document.createElement('div');
+        hamburger.classList.add('hamburger');
+        hamburger.innerHTML = '<span></span><span></span><span></span>';
+        document.querySelector('.navbar').insertBefore(hamburger, document.querySelector('.nav-actions'));
+
+        const mainNav = document.querySelector('.main-nav');
+        const mobileMenu = document.createElement('div');
+        mobileMenu.classList.add('mobile-menu');
+        mobileMenu.innerHTML = mainNav.innerHTML;
+        document.querySelector('.navbar').appendChild(mobileMenu);
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.style.display = hamburger.classList.contains('active') ? 'flex' : 'none';
+        });
+        });
+        document.addEventListener("DOMContentLoaded", () => {
+            const fadeEls = document.querySelectorAll(".fade-up");
+            const observer = new IntersectionObserver(
+                entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) entry.target.classList.add("visible");
+                    });
+                },
+                { threshold: 0.2 }
+            );
+
+            fadeEls.forEach(el => observer.observe(el));
+        });
+    </script>
 </body>
 </html>

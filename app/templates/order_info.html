@@ -1,11 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Order Info</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Order Information{% endblock %}
+
+{% block content %}
+<!-- Order Info Header -->
+<section class="order-info-header">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Order Information</h2>
+            <p>Delivery agent portal</p>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="order-info-container">
+        <div class="text-center py-5">
+            <h3>Order Information Portal</h3>
+            <p class="text-muted">This page is under development. Please check back later.</p>
+            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-info-header {
+        background: var(--gray-50);
+        padding: var(--space-xl) 0;
+    }
+    
+    .order-info-container {
+        padding: var(--space-xl) 0;
+    }
+</style>
+{% endblock %}

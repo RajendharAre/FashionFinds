@@ -297,7 +297,10 @@ def cart_add(product_id):
     if cart_item:
         cart_item.quantity += quantity
     else:
-        new_cart_item = Cart(user_id=user_id, product_id=product_id, quantity=quantity)
+        new_cart_item = Cart()
+        new_cart_item.user_id = user_id
+        new_cart_item.product_id = product_id
+        new_cart_item.quantity = 1
         db.session.add(new_cart_item)
     
     db.session.commit()
@@ -391,7 +394,9 @@ def wishlist_add(product_id):
     ).first()
     
     if not existing_item:
-        new_wishlist_item = Wishlist(user_id=user_id, product_id=product_id)
+        new_wishlist_item = Wishlist()
+        new_wishlist_item.user_id = user_id
+        new_wishlist_item.product_id = product_id
         db.session.add(new_wishlist_item)
         db.session.commit()
         
@@ -446,7 +451,10 @@ def move_to_cart(product_id):
         if cart_item:
             cart_item.quantity += 1
         else:
-            new_cart_item = Cart(user_id=user_id, product_id=product_id, quantity=1)
+            new_cart_item = Cart()
+            new_cart_item.user_id = user_id
+            new_cart_item.product_id = product_id
+            new_cart_item.quantity = 1
             db.session.add(new_cart_item)
         
         # Remove from wishlist
@@ -527,30 +535,28 @@ def place_order():
     total = sum(c.quantity * p.current_price for c, p in cart_data)
     
     # Create order
-    new_order = Order(
-        user_id=user_id,
-        customer_name=customer_name,
-        address_line_1=address_line_1,
-        city=city,
-        state=state,
-        pincode=pincode,
-        mail=email,
-        total_price=total,
-        status='Pending'
-    )
+    new_order = Order()
+    new_order.user_id = user_id
+    new_order.customer_name = customer_name
+    new_order.address_line_1 = address_line_1
+    new_order.city = city
+    new_order.state = state
+    new_order.pincode = pincode
+    new_order.mail = email
+    new_order.total_price = total
+    new_order.status = 'Pending'
     
     db.session.add(new_order)
     db.session.flush()  # Get order ID
     
     # Add order items
     for cart, product in cart_data:
-        order_item = OrderItem(
-            order_id=new_order.id,
-            product_id=product.id,
-            quantity=cart.quantity,
-            unit_price=product.current_price,
-            subtotal=cart.quantity * product.current_price
-        )
+        order_item = OrderItem()
+        order_item.order_id = new_order.id
+        order_item.product_id = product.id
+        order_item.quantity = cart.quantity
+        order_item.unit_price = product.current_price
+        order_item.subtotal = cart.quantity * product.current_price
         db.session.add(order_item)
         
         # Update product stock

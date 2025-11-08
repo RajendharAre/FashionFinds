@@ -2,6 +2,10 @@
 
 {% block title %}{{ category }} - Category{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/category.css') }}?v={{ range(1, 1000) | random }}">
+{% endblock %}
+
 {% block content %}
 <!-- Category Header -->
 <section class="category-header">
@@ -9,6 +13,26 @@
         <div class="section-header text-center">
             <h2>{{ category }} Collection</h2>
             <p>Explore the latest trends in {{ category }} fashion</p>
+        </div>
+    </div>
+</section>
+
+<!-- Filter & Sort Section -->
+<section class="filter-sort-section">
+    <div class="container">
+        <div class="filter-container">
+            <div class="filter-results">
+                <p>{{ products|length }} products found</p>
+            </div>
+            <div class="filter-controls">
+                <select class="filter-select" id="sortSelect" onchange="sortProducts()">
+                    <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Sort by Popularity</option>
+                    <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Top Rated</option>
+                    <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                </select>
+            </div>
         </div>
     </div>
 </section>
@@ -67,19 +91,51 @@
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('views.products_by_category', category_name=category, page=pagination.prev_num, sort=sort_by) }}">&laquo;</a>
+            {% else %}
+                <span class="disabled">&laquo;</span>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != pagination.page %}
+                        <a href="{{ url_for('views.products_by_category', category_name=category, page=page_num, sort=sort_by) }}">{{ page_num }}</a>
+                    {% else %}
+                        <span class="current">{{ page_num }}</span>
+                    {% endif %}
+                {% else %}
+                    <span class="disabled">&hellip;</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+                <a href="{{ url_for('views.products_by_category', category_name=category, page=pagination.next_num, sort=sort_by) }}">&raquo;</a>
+            {% else %}
+                <span class="disabled">&raquo;</span>
+            {% endif %}
+        </div>
+        {% endif %}
+        
         {% else %}
-        <div class="text-center py-5">
+        <div class="no-products">
             <h3>No products found in this category</h3>
-            <p class="text-muted">Check back later for new arrivals</p>
-            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Browse All Products</a>
+            <p>Check back later for new arrivals</p>
+            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Browse All Products</a>
         </div>
         {% endif %}
     </div>
 </section>
 
 <!-- Back to Home Button -->
-<div class="text-center mt-5">
-    <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Back to Home</a>
+<div class="back-to-home">
+    <div class="container">
+        <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Back to Home</a>
+    </div>
 </div>
 {% endblock %}
 
@@ -174,6 +230,13 @@
             const current = parseInt(badge.textContent) || 0;
             badge.textContent = current + 1;
         }
+    }
+    
+    // Sort products function
+    function sortProducts() {
+        const sortValue = document.getElementById('sortSelect').value;
+        const category = "{{ category }}";
+        window.location.href = `/category/${category}?sort=${sortValue}`;
     }
 </script>
 {% endblock %}

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}?v={{ range(1, 1000) | random }}">
+{% endblock %}
+
 {% block content %}
 <!-- Search Header -->
 <section class="search-header">
@@ -13,12 +17,12 @@
 
 <!-- Search Filters -->
 <section class="search-filters">
-    <div class="container">
+    <div class="filter-container">
         <form method="GET" action="{{ url_for('views.search') }}" class="filter-form">
             <input type="hidden" name="query" value="{{ query }}">
             
             <div class="filter-row">
-                <select name="category" class="form-control filter-select">
+                <select name="category" class="filter-select">
                     <option value="">All Categories</option>
                     <option value="Men" {% if request.args.get('category') == 'Men' %}selected{% endif %}>Men</option>
                     <option value="Women" {% if request.args.get('category') == 'Women' %}selected{% endif %}>Women</option>
@@ -27,18 +31,18 @@
                     <option value="Shoes" {% if request.args.get('category') == 'Shoes' %}selected{% endif %}>Shoes</option>
                 </select>
                 
-                <select name="color" class="form-control filter-select">
+                <select name="color" class="filter-select">
                     <option value="">All Colors</option>
                     {% for c in colors %}
                     <option value="{{ c }}" {% if request.args.get('color') == c %}selected{% endif %}>{{ c.capitalize() }}</option>
                     {% endfor %}
                 </select>
                 
-                <input type="number" name="min_price" placeholder="Min Price" value="{{ request.args.get('min_price') or '' }}" class="form-control filter-input">
-                <input type="number" name="max_price" placeholder="Max Price" value="{{ request.args.get('max_price') or '' }}" class="form-control filter-input">
+                <input type="number" name="min_price" placeholder="Min Price" value="{{ request.args.get('min_price') or '' }}" class="filter-input">
+                <input type="number" name="max_price" placeholder="Max Price" value="{{ request.args.get('max_price') or '' }}" class="filter-input">
                 
-                <button type="submit" class="btn btn-primary filter-button">Apply Filters</button>
-                <a href="{{ url_for('views.search', query=query) }}" class="btn btn-secondary filter-button">Clear Filters</a>
+                <button type="submit" class="filter-button btn-primary">Apply Filters</button>
+                <a href="{{ url_for('views.search', query=query) }}" class="filter-button btn-secondary">Clear Filters</a>
             </div>
         </form>
     </div>
@@ -99,17 +103,17 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center py-5">
+        <div class="empty-state">
             <h3>No products found matching your search</h3>
-            <p class="text-muted">Try different search terms or filters</p>
-            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Browse All Products</a>
+            <p>Try different search terms or filters</p>
+            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Browse All Products</a>
         </div>
         {% endif %}
     </div>
 </section>
 
 <!-- Back to Home Button -->
-<div class="text-center mt-5">
+<div class="back-to-home">
     <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Back to Home</a>
 </div>
 {% endblock %}

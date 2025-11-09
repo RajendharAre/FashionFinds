@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/wishlist.css') }}?v={{ range(1, 1000) | random }}">
+{% endblock %}
+
 {% block content %}
 <!-- Wishlist Header -->
 <section class="wishlist-header">
@@ -50,10 +54,10 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-5">
+    <div class="empty-state">
         <h3>Your wishlist is empty ❤️</h3>
-        <p class="text-muted">Add some products to your wishlist</p>
-        <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Continue Shopping</a>
+        <p>Add some products to your wishlist to save them for later</p>
+        <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Continue Shopping</a>
     </div>
     {% endif %}
 </div>

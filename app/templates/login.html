@@ -7,62 +7,57 @@
 {% endblock %}
 
 {% block content %}
-<!-- Login Header -->
-<section class="auth-header">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2>Login to Your Account</h2>
-            <p>Access your Fashion Finds account</p>
-        </div>
-    </div>
-</section>
-
-<div class="container">
-    <div class="auth-container">
-        <div class="auth-image">
-            <img src="{{ url_for('static', filename='images/log-img.gif') }}" alt="Fashion Finds Login" class="auth-gif">
+<div class="auth-form">
+    <form method="POST" class="login-form">
+        <h3 class="form-title">Welcome Back</h3>
+        
+        <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" required placeholder="Enter your email">
         </div>
         
-        <div class="auth-form">
-            <form method="POST" class="login-form">
-                <h3 class="form-title">Welcome Back</h3>
-                
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div class="flash-messages">
-                            {% for category, message in messages %}
-                                <div class="flash-message flash-{{ category }}">
-                                    <div class="flash-content">
-                                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'warning' else 'times-circle' if category == 'error' else 'info-circle' }}"></i>
-                                        <span>{{ message }}</span>
-                                    </div>
-                                    <button class="flash-close" onclick="this.parentElement.remove()">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
-                
-                <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">Login</button>
-                
-                <div class="auth-links">
-                    <p>Don't have an account? <a href="{{ url_for('auth.register') }}" class="auth-link">Register here</a></p>
-                    <p><a href="{{ url_for('auth.forgot_password') }}" class="auth-link">Forgot Password?</a></p>
-                </div>
-            </form>
+        <div class="form-group password-field">
+            <label for="password" class="form-label">Password</label>
+            <div class="password-input-container">
+                <input type="password" id="password" name="password" class="form-control password-input" required placeholder="Enter your password">
+                <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
         </div>
-    </div>
+        
+        <button type="submit" class="btn btn-primary">Login</button>
+        
+        <div class="auth-links">
+            <p>Don't have an account? <a href="{{ url_for('auth.register') }}" class="auth-link">Register here</a></p>
+            <p><a href="{{ url_for('auth.forgot_password') }}" class="auth-link">Forgot Password?</a></p>
+        </div>
+    </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle functionality
+    const passwordToggles = document.querySelectorAll('.password-toggle');
+    
+    passwordToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const icon = this.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -160,6 +160,7 @@
 .category-section {
   padding: var(--space-3xl) 0;
   background: var(--white);
+  box-sizing: border-box;
 }
 
 .category-grid {
@@ -203,6 +204,7 @@
 .brands-section {
   padding: var(--space-3xl) 0;
   background: var(--gray-100);
+  box-sizing: border-box;
 }
 
 .brand-container-wrapper {
@@ -273,6 +275,7 @@
 .products-section {
   padding: var(--space-3xl) 0;
   background: var(--white);
+  box-sizing: border-box;
 }
 
 .product-container {
@@ -340,6 +343,7 @@
 .offers-banner {
   padding: var(--space-3xl) 0;
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  box-sizing: border-box;
 }
 
 .offers-grid {

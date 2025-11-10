@@ -17,7 +17,7 @@
 }
 
 /* Reset */
-* {
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
@@ -27,7 +27,6 @@ html, body {
     overflow-x: hidden;
     background: #fafafa;
     font-family: 'Poppins', sans-serif;
-    padding-top: 80px;
 }
 
 /* =========================

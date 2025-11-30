@@ -1,19 +1,49 @@
 /* Navbar Styles */
 
 :root {
-    --dark: #111;
-    --primary: #c4877a;
-    --primary-hover: #b06b61;
-    --white: #fff;
-    --gray-800: #222;
-    --gray-700: #333;
-    --gray-400: #bbb;
-    --radius-md: 6px;
-    --radius-full: 999px;
-    --font-heading: 'Poppins', sans-serif;
-    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.15);
-    --transition: all 0.25s ease;
-    --z-sticky: 2000;
+    /* Colors - Matching style.css */
+    --primary: #C4877A;
+    --primary-hover: #A56B5F;
+    --primary-light: #E5D3CD;
+    --dark: #2C2C2C;
+    --light: #F8F9FA;
+    --white: #FFFFFF;
+    --gray-800: #424242;
+    --gray-700: #616161;
+    --gray-400: #BDBDBD;
+    --gray-500: #9E9E9E;
+    --gray-100: #F5F5F5;
+    --gray-300: #E0E0E0;
+    
+    /* Typography - Matching style.css */
+    --font-primary: 'Inter', -apple-system, system-ui, sans-serif;
+    --font-heading: 'Playfair Display', serif;
+    
+    /* Spacing - Matching style.css */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    
+    /* Border Radius - Matching style.css */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
+    
+    /* Shadows - Matching style.css */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    /* Transitions - Matching style.css */
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Z-index - Matching style.css */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-modal: 1050;
 }
 
 /* Reset */
@@ -25,8 +55,9 @@ html, body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background: #fafafa;
-    font-family: 'Poppins', sans-serif;
+    background: var(--gray-50);
+    font-family: var(--font-primary);
+    color: var(--gray-900);
 }
 
 /* =========================
@@ -66,6 +97,7 @@ html, body {
     color: var(--white);
     text-decoration: none;
     flex-shrink: 0;
+    font-family: var(--font-heading);
 }
 
 .logo i {
@@ -206,11 +238,19 @@ html, body {
     position: absolute;
     top: -6px;
     right: -6px;
-    background: #ff4b4b;
-    color: #fff;
-    font-size: 0.65rem;
-    padding: 2px 5px;
+    background: #F44336;
+    color: white;
+    font-size: 0.5rem;
+    padding: 1px 4px;
     border-radius: 50%;
+    font-weight: 600;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    z-index: 2;
 }
 
 /* =========================
@@ -249,13 +289,13 @@ html, body {
 }
 
 .dropdown-item:hover {
-    background: #f5f5f5;
+    background: var(--gray-100);
     color: var(--primary);
 }
 
 .dropdown-divider {
     height: 1px;
-    background: #eee;
+    background: var(--gray-300);
     margin: 5px 0;
 }
 
@@ -336,12 +376,43 @@ html, body {
 /* =========================
    RESPONSIVE DESIGN
    ========================= */
+@media (max-width: 1200px) {
+    .navbar {
+        padding: 15px 25px;
+    }
+    
+    .logo {
+        font-size: 1.5rem;
+    }
+    
+    .main-nav {
+        gap: 15px;
+    }
+    
+    .nav-item {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+    }
+}
+
 @media (max-width: 992px) {
     .main-nav {
         display: none;
     }
     .hamburger {
         display: flex;
+    }
+    
+    .navbar {
+        padding: 12px 20px;
+    }
+    
+    .logo {
+        font-size: 1.4rem;
+    }
+    
+    .search-container {
+        max-width: 300px;
     }
 }
 
@@ -360,6 +431,38 @@ html, body {
     .logo {
         font-size: 1.4rem;
     }
+    
+    .navbar {
+        padding: 10px 15px;
+    }
+    
+    .nav-icon {
+        min-width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar {
+        padding: 8px 12px;
+    }
+    
+    .logo {
+        font-size: 1.3rem;
+    }
+    
+    .nav-icon {
+        min-width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+        min-width: 14px;
+        height: 14px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -374,5 +477,9 @@ html, body {
     .nav-icon {
         min-width: 28px;
         height: 28px;
+    }
+    
+    .navbar {
+        padding: 6px 10px;
     }
 }

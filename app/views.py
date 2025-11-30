@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session, flash, send_from_directory
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
+from flask_login import login_required, current_user
+from flask_mail import Message, Mail
 from app.models import Product, Brand, Cart, Wishlist, User, Order, OrderItem, ProductSize, db
 from sqlalchemy import func, or_, desc
 import random
@@ -218,14 +220,10 @@ def search():
 
 # ============= CART FUNCTIONALITY =============
 @views.route('/cart')
+@login_required
 def show_cart():
     """Enhanced cart view with recommendations"""
-    if 'user_id' not in session:
-        flash('Please login to view your cart', 'warning')
-        return render_template('cart.html', cart_items={}, 
-                             total_mrp=0, discount_mrp=0, total_amount=0)
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     
     # Get cart items with product details
     cart_data = db.session.query(Cart, Product)\
@@ -282,13 +280,12 @@ def show_cart():
 
 
 @views.route('/add_to_cart/<int:product_id>', methods=['POST'])
+@login_required
 def cart_add(product_id):
     """Add product to cart"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Please login first'}), 401
     
     product = Product.query.get_or_404(product_id)
-    user_id = session['user_id']
+    user_id = current_user.id
     quantity = request.form.get('quantity', 1, type=int)
     
     # Check if already in cart
@@ -313,12 +310,10 @@ def cart_add(product_id):
 
 
 @views.route('/remove_from_cart/<int:product_id>', methods=['POST'])
+@login_required
 def cart_remove(product_id):
     """Remove product from cart"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
     
     if cart_item:
@@ -330,12 +325,10 @@ def cart_remove(product_id):
 
 
 @views.route('/update_cart_quantity/<int:product_id>', methods=['POST'])
+@login_required
 def update_cart_quantity(product_id):
     """Update cart item quantity"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     new_quantity = request.form.get('quantity', 1, type=int)
     
     if new_quantity < 1:
@@ -367,25 +360,29 @@ def update_cart_quantity(product_id):
 
 # ============= WISHLIST FUNCTIONALITY =============
 @views.route('/wishlist')
+@login_required
 def show_wishlist():
     """Enhanced wishlist view"""
-    if 'user_id' not in session:
-        flash('Please login to view your wishlist', 'warning')
-        return render_template('wishlist.html', wishlist_items=[])
+    wishlist_data = db.session.query(Wishlist, Product)\
+        .join(Product, Wishlist.product_id == Product.id)\
+        .filter(Wishlist.user_id == current_user.id).all()
     
-    wishlist_data = db.session.query(Wishlist)\
-        .filter(Wishlist.user_id == session['user_id']).all()
+    # Create a list of dictionaries with wishlist and product information
+    wishlist_items = []
+    for wishlist, product in wishlist_data:
+        wishlist_items.append({
+            'wishlist': wishlist,
+            'product': product
+        })
     
-    return render_template('wishlist.html', wishlist_items=wishlist_data)
+    return render_template('wishlist.html', wishlist_items=wishlist_items)
 
 
 @views.route('/add_to_wishlist/<int:product_id>', methods=['POST'])
+@login_required
 def wishlist_add(product_id):
     """Add product to wishlist"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Please login first'}), 401
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     
     # Check if already in wishlist
     existing_item = Wishlist.query.filter_by(
@@ -413,13 +410,11 @@ def wishlist_add(product_id):
 
 
 @views.route('/remove_from_wishlist/<int:product_id>', methods=['POST'])
+@login_required
 def remove_from_wishlist(product_id):
     """Remove product from wishlist"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
     wishlist_item = Wishlist.query.filter_by(
-        user_id=session['user_id'], 
+        user_id=current_user.id, 
         product_id=product_id
     ).first()
     
@@ -432,12 +427,10 @@ def remove_from_wishlist(product_id):
 
 
 @views.route('/move_to_cart/<int:product_id>', methods=['POST'])
+@login_required
 def move_to_cart(product_id):
     """Move item from wishlist to cart"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     
     # Remove from wishlist
     wishlist_item = Wishlist.query.filter_by(
@@ -468,13 +461,10 @@ def move_to_cart(product_id):
 
 # ============= CHECKOUT & ORDERS =============
 @views.route('/checkout')
+@login_required
 def checkout():
     """Checkout page"""
-    if 'user_id' not in session:
-        flash('Please login to checkout', 'warning')
-        return redirect(url_for('auth.login'))
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     user = User.query.get(user_id)
     
     # Get cart items
@@ -508,12 +498,10 @@ def checkout():
 
 
 @views.route('/place_order', methods=['POST'])
+@login_required
 def place_order():
     """Place an order"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    user_id = session['user_id']
+    user_id = current_user.id
     
     # Get form data
     data = request.form
@@ -567,35 +555,44 @@ def place_order():
     
     db.session.commit()
     
-    if request.is_json:
+    # Check if the request is an AJAX/fetch request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
         return jsonify({'success': True, 'order_id': new_order.id})
     
     flash('Order placed successfully!', 'success')
-    return redirect(url_for('views.my_orders'))
+    return render_template('payment_success.html', order=new_order)
+    # return redirect(url_for('views.my_orders'))
 
 
 @views.route('/my_orders')
+@login_required
 def my_orders():
     """View user's orders"""
-    if 'user_id' not in session:
-        flash('Please login to view orders', 'warning')
-        return redirect(url_for('auth.login'))
-    
-    orders = Order.query.filter_by(user_id=session['user_id'])\
+    orders = Order.query.filter_by(user_id=current_user.id)\
         .order_by(Order.order_date.desc()).all()
     
     return render_template('my_orders.html', orders=orders)
 
 
-@views.route('/cancel_order/<int:order_id>', methods=['POST'])
-def cancel_order(order_id):
-    """Cancel an order"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
+@views.route('/view_order_items/<int:order_id>')
+@login_required
+def view_order_items(order_id):
+    """View detailed order items"""
     order = Order.query.filter_by(
         id=order_id, 
-        user_id=session['user_id']
+        user_id=current_user.id
+    ).first_or_404()
+    
+    return render_template('order_details.html', order=order)
+
+
+@views.route('/cancel_order/<int:order_id>', methods=['POST'])
+@login_required
+def cancel_order(order_id):
+    """Cancel an order"""
+    order = Order.query.filter_by(
+        id=order_id, 
+        user_id=current_user.id
     ).first_or_404()
     
     if order.status != 'Pending':
@@ -613,6 +610,18 @@ def cancel_order(order_id):
     
     flash('Order cancelled successfully', 'success')
     return redirect(url_for('views.my_orders'))
+
+
+@views.route('/payment_success/<int:order_id>')
+@login_required
+def payment_success(order_id):
+    """Display payment success page"""
+    order = Order.query.filter_by(
+        id=order_id, 
+        user_id=current_user.id
+    ).first_or_404()
+    
+    return render_template('payment_success.html', order=order)
 
 
 # ============= API ENDPOINTS =============
@@ -639,20 +648,18 @@ def api_trending_products():
 @views.route('/api/cart/count')
 def api_cart_count():
     """Get cart item count"""
-    if 'user_id' not in session:
+    if not current_user.is_authenticated:
         return jsonify({'count': 0})
-    
-    count = Cart.query.filter_by(user_id=session['user_id']).count()
+    count = Cart.query.filter_by(user_id=current_user.id).count()
     return jsonify({'count': count})
 
 
 @views.route('/api/wishlist/count')
 def api_wishlist_count():
     """Get wishlist item count"""
-    if 'user_id' not in session:
+    if not current_user.is_authenticated:
         return jsonify({'count': 0})
-    
-    count = Wishlist.query.filter_by(user_id=session['user_id']).count()
+    count = Wishlist.query.filter_by(user_id=current_user.id).count()
     return jsonify({'count': count})
 
 
@@ -664,3 +671,84 @@ def get_image(filename):
     if not os.path.exists(file_path):
         return "File not found", 404
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+
+@views.route('/contact')
+def contact():
+    """Display contact page"""
+    return render_template('contact.html')
+
+
+@views.route('/faqs')
+def faqs():
+    return render_template('faqs.html')
+
+
+@views.route('/shipping-policy')
+def shipping_policy():
+    return render_template('shipping_policy.html')
+
+
+@views.route('/returns-exchanges')
+def returns_exchanges():
+    return render_template('returns_exchanges.html')
+
+
+@views.route('/size-guide')
+def size_guide():
+    return render_template('size_guide.html')
+
+
+@views.route('/track-order')
+def track_order():
+    return render_template('track_order.html')
+
+
+@views.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy_policy.html')
+
+
+@views.route('/terms-of-service')
+def terms_of_service():
+    return render_template('terms_of_service.html')
+
+
+@views.route('/send_contact_email', methods=['POST'])
+def send_contact_email():
+    """Send contact email"""
+    try:
+        from app import mail  # Import mail from app context
+        
+        data = request.get_json()
+        
+        name = data.get('name')
+        email = data.get('email')
+        subject = data.get('subject')
+        message = data.get('message')
+        
+        # Create email message
+        msg = Message(
+            subject=f"Contact Form: {subject}",
+            sender='help@fashionfinds.com',  # This will be the visible sender
+            recipients=['arerajendhar33@gmail.com'],  # Your actual email
+            body=f"""
+            New contact form submission:
+            
+            Name: {name}
+            Email: {email}
+            Subject: {subject}
+            
+            Message:
+            {message}
+            """
+        )
+        
+        # Send email
+        mail.send(msg)
+        
+        return jsonify({'success': True, 'message': 'Email sent successfully'})
+        
+    except Exception as e:
+        print(f"Error sending email: {str(e)}")
+        return jsonify({'success': False, 'message': 'Failed to send email'}), 500

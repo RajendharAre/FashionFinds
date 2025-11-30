@@ -73,7 +73,7 @@ def register():
         state = request.form["state"]
         city = request.form["city"]
         pincode = request.form["pincode"]
-        role = request.form["role"]
+        role = request.form.get("role", "user")  # Default to user if not specified
 
         # Validation
         if not all([name, phone, email, password, confirm_password, address, state, city, pincode]):
@@ -98,7 +98,30 @@ def register():
 
         hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
 
+        # Generate custom ID based on role
+        if role == "admin":
+            prefix = "A"
+        elif role == "delivery_agent":
+            prefix = "D"
+        else:
+            prefix = "U"
+
+        # Get the next available ID number
+        last_user = User.query.filter(User.custom_id.like(f"{prefix}%")).order_by(User.id.desc()).first()
+        if last_user and last_user.custom_id:
+            # Extract the number from the last custom_id
+            try:
+                last_number = int(last_user.custom_id[1:])
+                new_number = last_number + 1
+            except:
+                new_number = 1
+        else:
+            new_number = 1
+
+        custom_id = f"{prefix}{new_number:04d}"
+
         new_user = User(
+            custom_id=custom_id,
             name=name,
             phone=phone,
             email=email,
@@ -249,3 +272,64 @@ def order_info():
     if current_user.role != 'delivery_agent':
         return redirect(url_for('views.homepage'))
     return render_template('order_info.html')
+
+
+@auth_bp.route("/delivery-application", methods=["GET", "POST"])
+def delivery_application():
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        phone = request.form["phone"]
+        address = request.form["address"]
+        state = request.form["state"]
+        city = request.form["city"]
+        pincode = request.form["pincode"]
+        experience = request.form["experience"]
+        availability = request.form["availability"]
+        cover_letter = request.form["cover_letter"]
+        terms = request.form.get("terms")
+
+        # Validation
+        if not all([name, email, phone, address, state, city, pincode, experience, availability, cover_letter, terms]):
+            flash("All fields are required!", "danger")
+            return render_template("delivery_application.html")
+
+        if not is_valid_email(email):
+            flash("Invalid email format!", "danger")
+            return render_template("delivery_application.html")
+
+        if not is_valid_phone(phone):
+            flash("Invalid phone number! Please enter 10 digits.", "danger")
+            return render_template("delivery_application.html")
+
+        if User.query.filter_by(email=email).first():
+            flash("Email already registered!", "danger")
+            return render_template("delivery_application.html")
+
+        # Create a delivery agent application (not approved yet)
+        new_application = User(
+            name=name,
+            phone=phone,
+            email=email,
+            password="",  # No password yet
+            address=address,
+            state=state,
+            city=city,
+            pincode=pincode,
+            role="delivery_agent",
+            experience=experience,
+            availability=availability,
+            cover_letter=cover_letter,
+            approved=False
+        )
+        
+        try:
+            db.session.add(new_application)
+            db.session.commit()
+            flash("Application submitted successfully! Our team will review your application and contact you soon.", "success")
+            return redirect(url_for("auth.delivery_application"))
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while submitting your application. Please try again.", "danger")
+
+    return render_template("delivery_application.html")

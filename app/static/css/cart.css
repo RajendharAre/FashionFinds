@@ -5,50 +5,50 @@
 /* ========== ROOT VARIABLES ========== */
 :root {
   /* Colors */
-  --cart-primary: #C4877A;
-  --cart-primary-hover: #A56B5F;
-  --cart-dark: #2C2C2C;
-  --cart-light: #F8F9FA;
-  --cart-white: #FFFFFF;
-  --cart-gray-100: #F8F9FA;
-  --cart-gray-200: #E9ECEF;
-  --cart-gray-300: #DEE2E6;
-  --cart-gray-400: #CED4DA;
-  --cart-gray-500: #ADB5BD;
-  --cart-gray-600: #6C757D;
-  --cart-gray-700: #495057;
-  --cart-gray-800: #343A40;
-  --cart-gray-900: #212529;
-  --cart-success: #28a745;
-  --cart-danger: #dc3545;
+  --cart-primary: var(--primary);
+  --cart-primary-hover: var(--primary-hover);
+  --cart-dark: var(--dark);
+  --cart-light: var(--light);
+  --cart-white: var(--white);
+  --cart-gray-100: var(--gray-100);
+  --cart-gray-200: var(--gray-200);
+  --cart-gray-300: var(--gray-300);
+  --cart-gray-400: var(--gray-400);
+  --cart-gray-500: var(--gray-500);
+  --cart-gray-600: var(--gray-600);
+  --cart-gray-700: var(--gray-700);
+  --cart-gray-800: var(--gray-800);
+  --cart-gray-900: var(--gray-900);
+  --cart-success: var(--success);
+  --cart-danger: var(--error);
   
   /* Spacing */
-  --cart-space-xs: 0.25rem;
-  --cart-space-sm: 0.5rem;
-  --cart-space-md: 1rem;
-  --cart-space-lg: 1.5rem;
-  --cart-space-xl: 2rem;
-  --cart-space-2xl: 3rem;
-  --cart-space-3xl: 4rem;
+  --cart-space-xs: var(--space-xs);
+  --cart-space-sm: var(--space-sm);
+  --cart-space-md: var(--space-md);
+  --cart-space-lg: var(--space-lg);
+  --cart-space-xl: var(--space-xl);
+  --cart-space-2xl: var(--space-2xl);
+  --cart-space-3xl: var(--space-3xl);
   
   /* Borders */
-  --cart-radius-sm: 0.25rem;
-  --cart-radius-md: 0.5rem;
-  --cart-radius-lg: 0.75rem;
-  --cart-radius-xl: 1rem;
+  --cart-radius-sm: var(--radius-sm);
+  --cart-radius-md: var(--radius-md);
+  --cart-radius-lg: var(--radius-lg);
+  --cart-radius-xl: var(--radius-xl);
   
   /* Shadows */
-  --cart-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  --cart-shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  --cart-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-  --cart-shadow-xl: 0 2rem 4rem rgba(0, 0, 0, 0.2);
+  --cart-shadow-sm: var(--shadow-sm);
+  --cart-shadow-md: var(--shadow-md);
+  --cart-shadow-lg: var(--shadow-lg);
+  --cart-shadow-xl: var(--shadow-xl);
   
   /* Transitions */
-  --cart-transition: all 0.3s ease-in-out;
+  --cart-transition: var(--transition);
   
   /* Typography */
-  --cart-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --cart-font-heading: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
+  --cart-font-primary: var(--font-primary);
+  --cart-font-heading: var(--font-heading);
 }
 
 /* ========== GLOBAL RESET ========== */

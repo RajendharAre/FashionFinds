@@ -16,6 +16,9 @@
         <div class="account-card">
             <div class="account-header">
                 <h3>Account Details</h3>
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
             </div>
             <div class="account-body">
                 <div class="account-row">
@@ -23,10 +26,22 @@
                     <div class="account-column">
                         <h5 class="account-subtitle">Personal Information</h5>
                         <div class="account-details">
-                            <p><strong>Name:</strong> {{ current_user.name }}</p>
-                            <p><strong>Email:</strong> {{ current_user.email }}</p>
-                            <p><strong>Phone:</strong> {{ current_user.phone }}</p>
-                            <p><strong>Role:</strong> {{ current_user.role }}</p>
+                            <div class="detail-item">
+                                <span class="detail-label">Name:</span>
+                                <span class="detail-value">{{ current_user.name }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Email:</span>
+                                <span class="detail-value">{{ current_user.email }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Phone:</span>
+                                <span class="detail-value">{{ current_user.phone }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Role:</span>
+                                <span class="detail-value">{{ current_user.role }}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -34,9 +49,22 @@
                     <div class="account-column">
                         <h5 class="account-subtitle">Address Information</h5>
                         <div class="account-details">
-                            <p><strong>Address:</strong> {{ current_user.address }}</p>
-                            <p><strong>City:</strong> {{ current_user.city }}</p>
-                            <p><strong>State:</strong> {{ current_user.state }}</p>
+                            <div class="detail-item">
+                                <span class="detail-label">Address:</span>
+                                <span class="detail-value">{{ current_user.address }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">City:</span>
+                                <span class="detail-value">{{ current_user.city }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">State:</span>
+                                <span class="detail-value">{{ current_user.state }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Pincode:</span>
+                                <span class="detail-value">{{ current_user.pincode }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -76,6 +104,9 @@
                     <a href="{{ url_for('auth.update_password') }}" class="btn btn-secondary">
                         <i class="fas fa-lock"></i> Change Password
                     </a>
+                    <a href="{{ url_for('views.my_orders') }}" class="btn btn-info">
+                        <i class="fas fa-shopping-bag"></i> My Orders
+                    </a>
                     <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
@@ -89,8 +120,9 @@
 {% block extra_css %}
 <style>
     .account-header-section {
-        background: var(--gray-50);
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
         padding: var(--space-xl) 0;
+        color: var(--white);
     }
     
     .account-container {
@@ -106,7 +138,7 @@
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-lg);
         width: 100%;
-        max-width: 900px;
+        max-width: 1000px;
         overflow: hidden;
         transition: transform var(--transition), box-shadow var(--transition);
     }
@@ -117,16 +149,29 @@
     }
 
     .account-header {
-        background-color: var(--primary);
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
         color: var(--white);
-        padding: var(--space-lg);
+        padding: var(--space-xl);
         text-align: center;
+        position: relative;
     }
 
     .account-header h3 {
-        margin: 0;
+        margin: 0 0 var(--space-md);
         font-size: 1.75rem;
         font-weight: 700;
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2rem;
     }
 
     .account-body {
@@ -137,11 +182,15 @@
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-lg);
+        margin-bottom: var(--space-xl);
     }
 
     .account-column {
         flex: 1;
-        min-width: 250px;
+        min-width: 300px;
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: var(--space-lg);
     }
 
     .account-subtitle {
@@ -153,14 +202,33 @@
         padding-bottom: var(--space-sm);
     }
 
-    .account-details p {
-        font-size: 1rem;
-        color: var(--gray-800);
-        margin: var(--space-sm) 0;
+    .account-details {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
     }
 
-    .account-details strong {
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--space-xs) 0;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+
+    .detail-value {
         color: var(--dark);
+        text-align: right;
+        flex: 1;
+        margin-left: var(--space-md);
     }
 
     .account-actions {
@@ -196,6 +264,15 @@
         
         .account-actions .btn {
             width: 100%;
+        }
+        
+        .detail-item {
+            flex-direction: column;
+        }
+        
+        .detail-value {
+            text-align: left;
+            margin-left: 0;
         }
     }
 </style>

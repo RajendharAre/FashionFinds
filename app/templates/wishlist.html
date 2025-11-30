@@ -20,11 +20,9 @@
     <div class="product-container">
         {% for item in wishlist_items %}
         <div class="product-card" data-product-id="{{ item['product'].id }}">
-            <form action="{{ url_for('views.remove_from_wishlist', product_id=item['product'].id) }}" method="POST" class="wishlist-form">
-                <button type="submit" class="wishlist-btn active" aria-label="Remove from wishlist">
-                    <i class="fas fa-heart"></i>
-                </button>
-            </form>
+            <button type="button" class="wishlist-btn active" data-product-id="{{ item['product'].id }}" aria-label="Remove from wishlist">
+                <i class="fas fa-heart"></i>
+            </button>
             
             <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="product-image-link">
                 <div class="product-image">
@@ -75,7 +73,7 @@
             
             if (response.ok) {
                 showNotification('Product added to cart!', 'success');
-                updateCartCount();
+                await updateCartCount();
             } else {
                 showNotification('Failed to add product to cart', 'error');
             }
@@ -86,8 +84,23 @@
     }
 
     function showNotification(message, type) {
-        // Reuse the flash message system
-        const container = document.querySelector('.flash-messages-container') || createFlashContainer();
+        // Check if notification already exists to prevent duplicates
+        const existingNotifications = document.querySelectorAll(`.flash-message.flash-${type} span`);
+        for (let notification of existingNotifications) {
+            if (notification.textContent === message) {
+                return; // Don't show duplicate notifications
+            }
+        }
+        
+        // Use the existing flash container from base template instead of creating a new one
+        let container = document.querySelector('.flash-messages-container');
+        if (!container) {
+            // If no container exists, create one (fallback)
+            container = document.createElement('div');
+            container.className = 'flash-messages-container';
+            document.body.appendChild(container);
+        }
+        
         const notification = document.createElement('div');
         notification.className = `flash-message flash-${type}`;
         notification.innerHTML = `
@@ -108,20 +121,67 @@
         }, 3000);
     }
 
-    function createFlashContainer() {
-        const container = document.createElement('div');
-        container.className = 'flash-messages-container';
-        document.body.appendChild(container);
-        return container;
+    // Use global updateCartCount function
+    async function updateCartCount() {
+        await window.updateCartCount();
     }
-
-    function updateCartCount() {
-        // TODO: Fetch actual count from server
-        const badge = document.getElementById('cartCount');
-        if (badge) {
-            const current = parseInt(badge.textContent) || 0;
-            badge.textContent = current + 1;
+    
+    // Remove from Wishlist Functionality
+    async function removeFromWishlist(productId) {
+        // Find the product card to remove it after successful removal
+        const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+        
+        try {
+            const response = await fetch(`/remove_from_wishlist/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            
+            if (response.ok) {
+                showNotification('Product removed from wishlist!', 'success');
+                // Update wishlist count
+                await window.updateWishlistCount();
+                
+                // Remove the product card from the DOM with animation
+                if (productCard) {
+                    productCard.style.opacity = '0';
+                    productCard.style.transform = 'translateX(100px)';
+                    productCard.style.transition = 'all 0.3s ease';
+                    
+                    setTimeout(() => {
+                        productCard.remove();
+                        
+                        // Check if wishlist is now empty
+                        const productContainer = document.querySelector('.product-container');
+                        if (productContainer && productContainer.children.length === 0) {
+                            // Reload the page to show empty state
+                            location.reload();
+                        }
+                    }, 300);
+                }
+            } else {
+                showNotification('Failed to remove product from wishlist', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
         }
     }
+    
+    // Initialize event listeners for wishlist buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        wishlistButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                if (productId) {
+                    // Show confirmation dialog
+                    if (confirm('Are you sure you want to remove this product from your wishlist?')) {
+                        removeFromWishlist(productId);
+                    }
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

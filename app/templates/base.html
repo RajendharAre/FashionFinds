@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="description" content="FashionFinds - Your Ultimate Fashion E-Commerce Platform">
     <meta name="theme-color" content="#C4877A">
     
@@ -78,6 +78,7 @@
             width: 100%;
             max-width: 100vw;
             overflow-x: hidden;
+            overflow-y: auto;
             box-sizing: border-box;
             padding-right: 0;
             padding-left: 0;
@@ -96,6 +97,35 @@
         body > * {
             max-width: 100vw !important;
             overflow-x: hidden !important;
+        }
+        
+        /* Responsive adjustments for different screen sizes */
+        @media (max-width: 1200px) {
+            .main-content {
+                padding-top: 15px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                padding-top: 10px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 5px;
+                padding-left: var(--space-sm);
+                padding-right: var(--space-sm);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding-top: 0;
+                padding-left: var(--space-xs);
+                padding-right: var(--space-xs);
+            }
         }
     </style>
 
@@ -169,6 +199,8 @@
     <!-- Main JavaScript -->
     <script src="{{ url_for('static', filename='js/app.js') }}?v={{ range(1, 1000) | random }}"></script>
     
+
+    
     <!-- Block for page-specific scripts -->
     {% block extra_js %}{% endblock %}
 
@@ -183,14 +215,40 @@
             }
         });
 
-        // Flash Messages Auto-dismiss
+        // Flash Messages Auto-dismiss with duplicate prevention
         document.addEventListener('DOMContentLoaded', function() {
+            // Ensure only one flash container exists
+            const existingContainers = document.querySelectorAll('.flash-messages-container');
+            if (existingContainers.length > 1) {
+                // Keep the first one, remove the rest
+                for (let i = 1; i < existingContainers.length; i++) {
+                    existingContainers[i].remove();
+                }
+            }
+            
+            // Handle flash messages
             const flashMessages = document.querySelectorAll('.flash-message');
             flashMessages.forEach(message => {
-                setTimeout(() => {
-                    message.classList.add('fade-out');
-                    setTimeout(() => message.remove(), 300);
-                }, 5000);
+                // Check if this message has a close button
+                const hasCloseButton = message.querySelector('.flash-close');
+                // Check if the message has actual content
+                const messageContent = message.querySelector('.flash-content span');
+                const isMessageEmpty = !messageContent || messageContent.textContent.trim() === '';
+                
+                // For debugging - log message info to console
+                console.log('Flash message:', {
+                    element: message,
+                    hasCloseButton: !!hasCloseButton,
+                    content: messageContent ? messageContent.textContent : 'No content',
+                    isEmpty: isMessageEmpty
+                });
+                
+                if (isMessageEmpty) {
+                    // Remove empty messages immediately
+                    message.remove();
+                }
+                // Note: We no longer auto-dismiss messages with close buttons
+                // All server-generated flash messages have close buttons and should remain until manually closed
             });
 
             // Back to Top Button
@@ -300,13 +358,98 @@
         window.addEventListener('error', function(e) {
             console.error('Global error:', e.error);
         });
+        
+        // Function to update cart count
+        async function updateCartCount() {
+            try {
+                const response = await fetch('/api/cart/count');
+                if (response.ok) {
+                    const data = await response.json();
+                    const badge = document.getElementById('cartCount');
+                    if (badge) {
+                        badge.textContent = data.count;
+                        // Hide badge if count is 0
+                        badge.style.display = data.count > 0 ? 'flex' : 'none';
+                    }
+                } else if (response.status === 401) {
+                    // User not authenticated, hide the badge
+                    const badge = document.getElementById('cartCount');
+                    if (badge) {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    }
+                } else if (response.headers.get('content-type') && response.headers.get('content-type').includes('text/html')) {
+                    // Handle case where we get HTML instead of JSON (e.g., redirect to login)
+                    const badge = document.getElementById('cartCount');
+                    if (badge) {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating cart count:', error);
+                // Hide badge on error
+                const badge = document.getElementById('cartCount');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+        
+        // Function to update wishlist count
+        async function updateWishlistCount() {
+            try {
+                const response = await fetch('/api/wishlist/count');
+                if (response.ok) {
+                    const data = await response.json();
+                    const badge = document.getElementById('wishlistCount');
+                    if (badge) {
+                        badge.textContent = data.count;
+                        // Hide badge if count is 0
+                        badge.style.display = data.count > 0 ? 'flex' : 'none';
+                    }
+                } else if (response.status === 401) {
+                    // User not authenticated, hide the badge
+                    const badge = document.getElementById('wishlistCount');
+                    if (badge) {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    }
+                } else if (response.headers.get('content-type') && response.headers.get('content-type').includes('text/html')) {
+                    // Handle case where we get HTML instead of JSON (e.g., redirect to login)
+                    const badge = document.getElementById('wishlistCount');
+                    if (badge) {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating wishlist count:', error);
+                // Hide badge on error
+                const badge = document.getElementById('wishlistCount');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+        
+        // Initialize cart and wishlist counts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only update counts for authenticated users
+            // We check if current_user is defined and authenticated
+            // This will be set by the template engine
+            updateCartCount();
+            updateWishlistCount();
+        });
 
         // Service Worker Registration (for PWA capabilities)
+        /*
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(err => {
                 console.log('Service Worker registration failed:', err);
             });
         }
+        */
     </script>
 
     <style>
@@ -336,6 +479,9 @@
             justify-content: center;
             z-index: 9999;
             transition: opacity 0.3s;
+            max-width: 100vw;
+            max-height: 100vh;
+            box-sizing: border-box;
         }
 
         .page-loader.fade-out {
@@ -349,6 +495,8 @@
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         @keyframes spin {
@@ -357,10 +505,15 @@
 
         .flash-messages-container {
             position: fixed;
-            top: 80px;
+            top: 100px; /* Move down to avoid navbar overlap */
             right: 20px;
             z-index: 10000;
             max-width: 400px;
+            max-width: calc(100vw - 40px);
+            box-sizing: border-box;
+            /* Ensure visibility */
+            visibility: visible !important;
+            display: block !important;
         }
 
         .flash-message {
@@ -371,6 +524,7 @@
             margin-bottom: 12px;
             border-radius: 12px;
             background: white;
+            color: var(--dark); /* Explicitly set text color for visibility */
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             animation: slideInRight 0.3s ease-out;
         }
@@ -401,6 +555,15 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            color: inherit; /* Ensure text inherits color from parent */
+        }
+        
+        .flash-content span {
+            color: inherit; /* Ensure message text is visible */
+        }
+        
+        .flash-content i {
+            color: inherit; /* Ensure icons are visible */
         }
 
         .flash-success { border-left: 4px solid var(--success); }
@@ -433,6 +596,8 @@
             visibility: hidden;
             transition: all 0.3s;
             z-index: 999;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .back-to-top.visible {
@@ -465,6 +630,8 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transition: all 0.3s;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .chatbot-toggle:hover {
@@ -501,6 +668,8 @@
             flex-direction: column;
             overflow: hidden;
             animation: scaleIn 0.3s ease-out;
+            max-width: calc(100vw - 40px);
+            box-sizing: border-box;
         }
 
         @keyframes scaleIn {
@@ -718,16 +887,60 @@
             transform: scale(1.05);
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             .chatbot-window {
                 width: calc(100vw - 40px);
                 height: calc(100vh - 120px);
+                max-width: 100vw;
+                box-sizing: border-box;
             }
 
             .flash-messages-container {
                 left: 20px;
                 right: 20px;
                 max-width: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .chatbot-window {
+                width: calc(100vw - 20px);
+                height: calc(100vh - 100px);
+                max-width: 100vw;
+                box-sizing: border-box;
+            }
+            
+            .chatbot-input {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .chatbot-input input {
+                width: 100%;
+            }
+            
+            .chatbot-input button {
+                width: 100%;
+                height: 40px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chatbot-window {
+                width: calc(100vw - 20px);
+                height: calc(100vh - 80px);
+                max-width: 100vw;
+                box-sizing: border-box;
+            }
+
+            .flash-messages-container {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+            
+            .message-content {
+                max-width: 80%;
             }
         }
     </style>

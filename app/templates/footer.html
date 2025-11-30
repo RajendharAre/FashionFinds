@@ -38,7 +38,7 @@
                     <li><a href="{{ url_for('views.products_by_category', category_name='Women') }}"><i class="fas fa-chevron-right"></i> Women's Fashion</a></li>
                     <li><a href="{{ url_for('views.products_by_category', category_name='Kids') }}"><i class="fas fa-chevron-right"></i> Kids Fashion</a></li>
                     <li><a href="{{ url_for('views.products_by_category', category_name='Accessories') }}"><i class="fas fa-chevron-right"></i> Accessories</a></li>
-                    <li><a href="/cart"><i class="fas fa-chevron-right"></i> Shopping Cart</a></li>
+                    <li><a href="{{ url_for('views.show_cart') }}"><i class="fas fa-chevron-right"></i> Shopping Cart</a></li>
                 </ul>
             </div>
 
@@ -46,12 +46,12 @@
             <div class="footer-section">
                 <h4>Customer Service</h4>
                 <ul class="footer-links">
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Shipping Policy</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Returns & Exchanges</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Size Guide</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Track Order</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> FAQs</a></li>
+                    <li><a href="{{ url_for('views.contact') }}"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
+                    <li><a href="{{ url_for('views.shipping_policy') }}"><i class="fas fa-chevron-right"></i> Shipping Policy</a></li>
+                    <li><a href="{{ url_for('views.returns_exchanges') }}"><i class="fas fa-chevron-right"></i> Returns & Exchanges</a></li>
+                    <li><a href="{{ url_for('views.size_guide') }}"><i class="fas fa-chevron-right"></i> Size Guide</a></li>
+                    <li><a href="{{ url_for('views.track_order') }}"><i class="fas fa-chevron-right"></i> Track Order</a></li>
+                    <li><a href="{{ url_for('views.faqs') }}"><i class="fas fa-chevron-right"></i> FAQs</a></li>
                 </ul>
             </div>
 
@@ -96,7 +96,7 @@
     <div class="footer-bottom">
         <div class="footer-bottom-container">
             <div class="copyright">
-                <p>&copy; 2024 FashionFinds. All rights reserved. | Made with <i class="fas fa-heart"></i> by <a href="#">Team FashionFinds</a></p>
+                <p>&copy; <span id="currentYear">2024</span> FashionFinds. All rights reserved. | Made with <i class="fas fa-heart"></i> by <a href="#">Team FashionFinds</a></p>
             </div>
             
             <!-- Payment Methods -->
@@ -113,9 +113,9 @@
             
             <!-- Legal Links -->
             <div class="legal-links">
-                <a href="#">Privacy Policy</a>
+                <a href="{{ url_for('views.privacy_policy') }}">Privacy Policy</a>
                 <span>|</span>
-                <a href="#">Terms of Service</a>
+                <a href="{{ url_for('views.terms_of_service') }}">Terms of Service</a>
             </div>
         </div>
     </div>
@@ -397,6 +397,33 @@
         color: var(--primary);
     }
 
+    @media (max-width: 992px) {
+        .footer-container {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .footer-section h4::after {
+            left: 0;
+            transform: none;
+        }
+        
+        .footer-bottom-container {
+            flex-direction: column;
+            text-align: center;
+            gap: var(--space-md);
+        }
+        
+        .payment-methods {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .legal-links {
+            justify-content: center;
+        }
+    }
+    
     @media (max-width: 768px) {
         .footer-container {
             grid-template-columns: 1fr;
@@ -423,6 +450,55 @@
 
         .payment-methods {
             flex-direction: column;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .footer-top {
+            padding: var(--space-xl) 0;
+        }
+        
+        .footer-container {
+            padding: 0 var(--space-sm);
+            gap: var(--space-lg);
+        }
+        
+        .footer-brand {
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        .newsletter-input-group {
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        .newsletter-btn {
+            width: 100%;
+        }
+        
+        .trust-badges {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .footer-bottom {
+            padding: var(--space-lg) 0;
+        }
+        
+        .footer-bottom-container {
+            padding: 0 var(--space-sm);
+            gap: var(--space-md);
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .trust-badges {
+            grid-template-columns: 1fr;
+        }
+        
+        .payment-icons {
+            flex-wrap: wrap;
+            justify-content: center;
         }
     }
 </style>
@@ -471,6 +547,9 @@
             showToast('Failed to subscribe. Please try again.', 'error');
         }
     });
+    
+    // Update copyright year automatically
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
     
     function showToast(message, type) {
         const toast = document.createElement('div');

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from .models import User, Product, ProductSize,  db, Order
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 import os
 from .forms import ProductForm
 
@@ -31,11 +32,14 @@ def admin_dashboard():
     
     total_users = User.query.count()
     pending_approvals = User.query.filter_by(approved=False).count()
+    # Get pending delivery applications
+    pending_delivery_applications = User.query.filter_by(role='delivery_agent', approved=False).count()
     
     return render_template(
         'admin_dashboard.html',
         total_users=total_users,
-        pending_approvals=pending_approvals
+        pending_approvals=pending_approvals,
+        pending_delivery_applications=pending_delivery_applications
     )
 
 ### ✅ Add Products Route
@@ -274,11 +278,34 @@ def role_approval():
 def approve_user(id):
     try:
         user = User.query.get_or_404(id)
-        user.approved = True  # Make sure this field exists in your User model
+        user.approved = True
+        
+        # If this is a delivery agent, generate their credentials
+        if user.role == 'delivery_agent' and not user.custom_id:
+            # Generate custom ID
+            prefix = "D"
+            last_user = User.query.filter(User.custom_id.like(f"{prefix}%")).order_by(User.id.desc()).first()
+            if last_user and last_user.custom_id:
+                try:
+                    last_number = int(last_user.custom_id[1:])
+                    new_number = last_number + 1
+                except:
+                    new_number = 1
+            else:
+                new_number = 1
+            
+            custom_id = f"{prefix}{new_number:04d}"
+            user.custom_id = custom_id
+            
+            # Generate email and password
+            user.email = f"delivery_{custom_id}@fashionfinds.com"
+            user.password = generate_password_hash(f"FF_{custom_id}", method="pbkdf2:sha256")
+        
         db.session.commit()
         return {"message": "User approved successfully"}, 200
     except Exception as e:
         print("Error approving user:", e)
+        db.session.rollback()
         return {"error": "Failed to approve user"}, 500
 
 @admin.route('/reject-user/<int:id>', methods=['POST'])

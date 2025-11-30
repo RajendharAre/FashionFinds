@@ -5,50 +5,50 @@
 /* ========== ROOT VARIABLES ========== */
 :root {
   /* Colors */
-  --wishlist-primary: #C4877A;
-  --wishlist-primary-hover: #A56B5F;
-  --wishlist-dark: #2C2C2C;
-  --wishlist-light: #F8F9FA;
-  --wishlist-white: #FFFFFF;
-  --wishlist-gray-100: #F8F9FA;
-  --wishlist-gray-200: #E9ECEF;
-  --wishlist-gray-300: #DEE2E6;
-  --wishlist-gray-400: #CED4DA;
-  --wishlist-gray-500: #ADB5BD;
-  --wishlist-gray-600: #6C757D;
-  --wishlist-gray-700: #495057;
-  --wishlist-gray-800: #343A40;
-  --wishlist-gray-900: #212529;
-  --wishlist-success: #28a745;
-  --wishlist-danger: #dc3545;
+  --wishlist-primary: var(--primary);
+  --wishlist-primary-hover: var(--primary-hover);
+  --wishlist-dark: var(--dark);
+  --wishlist-light: var(--light);
+  --wishlist-white: var(--white);
+  --wishlist-gray-100: var(--gray-100);
+  --wishlist-gray-200: var(--gray-200);
+  --wishlist-gray-300: var(--gray-300);
+  --wishlist-gray-400: var(--gray-400);
+  --wishlist-gray-500: var(--gray-500);
+  --wishlist-gray-600: var(--gray-600);
+  --wishlist-gray-700: var(--gray-700);
+  --wishlist-gray-800: var(--gray-800);
+  --wishlist-gray-900: var(--gray-900);
+  --wishlist-success: var(--success);
+  --wishlist-danger: var(--error);
   
   /* Spacing */
-  --wishlist-space-xs: 0.25rem;
-  --wishlist-space-sm: 0.5rem;
-  --wishlist-space-md: 1rem;
-  --wishlist-space-lg: 1.5rem;
-  --wishlist-space-xl: 2rem;
-  --wishlist-space-2xl: 3rem;
-  --wishlist-space-3xl: 4rem;
+  --wishlist-space-xs: var(--space-xs);
+  --wishlist-space-sm: var(--space-sm);
+  --wishlist-space-md: var(--space-md);
+  --wishlist-space-lg: var(--space-lg);
+  --wishlist-space-xl: var(--space-xl);
+  --wishlist-space-2xl: var(--space-2xl);
+  --wishlist-space-3xl: var(--space-3xl);
   
   /* Borders */
-  --wishlist-radius-sm: 0.25rem;
-  --wishlist-radius-md: 0.5rem;
-  --wishlist-radius-lg: 0.75rem;
-  --wishlist-radius-xl: 1rem;
+  --wishlist-radius-sm: var(--radius-sm);
+  --wishlist-radius-md: var(--radius-md);
+  --wishlist-radius-lg: var(--radius-lg);
+  --wishlist-radius-xl: var(--radius-xl);
   
   /* Shadows */
-  --wishlist-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  --wishlist-shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  --wishlist-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-  --wishlist-shadow-xl: 0 2rem 4rem rgba(0, 0, 0, 0.2);
+  --wishlist-shadow-sm: var(--shadow-sm);
+  --wishlist-shadow-md: var(--shadow-md);
+  --wishlist-shadow-lg: var(--shadow-lg);
+  --wishlist-shadow-xl: var(--shadow-xl);
   
   /* Transitions */
-  --wishlist-transition: all 0.3s ease-in-out;
+  --wishlist-transition: var(--transition);
   
   /* Typography */
-  --wishlist-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --wishlist-font-heading: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
+  --wishlist-font-primary: var(--font-primary);
+  --wishlist-font-heading: var(--font-heading);
 }
 
 /* ========== GLOBAL RESET ========== */
@@ -160,6 +160,8 @@
   color: var(--wishlist-primary);
   font-size: 1.2rem;
   transition: var(--wishlist-transition);
+  display: block; /* Ensure proper display */
+  line-height: 1; /* Ensure proper alignment */
 }
 
 .wishlist-btn:hover {
@@ -171,8 +173,17 @@
   color: var(--wishlist-white);
 }
 
+.wishlist-btn.active {
+  background: var(--wishlist-danger);
+}
+
+.wishlist-btn.active:hover {
+  background: #d32f2f; /* Darker red on hover for better feedback */
+}
+
 .wishlist-btn.active i {
-  color: var(--wishlist-danger);
+  color: var(--wishlist-white);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
 }
 
 /* ========== PRODUCT IMAGE ========== */

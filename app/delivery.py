@@ -39,8 +39,11 @@ def send_email(user, order, token):
 
     product = Product.query.get_or_404(order.product_id)
     orders = Order.query.get_or_404(order.order_id)
-    sender_email = 'vishnujavvaji19@gmail.com'
-    sender_password = 'aiun nsnp auvd nrbt'
+    # Email configuration
+    smtp_server = "smtp.gmail.com"
+    port = 587
+    sender_email = "arerajendhar33@gmail.com"
+    password = "aiun nsnp auvd nrbt"
     receiver_email = orders.mail
     subject = 'Rate the Product'
     body = f"Hello {orders.customer_name}, \n\nYour order : {product.product_name} with ID {orders.id} has been successfully delivered. Thank you for choosing us!\n\nTo rate the delivered products click : {rating_url}\n\nBest regards,\nYour Delivery Team\n\n"

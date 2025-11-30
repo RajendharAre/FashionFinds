@@ -25,27 +25,27 @@
     {% if cart_items %}
     <div class="cart-container">
         <div class="cart-items">
-            {% for cart, item in cart_items %}
-            <div class="cart-item" data-product-id="{{ item.id }}" data-price="{{ item.price }}" data-discount="{{ item.discount }}">
+            {% for product_id, item in cart_items.items() %}
+            <div class="cart-item" data-product-id="{{ product_id }}" data-price="{{ item.price }}" data-discount="0">
                 <div class="cart-item-image">
-                    <img src="{{ url_for('views.get_image', filename=item.product_picture) }}" alt="{{ item.product_name }}">
+                    <img src="{{ url_for('views.get_image', filename=item.image) }}" alt="{{ item.product_name }}">
                 </div>
                 
                 <div class="cart-item-details">
                     <h3 class="cart-item-title">{{ item.product_name }}</h3>
-                    <p class="cart-item-price">₹<span class="item-price" data-price="{{ item.price }}">{{ item.current_price }}</span></p>
+                    <p class="cart-item-price">₹<span class="item-price" data-price="{{ item.price }}">{{ item.price }}</span></p>
                     
                     <div class="cart-item-actions">
                         <div class="quantity-control">
                             <span class="quantity-label">Qty:</span>
-                            <input type="number" class="form-control quantity-input" value="{{ cart.quantity }}" min="1" data-product-id="{{ item.id }}">
+                            <input type="number" class="form-control quantity-input" value="{{ item.quantity }}" min="1" data-product-id="{{ product_id }}">
                         </div>
                         
                         <div class="cart-item-buttons">
-                            <form action="{{ url_for('views.remove_from_cart', product_id=item.id) }}" method="post">
+                            <form action="{{ url_for('views.cart_remove', product_id=product_id) }}" method="post">
                                 <button type="submit" class="btn btn-outline">Remove</button>
                             </form>
-                            <form action="{{ url_for('views.move_to_wishlist', product_id=item.id) }}" method="post">
+                            <form action="{{ url_for('views.wishlist_add', product_id=product_id) }}" method="post">
                                 <button type="submit" class="btn btn-secondary">Move to Wishlist</button>
                             </form>
                         </div>

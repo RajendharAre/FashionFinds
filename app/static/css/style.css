@@ -1266,12 +1266,47 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
 }
 
 /* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1200px) {
+    .auth-container {
+        gap: var(--space-lg);
+    }
+    
+    .login-form, .registration-form, .reset-password-form {
+        padding: var(--space-xl);
+    }
+    
+    .product-container {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
 @media (max-width: 992px) {
     .auth-container {
         flex-direction: column;
     }
     
     .auth-image, .auth-form {
+        width: 100%;
+    }
+    
+    .product-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        padding: var(--space-md);
+    }
+    
+    .cart-container {
+        flex-direction: column;
+    }
+    
+    .cart-items, .cart-summary {
+        width: 100%;
+    }
+    
+    .checkout-container {
+        flex-direction: column;
+    }
+    
+    .checkout-form, .order-summary {
         width: 100%;
     }
 }
@@ -1324,6 +1359,45 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         padding: var(--space-md);
     }
+    
+    .section-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .wishlist-header, .auth-header {
+        padding: var(--space-xl) 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-container {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        padding: var(--space-sm);
+    }
+    
+    .card, .product-card {
+        max-width: 100%;
+    }
+    
+    .card-image, .product-image {
+        height: 250px;
+    }
+    
+    .login-form, .registration-form, .reset-password-form {
+        padding: var(--space-lg);
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+    }
+    
+    .section-header h2 {
+        font-size: 1.6rem;
+    }
+    
+    .section-header p {
+        font-size: 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1337,5 +1411,17 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
     
     .section-header h2 {
         font-size: 1.5rem;
+    }
+    
+    .card-image, .product-image {
+        height: 200px;
+    }
+    
+    .login-form, .registration-form, .reset-password-form {
+        padding: var(--space-md);
+    }
+    
+    .form-title {
+        font-size: 1.3rem;
     }
 }

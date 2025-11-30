@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - FashionFinds{% endblock %}
+
+{% block content %}
+<!-- Contact Header -->
+<section class="contact-header">
+    <div class="container">
+        <div class="section-header text-center">
+            <h1>Contact Us</h1>
+            <p>We'd love to hear from you! Get in touch with our team</p>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="contact-container">
+        <!-- Contact Information -->
+        <div class="contact-info">
+            <h2>Get In Touch</h2>
+            <p class="contact-description">
+                Have questions about your order, product information, or need assistance? 
+                Our customer service team is here to help you 24/7.
+            </p>
+            
+            <div class="contact-details">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h4>Email Us</h4>
+                        <p>help@fashionfinds.com</p>
+                        <small>Response within 24 hours</small>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h4>Call Us</h4>
+                        <p>+91 8688790000</p>
+                        <small>Mon-Fri, 9AM-6PM IST</small>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h4>Visit Us</h4>
+                        <p>10-91 Maruti Nagar</p>
+                        <p>Hyderabad, Telangana</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Form -->
+        <div class="contact-form">
+            <h2>Send us a Message</h2>
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="6" required class="form-control"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                    <span class="btn-text">Send Message</span>
+                    <span class="btn-spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> Sending...
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/contact.css') }}?v={{ range(1,1000)|random }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnSpinner = submitBtn.querySelector('.btn-spinner');
+        
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'inline-block';
+        submitBtn.disabled = true;
+        
+        try {
+            // Send email using Flask-Mail
+            const response = await fetch('/send_contact_email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Show success message
+                showNotification('Message sent successfully! We will get back to you soon.', 'success');
+                // Reset form
+                this.reset();
+            } else {
+                // Show error message
+                showNotification('Failed to send message. Please try again.', 'error');
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+        } finally {
+            // Reset button state
+            btnText.style.display = 'inline-block';
+            btnSpinner.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    });
+    
+    function showNotification(message, type) {
+        // Check if notification already exists to prevent duplicates
+        const existingNotifications = document.querySelectorAll(`.flash-message.flash-${type} span`);
+        for (let notification of existingNotifications) {
+            if (notification.textContent === message) {
+                return; // Don't show duplicate notifications
+            }
+        }
+        
+        // Use the existing flash container from base template instead of creating a new one
+        let container = document.querySelector('.flash-messages-container');
+        if (!container) {
+            // If no container exists, create one (fallback)
+            container = document.createElement('div');
+            container.className = 'flash-messages-container';
+            document.body.appendChild(container);
+        }
+        
+        const notification = document.createElement('div');
+        notification.className = `flash-message flash-${type}`;
+        notification.innerHTML = `
+            <div class="flash-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="flash-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+</script>
+{% endblock %}

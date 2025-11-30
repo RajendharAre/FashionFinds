@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded", function () {
     let touchStartX = 0;
     let touchEndX = 0;
 
+    // Only initialize slider if elements exist
+    if (!sliderTrack || !slides.length || !dotsContainer) {
+        return; // Exit if slider elements don't exist on this page
+    }
+
     // Create dots
     function createDots() {
         if (!dotsContainer) {
@@ -26,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateSlider() {
+        if (!sliderTrack) return; // Check if sliderTrack exists
         sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
         document.querySelectorAll(".slider-dot").forEach((dot, index) => {
             dot.classList.toggle("active", index === currentIndex);
@@ -78,11 +84,15 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("resize", () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-            sliderTrack.style.transition = "none";
-            updateSlider();
-            setTimeout(() => {
-                sliderTrack.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
-            }, 10);
+            if (sliderTrack) {
+                sliderTrack.style.transition = "none";
+                updateSlider();
+                setTimeout(() => {
+                    if (sliderTrack) {
+                        sliderTrack.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+                    }
+                }, 10);
+            }
         }, 250);
     });
 

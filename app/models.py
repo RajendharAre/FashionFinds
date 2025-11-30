@@ -20,6 +20,7 @@ class Brand(db.Model):
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    custom_id = db.Column(db.String(10), unique=True, nullable=True)  # Custom ID like U0001, A0001, D0001
     name = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -31,7 +32,10 @@ class User(db.Model, UserMixin):
     reset_token = db.Column(db.String(255), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
     approved = db.Column(db.Boolean, default=False)    
-    role = db.Column(db.String(10), nullable=False)
+    role = db.Column(db.String(20), nullable=False)  # Increased length to accommodate longer role names
+    experience = db.Column(db.Integer, nullable=True)  # For delivery agents
+    availability = db.Column(db.String(20), nullable=True)  # For delivery agents
+    cover_letter = db.Column(db.Text, nullable=True)  # For delivery agents
     
     def generate_reset_token(self, secret_key):
         """Generate a unique reset token for password reset"""

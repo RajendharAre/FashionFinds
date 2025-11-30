@@ -1,14 +1,14 @@
 <div class="nav-container">
     <nav class="navbar">
         <!-- Logo -->
-        <a href="/" class="logo">
+        <a href="{{ url_for('views.homepage') }}" class="logo">
             <i class="fas fa-shopping-bag"></i>
             <span class="logo-text">FASHION FINDS</span>
         </a>
 
         <!-- Main Navigation -->
         <div class="main-nav">
-            <a href="/" class="nav-item" data-page="home" title="Home">
+            <a href="{{ url_for('views.homepage') }}" class="nav-item" data-page="home" title="Home">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
@@ -40,10 +40,10 @@
 
         <!-- Actions -->
         <div class="nav-actions">
-            <a href="/wishlist" class="nav-item nav-icon" title="Wishlist">
+            <a href="{{ url_for('views.show_wishlist') }}" class="nav-item nav-icon" title="Wishlist">
                 <i class="far fa-heart"></i><span class="badge" id="wishlistCount">0</span>
             </a>
-            <a href="/cart" class="nav-item nav-icon" title="Cart">
+            <a href="{{ url_for('views.show_cart') }}" class="nav-item nav-icon" title="Cart">
                 <i class="fas fa-shopping-cart"></i><span class="badge" id="cartCount">0</span>
             </a>
 
@@ -55,8 +55,8 @@
                 <div class="dropdown-content">
                     {% if current_user.is_authenticated %}
                         <a href="{{ url_for('auth.account') }}" class="dropdown-item"><i class="fas fa-user"></i> My Profile</a>
-                        <a href="/orders" class="dropdown-item"><i class="fas fa-box"></i> My Orders</a>
-                        <a href="/wishlist" class="dropdown-item"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="{{ url_for('views.my_orders') }}" class="dropdown-item"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="{{ url_for('views.show_wishlist') }}" class="dropdown-item"><i class="fas fa-heart"></i> Wishlist</a>
                         <div class="dropdown-divider"></div>
                         {% if current_user.role == 'admin' %}
                             <a href="{{ url_for('admin.admin_dashboard') }}" class="dropdown-item"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a>

@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+
+{% block title %}Shipping Policy | Fashion Finds{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/shipping-policy.css') }}?v={{ range(1,1000)|random }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================
+     HEADER
+========================= -->
+<section class="policy-header" id="top">
+    <div class="container text-center">
+        <h1>Shipping Policy</h1>
+        <p>Learn about our shipping methods, delivery times, and costs.</p>
+    </div>
+</section>
+
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    .policy-nav a.active {
+        background: var(--primary);
+        color: var(--white);
+        border-color: var(--primary);
+        font-weight: 600;
+    }
+</style>
+
+<!-- =========================
+     QUICK NAVIGATION
+========================= -->
+<div class="container quick-nav">
+    <div class="nav-wrapper">
+        <h3>Jump to Section:</h3>
+        <nav class="policy-nav">
+            <a href="#methods">Methods & Carriers</a>
+            <a href="#delivery">Delivery Timeframes</a>
+            <a href="#costs">Shipping Costs</a>
+            <a href="#international">International Shipping</a>
+            <a href="#processing">Processing Times</a>
+            <a href="#tracking">Tracking Information</a>
+            <a href="#returns">Return Procedures</a>
+        </nav>
+    </div>
+</div>
+
+<!-- =========================
+     POLICY CONTENT
+========================= -->
+<section class="policy-content">
+    <div class="container policy-container">
+        <div class="policy-section" id="methods">
+            <h2>Shipping Methods & Carriers</h2>
+            <p>We partner with reliable carriers to ensure your orders arrive safely and on time. Our primary shipping partners include FedEx, UPS, and USPS for domestic deliveries, and DHL for international shipments.</p>
+            
+            <div class="policy-grid">
+                <div class="policy-card">
+                    <h3><i class="fas fa-truck"></i> Standard Shipping</h3>
+                    <p>Delivered via ground transportation. Perfect for non-urgent items.</p>
+                </div>
+                <div class="policy-card">
+                    <h3><i class="fas fa-bolt"></i> Express Shipping</h3>
+                    <p>Faster delivery via air transportation. Ideal for time-sensitive purchases.</p>
+                </div>
+                <div class="policy-card">
+                    <h3><i class="fas fa-plane"></i> Overnight Shipping</h3>
+                    <p>Next business day delivery for urgent needs.</p>
+                </div>
+                <div class="policy-card">
+                    <h3><i class="fas fa-globe"></i> International Shipping</h3>
+                    <p>Global delivery to over 100 countries worldwide.</p>
+                </div>
+            </div>
+            
+            <div class="back-to-top-link">
+                <a href="#top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+            </div>
+        </div>
+
+        <div class="policy-section" id="delivery">
+            <h2>Delivery Timeframes</h2>
+            <p>Delivery times vary based on your location and selected shipping method:</p>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">1</div>
+                    <div class="timeline-content">
+                        <h3>Order Processing</h3>
+                        <p>1-2 business days for order verification and preparation</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">2</div>
+                    <div class="timeline-content">
+                        <h3>Shipment Dispatch</h3>
+                        <p>Orders are dispatched within 1-2 business days</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">3</div>
+                    <div class="timeline-content">
+                        <h3>Transit Time</h3>
+                        <p>Varies by shipping method and destination</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">4</div>
+                    <div class="timeline-content">
+                        <h3>Delivery</h3>
+                        <p>Estimated delivery times based on service level</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="delivery-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shipping Method</th>
+                            <th>Delivery Time</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Standard Shipping</td>
+                            <td>5-7 business days</td>
+                            <td>Free on orders over $50</td>
+                        </tr>
+                        <tr>
+                            <td>Express Shipping</td>
+                            <td>2-3 business days</td>
+                            <td>$9.99</td>
+                        </tr>
+                        <tr>
+                            <td>Overnight Shipping</td>
+                            <td>1 business day</td>
+                            <td>$19.99</td>
+                        </tr>
+                        <tr>
+                            <td>International Shipping</td>
+                            <td>7-14 business days</td>
+                            <td>Varies by destination</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="back-to-top-link">
+                <a href="#top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+            </div>
+        </div>
+
+        <div class="policy-section" id="costs">
+            <h2>Shipping Costs</h2>
+            <p>We offer competitive shipping rates with free shipping thresholds:</p>
+            
+            <ul class="cost-list">
+                <li><strong>Free Standard Shipping:</strong> On all orders over $50</li>
+                <li><strong>Standard Shipping:</strong> $5.99 for orders under $50</li>
+                <li><strong>Express Shipping:</strong> $9.99 flat rate</li>
+                <li><strong>Overnight Shipping:</strong> $19.99 flat rate</li>
+                <li><strong>International Shipping:</strong> Calculated at checkout based on destination</li>
+            </ul>
+            
+            <div class="note-box">
+                <h4><i class="fas fa-info-circle"></i> Note</h4>
+                <p>Shipping costs are calculated at checkout based on your delivery address and selected shipping method. Some oversized or heavy items may incur additional shipping charges.</p>
+            </div>
+            
+            <div class="back-to-top-link">
+                <a href="#top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+            </div>
+        </div>
+
+        <div class="policy-section" id="international">
+            <h2>International Shipping</h2>
+            <p>We proudly ship to customers worldwide. International shipping policies include:</p>
+            
+            <div class="international-grid">
+                <div class="international-card">
+                    <h3><i class="fas fa-map-marked-alt"></i> Coverage</h3>
+                    <p>We ship to over 100 countries with reliable international carriers.</p>
+                </div>
+                <div class="international-card">
+                    <h3><i class="fas fa-money-bill-wave"></i> Customs & Duties</h3>
+                    <p>International shipments may be subject to customs duties and taxes, which are the responsibility of the recipient.</p>
+                </div>
+                <div class="international-card">
+                    <h3><i class="fas fa-clock"></i> Delivery Times</h3>
+                    <p>7-14 business days depending on destination and customs clearance.</p>
+                </div>
+                <div class="international-card">
+                    <h3><i class="fas fa-exchange-alt"></i> Returns</h3>
+                    <p>Return shipping for international orders is the customer's responsibility.</p>
+                </div>
+            </div>
+            
+            <div class="back-to-top-link">
+                <a href="#top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+            </div>
+        </div>
+
+        <div class="policy-section" id="processing">
+            <h2>Order Processing Times</h2>
+            <p>Our team works diligently to process your orders quickly:</p>
+            
+            <div class="processing-info">
+                <div class="processing-item">
+                    <h3><i class="fas fa-calendar-check"></i> Business Days</h3>
+                    <p>Orders are processed Monday through Friday, excluding holidays.</p>
+                </div>
+                <div class="processing-item">
+                    <h3><i class="fas fa-hourglass-half"></i> Processing Time</h3>
+                    <p>Most orders are processed within 1-2 business days.</p>
+                </div>
+                <div class="processing-item">
+                    <h3><i class="fas fa-shopping-cart"></i> Peak Periods</h3>
+                    <p>During holidays and sales events, processing may take up to 3 business days.</p>
+                </div>
+            </div>
+            
+            <div class="notification-box">
+                <h4><i class="fas fa-bell"></i> Order Confirmation</h4>
+                <p>You will receive an email confirmation once your order has been placed and another when it has been shipped.</p>
+            </div>
+            
+            <div class="back-to-top-link">
+                <a href="#top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+            </div>
+        </div>
+
+        <div class="policy-section" id="tracking">
+            <h2>Tracking Information</h2>
+            <p>We believe in transparency and keeping you informed about your order status:</p>
+            
+            <div class="tracking-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Order Confirmation</h3>
+                        <p>Receive an email with your order details and estimated shipping date.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Shipment Notification</h3>
+                        <p>Get a shipping confirmation email with tracking number when your order ships.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Real-Time Tracking</h3>
+                        <p>Track your package status through the carrier's website using the provided tracking number.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Delivery Updates</h3>
+                        <p>Receive delivery notifications and updates via email and SMS (if opted in).</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="back-to-top-link">
+                <a href="#top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+            </div>
+        </div>
+
+        <div class="policy-section" id="returns">
+            <h2>Return Shipping Procedures</h2>
+            <p>If you need to return an item, we make the process as simple as possible:</p>
+            
+            <div class="return-process">
+                <h3>Initiating a Return</h3>
+                <ol>
+                    <li>Log into your account and go to "My Orders"</li>
+                    <li>Select the order containing the item(s) you want to return</li>
+                    <li>Click "Request Return" and follow the prompts</li>
+                    <li>Print the prepaid return label (for domestic returns)</li>
+                    <li>Package the item securely and attach the return label</li>
+                    <li>Drop off at any authorized shipping location</li>
+                </ol>
+                
+                <div class="return-note">
+                    <h4><i class="fas fa-exclamation-circle"></i> Important Information</h4>
+                    <ul>
+                        <li>Return shipping is free for domestic orders within 30 days of purchase</li>
+                        <li>International return shipping is the customer's responsibility</li>
+                        <li>Original shipping costs are non-refundable</li>
+                        <li>Items must be in original condition with tags attached</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="back-to-top-link">
+                <a href="#top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+            </div>
+        </div>
+
+        <div class="policy-section contact-section">
+            <h2>Questions About Shipping?</h2>
+            <p>If you have any questions about our shipping policy or need assistance with your order, our customer service team is here to help.</p>
+            
+            <div class="contact-options">
+                <a href="{{ url_for('views.contact') }}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Contact Support
+                </a>
+                <a href="tel:+18001234567" class="btn btn-secondary">
+                    <i class="fas fa-phone"></i> Call Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+    // Highlight active section in navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.policy-section');
+        const navLinks = document.querySelectorAll('.policy-nav a');
+        
+        function highlightActiveSection() {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', highlightActiveSection);
+        highlightActiveSection(); // Run on page load
+    });
+</script>
+{% endblock %}
+{% endblock %}

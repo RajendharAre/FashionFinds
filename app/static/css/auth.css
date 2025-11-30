@@ -262,7 +262,7 @@
 }
 
 /* ========== FLASH MESSAGES ========== */
-.flash-messages {
+.flash-messages-container {
   margin-bottom: var(--auth-space-lg);
 }
 
@@ -276,6 +276,8 @@
   animation: fadeIn 0.3s ease;
   font-size: 0.95rem;
   line-height: 1.5;
+  position: relative;
+  z-index: 10001; /* Ensure it's above other elements */
 }
 
 .flash-success {

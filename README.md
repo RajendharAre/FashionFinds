@@ -118,3 +118,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
 ## License
 This project is licensed under the MIT License.
+
+
+## Run the project
+To run the project, follow these steps:
+- Use this command : `python main.py`

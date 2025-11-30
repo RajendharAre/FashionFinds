@@ -2,534 +2,443 @@
 
 {% block title %}FAQs | Fashion Finds{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/faq.css') }}?v={{ range(1,1000)|random }}">
+{% endblock %}
+
 {% block content %}
-<!-- FAQ Header -->
+
+<!-- =========================
+     SIMPLE HEADER
+========================= -->
 <section class="faq-header">
-    <div class="container">
-        <div class="section-header text-center">
-            <h1>Frequently Asked Questions</h1>
-            <p>Find answers to common questions about our products, services, and policies</p>
-        </div>
+    <div class="container text-center">
+        <h1>Frequently Asked Questions</h1>
+        <p>Find answers to common questions about our products, services, and policies.</p>
     </div>
 </section>
 
-<!-- Search Section -->
+<!-- =========================
+     SEARCH BAR (LIGHT VERSION)
+========================= -->
 <div class="container">
-    <div class="search-container">
-        <div class="search-box">
-            <input type="text" id="faqSearch" class="form-control search-input" placeholder="Search FAQs...">
-            <button class="btn btn-primary search-btn">
-                <i class="fas fa-search"></i> Search
+    <form class="faq-search" onsubmit="return false;">
+        <div class="search-bar">
+            <input type="search" id="faqSearch" class="search-input"
+                placeholder="Search FAQs..." autocomplete="off">
+            <button type="button" id="faqSearchBtn" class="search-button">
+                <i class="fas fa-search"></i>
             </button>
         </div>
-    </div>
+        <div id="faqSearchSuggestions" class="search-suggestions" style="display:none;"></div>
+    </form>
 </div>
 
-<!-- FAQ Content -->
+<!-- =========================
+     FAQ MAIN CONTENT
+========================= -->
 <section class="faq-content">
-    <div class="container">
-        <!-- Tabs -->
-        <ul class="nav nav-tabs justify-content-center" id="faqTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">General</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button" role="tab">Shipping</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="returns-tab" data-bs-toggle="tab" data-bs-target="#returns" type="button" role="tab">Returns</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">Payment</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account" type="button" role="tab">Account</button>
-            </li>
-        </ul>
+    <div class="container faq-container">
 
-        <!-- Tab Content -->
-        <div class="tab-content" id="faqTabContent">
-            <!-- General FAQs -->
-            <div class="tab-pane fade show active" id="general" role="tabpanel">
-                <div class="accordion" id="generalAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#generalOne">
-                                What is Fashion Finds?
-                            </button>
-                        </h2>
-                        <div id="generalOne" class="accordion-collapse collapse show" data-bs-parent="#generalAccordion">
-                            <div class="accordion-body">
-                                Fashion Finds is your ultimate destination for trendy and affordable fashion. We offer a wide range of clothing, accessories, and footwear for men, women, and kids. Our curated collections are designed to help you express your unique style while staying within your budget.
+        <!-- TABS -->
+        <div class="tabs" role="tablist">
+            <button class="tab active" data-target="general" aria-selected="true">General</button>
+            <button class="tab" data-target="shipping" aria-selected="false">Shipping</button>
+            <button class="tab" data-target="returns" aria-selected="false">Returns</button>
+            <button class="tab" data-target="payment" aria-selected="false">Payment</button>
+            <button class="tab" data-target="account" aria-selected="false">Account</button>
+        </div>
+
+        <!-- PANELS -->
+        <div class="tab-panels">
+
+            <!-- GENERAL -->
+            <section class="panel active" id="panel-general">
+                <h2 class="category-title">General</h2>
+
+                <div class="accordion">
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="true"
+                            aria-controls="gen-1">What is Fashion Finds?</button>
+                        <div id="gen-1" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
+                                Fashion Finds is your ultimate destination for trendy and affordable fashion. We offer a wide range of clothing, accessories, and footwear for men, women, and children. Our curated collections feature the latest styles and timeless pieces that cater to every taste and occasion.
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#generalTwo">
-                                How do I contact customer support?
-                            </button>
-                        </h2>
-                        <div id="generalTwo" class="accordion-collapse collapse" data-bs-parent="#generalAccordion">
-                            <div class="accordion-body">
+
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="false"
+                            aria-controls="gen-2">How do I contact customer support?</button>
+                        <div id="gen-2" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
                                 You can reach our customer support team through multiple channels:
                                 <ul>
-                                    <li>Email: support@fashionfinds.com</li>
-                                    <li>Phone: +91 98765 43210</li>
-                                    <li>Live Chat: Available on our website from 9 AM to 9 PM IST</li>
-                                    <li>Social Media: Message us on Facebook, Instagram, or Twitter</li>
+                                    <li><strong>Email:</strong> support@fashionfinds.com</li>
+                                    <li><strong>Phone:</strong> +1 (800) 123-4567</li>
+                                    <li><strong>Live Chat:</strong> Available on our website during business hours (9 AM - 6 PM EST)</li>
+                                    <li><strong>Contact Form:</strong> Fill out our online contact form on the Contact Us page</li>
                                 </ul>
-                                Our team typically responds within 24 hours.
+                                Our support team typically responds within 24 hours.
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#generalThree">
-                                Do you offer international shipping?
-                            </button>
-                        </h2>
-                        <div id="generalThree" class="accordion-collapse collapse" data-bs-parent="#generalAccordion">
-                            <div class="accordion-body">
-                                Currently, we only ship within India. We're working on expanding our services to international destinations. Please check back soon for updates on international shipping options.
+                    
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="false"
+                            aria-controls="gen-3">Where are your products manufactured?</button>
+                        <div id="gen-3" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
+                                Our products are sourced from trusted manufacturers around the world. We prioritize ethical manufacturing practices and ensure all our suppliers meet our quality and labor standards. Specific country of origin information can be found on each product's detail page.
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Shipping FAQs -->
-            <div class="tab-pane fade" id="shipping" role="tabpanel">
-                <div class="accordion" id="shippingAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#shippingOne">
-                                What are your shipping options?
-                            </button>
-                        </h2>
-                        <div id="shippingOne" class="accordion-collapse collapse show" data-bs-parent="#shippingAccordion">
-                            <div class="accordion-body">
-                                We offer several shipping options:
+            <!-- SHIPPING -->
+            <section class="panel" id="panel-shipping">
+                <h2 class="category-title">Shipping</h2>
+
+                <div class="accordion">
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="true"
+                            aria-controls="ship-1">What are your shipping options?</button>
+                        <div id="ship-1" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
+                                We offer several shipping options to meet your needs:
                                 <ul>
-                                    <li><strong>Standard Delivery:</strong> 5-7 business days - Free on orders over ₹999</li>
-                                    <li><strong>Express Delivery:</strong> 2-3 business days - ₹150</li>
-                                    <li><strong>Same-Day Delivery:</strong> Available in select cities - ₹250</li>
+                                    <li><strong>Standard Shipping:</strong> 5-7 business days - Free on orders over $50</li>
+                                    <li><strong>Express Shipping:</strong> 2-3 business days - $9.99</li>
+                                    <li><strong>Overnight Shipping:</strong> 1 business day - $19.99</li>
+                                    <li><strong>International Shipping:</strong> 7-14 business days - Rates vary by destination</li>
                                 </ul>
-                                Delivery times may vary based on your location and product availability.
+                                Shipping rates and delivery times may vary based on your location and selected option.
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#shippingTwo">
-                                How can I track my order?
-                            </button>
-                        </h2>
-                        <div id="shippingTwo" class="accordion-collapse collapse" data-bs-parent="#shippingAccordion">
-                            <div class="accordion-body">
-                                Once your order is shipped, you'll receive a confirmation email with a tracking number and link. You can also track your order by:
-                                <ol>
-                                    <li>Logging into your account</li>
-                                    <li>Going to "My Orders" section</li>
-                                    <li>Selecting the order you want to track</li>
-                                    <li>Clicking on "Track Order" button</li>
-                                </ol>
-                                You'll receive regular updates on your order status via email and SMS.
+                    
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="false"
+                            aria-controls="ship-2">Do you ship internationally?</button>
+                        <div id="ship-2" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
+                                Yes, we ship to over 100 countries worldwide. International shipping costs and delivery times vary by destination. During checkout, you'll see the available shipping options and costs for your country. Please note that international shipments may be subject to customs duties and taxes, which are the responsibility of the recipient.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="false"
+                            aria-controls="ship-3">Can I track my order?</button>
+                        <div id="ship-3" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
+                                Yes, all orders come with tracking information. Once your order ships, you'll receive a shipping confirmation email with a tracking number and link. You can also track your order status by logging into your account and visiting the "My Orders" section.
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Returns FAQs -->
-            <div class="tab-pane fade" id="returns" role="tabpanel">
-                <div class="accordion" id="returnsAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#returnsOne">
-                                What is your return policy?
-                            </button>
-                        </h2>
-                        <div id="returnsOne" class="accordion-collapse collapse show" data-bs-parent="#returnsAccordion">
-                            <div class="accordion-body">
-                                We offer a 30-day return policy from the date of delivery. Items must be:
+            <!-- RETURNS -->
+            <section class="panel" id="panel-returns">
+                <h2 class="category-title">Returns</h2>
+
+                <div class="accordion">
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="true"
+                            aria-controls="ret-1">What is your return policy?</button>
+                        <div id="ret-1" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
+                                We offer a 30-day return policy on most items. To be eligible for a return, items must be:
                                 <ul>
-                                    <li>In original condition with tags attached</li>
-                                    <li>Unused and unwashed</li>
-                                    <li>In original packaging</li>
+                                    <li>Unused and in the same condition as received</li>
+                                    <li>In the original packaging</li>
+                                    <li>With all tags attached</li>
                                 </ul>
+                                Items that are damaged, defective, or incorrectly shipped may be returned free of charge beyond the 30-day window. Certain items such as swimwear, lingerie, and beauty products are final sale and cannot be returned for hygiene reasons.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="false"
+                            aria-controls="ret-2">How do I initiate a return?</button>
+                        <div id="ret-2" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
                                 To initiate a return:
                                 <ol>
-                                    <li>Log into your account</li>
-                                    <li>Go to "My Orders"</li>
-                                    <li>Select the order and click "Return Item"</li>
-                                    <li>Follow the instructions to print return label</li>
+                                    <li>Log into your account and go to "My Orders"</li>
+                                    <li>Select the order containing the item(s) you want to return</li>
+                                    <li>Click "Request Return" and follow the prompts</li>
+                                    <li>Print the prepaid return label (if applicable)</li>
+                                    <li>Package the item securely and attach the return label</li>
+                                    <li>Drop off at any authorized shipping location</li>
                                 </ol>
-                                Refunds will be processed within 7-10 business days after we receive the item.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#returnsTwo">
-                                How long does it take to process a refund?
-                            </button>
-                        </h2>
-                        <div id="returnsTwo" class="accordion-collapse collapse" data-bs-parent="#returnsAccordion">
-                            <div class="accordion-body">
-                                Refunds are typically processed within 7-10 business days after we receive the returned item. The time it takes for the refund to appear in your account depends on your payment method:
-                                <ul>
-                                    <li><strong>Credit/Debit Card:</strong> 5-7 business days</li>
-                                    <li><strong>Net Banking:</strong> 3-5 business days</li>
-                                    <li><strong>Wallet:</strong> 1-2 business days</li>
-                                </ul>
-                                You'll receive a confirmation email once the refund is processed.
+                                You'll receive email updates on your return status. Refunds are processed within 5-7 business days after we receive the item.
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Payment FAQs -->
-            <div class="tab-pane fade" id="payment" role="tabpanel">
-                <div class="accordion" id="paymentAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#paymentOne">
-                                What payment methods do you accept?
-                            </button>
-                        </h2>
-                        <div id="paymentOne" class="accordion-collapse collapse show" data-bs-parent="#paymentAccordion">
-                            <div class="accordion-body">
+            <!-- PAYMENT -->
+            <section class="panel" id="panel-payment">
+                <h2 class="category-title">Payment</h2>
+                <div class="accordion">
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="true"
+                            aria-controls="pay-1">What payment options do you accept?</button>
+                        <div id="pay-1" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
                                 We accept various payment methods for your convenience:
                                 <ul>
-                                    <li>Credit and Debit Cards (Visa, MasterCard, Rupay)</li>
-                                    <li>Net Banking (All major banks)</li>
-                                    <li>UPI (Google Pay, PhonePe, Paytm, etc.)</li>
-                                    <li>Digital Wallets (Paytm, PhonePe, Amazon Pay)</li>
-                                    <li>Cash on Delivery (COD) - Available for orders up to ₹5000</li>
+                                    <li>Credit and debit cards (Visa, Mastercard, American Express, Discover)</li>
+                                    <li>PayPal</li>
+                                    <li>Apple Pay and Google Pay</li>
+                                    <li>Bank transfers</li>
+                                    <li>Gift cards</li>
                                 </ul>
-                                All transactions are secured with 256-bit SSL encryption.
+                                All transactions are secured with SSL encryption technology. We do not store your full credit card information on our servers.
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paymentTwo">
-                                Is it safe to use my credit/debit card on Fashion Finds?
-                            </button>
-                        </h2>
-                        <div id="paymentTwo" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
-                            <div class="accordion-body">
-                                Yes, it's completely safe. We use industry-standard security measures including:
-                                <ul>
-                                    <li>256-bit SSL encryption for all transactions</li>
-                                    <li>PCI DSS compliance for card payments</li>
-                                    <li>3D Secure authentication for credit/debit cards</li>
-                                    <li>Regular security audits and monitoring</li>
-                                </ul>
-                                We do not store your complete card information on our servers. Your payment details are processed securely by our payment partners.
+                    
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="false"
+                            aria-controls="pay-2">Is it safe to use my credit card on your site?</button>
+                        <div id="pay-2" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
+                                Absolutely. We use industry-standard SSL encryption to protect your payment information during transmission. Our payment processors are PCI compliant, ensuring your financial data is handled securely. We never store your full credit card number on our servers. Additionally, we offer multiple payment options including PayPal for those who prefer third-party payment processing.
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Account FAQs -->
-            <div class="tab-pane fade" id="account" role="tabpanel">
-                <div class="accordion" id="accountAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accountOne">
-                                How do I create an account?
-                            </button>
-                        </h2>
-                        <div id="accountOne" class="accordion-collapse collapse show" data-bs-parent="#accountAccordion">
-                            <div class="accordion-body">
+            <!-- ACCOUNT -->
+            <section class="panel" id="panel-account">
+                <h2 class="category-title">Account</h2>
+                <div class="accordion">
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="true"
+                            aria-controls="acc-1">How do I create an account?</button>
+                        <div id="acc-1" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
                                 Creating an account is simple:
                                 <ol>
-                                    <li>Click on "Login/Register" at the top right corner</li>
-                                    <li>Select "Create New Account"</li>
-                                    <li>Enter your personal details (name, email, phone number)</li>
-                                    <li>Create a password</li>
-                                    <li>Verify your email address through the confirmation link sent to your inbox</li>
+                                    <li>Click on the "Sign Up" link in the header</li>
+                                    <li>Enter your email address and create a password</li>
+                                    <li>Verify your email address by clicking the link sent to your inbox</li>
+                                    <li>Complete your profile information (optional but recommended)</li>
                                 </ol>
-                                Having an account allows you to track orders, save addresses, and access exclusive offers.
+                                Having an account allows you to track orders, save wishlist items, and enjoy a faster checkout experience.
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accountTwo">
-                                I forgot my password. How can I reset it?
-                            </button>
-                        </h2>
-                        <div id="accountTwo" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
-                            <div class="accordion-body">
+                    
+                    <div class="ff-accordion-item">
+                        <button class="ff-accordion-toggle" aria-expanded="false"
+                            aria-controls="acc-2">I forgot my password. How can I reset it?</button>
+                        <div id="acc-2" class="ff-accordion-panel">
+                            <div class="ff-accordion-body">
                                 To reset your password:
                                 <ol>
-                                    <li>Click on "Login" at the top right corner</li>
+                                    <li>Click on "Login" in the header</li>
                                     <li>Click on "Forgot Password?"</li>
                                     <li>Enter your registered email address</li>
-                                    <li>Check your email for a password reset link</li>
-                                    <li>Click the link and create a new password</li>
+                                    <li>Check your inbox for a password reset email</li>
+                                    <li>Click the reset link and enter a new password</li>
                                 </ol>
-                                The reset link is valid for 24 hours. If you don't receive the email, please check your spam folder.
+                                The reset link expires after 24 hours for security reasons. If you don't receive the email, please check your spam folder.
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
+
         </div>
     </div>
 </section>
 
-<!-- Contact CTA -->
+<!-- CONTACT CTA -->
 <section class="contact-cta">
     <div class="container text-center">
         <h3>Still have questions?</h3>
-        <p>Our customer support team is here to help you 24/7</p>
-        <a href="mailto:support@fashionfinds.com" class="btn btn-primary">
+        <p class="mb-4">Our support team is here for you.</p>
+        <a href="{{ url_for('views.contact') }}" class="btn btn-primary">
             <i class="fas fa-envelope"></i> Contact Support
         </a>
     </div>
 </section>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-    .faq-header {
-        background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                    url('https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
-        background-size: cover;
-        background-position: center;
-        padding: 100px 0;
-        color: var(--light);
-        text-align: center;
-        margin-bottom: 50px;
-    }
-    
-    .faq-header h1 {
-        font-family: var(--font-heading);
-        font-size: 3.5rem;
-        font-weight: 700;
-        margin-bottom: 20px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .faq-header p {
-        font-size: 1.2rem;
-        max-width: 700px;
-        margin: 0 auto;
-        opacity: 0.9;
-    }
-    
-    .search-container {
-        max-width: 600px;
-        margin: -30px auto 50px;
-        position: relative;
-        z-index: 10;
-    }
-    
-    .search-box {
-        position: relative;
-    }
-    
-    .search-input {
-        border-radius: 50px;
-        padding: 15px 120px 15px 25px;
-        border: none;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        width: 100%;
-        height: 50px;
-        font-size: 1rem;
-        outline: none;
-    }
-    
-    .search-btn {
-        position: absolute;
-        right: 5px;
-        top: 0px;
-        bottom: 5px;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        padding: 0 25px;
-        transition: all 0.3s;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .search-btn i {
-        margin-right: 8px;
-    }
-    
-    .search-btn:hover {
-        background: var(--primary-hover);
-        transform: translateY(-1px);
-    }
-    
-    .nav-tabs {
-        border: none;
-        justify-content: center;
-        margin-bottom: 30px;
-    }
-    
-    .nav-tabs .nav-link {
-        border: none;
-        color: var(--dark);
-        font-weight: 600;
-        padding: 12px 30px;
-        margin: 0 10px;
-        border-radius: 50px;
-        transition: all 0.3s;
-        background: rgba(196, 135, 122, 0.1);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .nav-tabs .nav-link::before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 3px;
-        background: var(--primary);
-        transition: all 0.3s;
-    }
-    
-    .nav-tabs .nav-link:hover {
-        background: rgba(196, 135, 122, 0.2);
-    }
-    
-    .nav-tabs .nav-link.active {
-        background: var(--primary);
-        color: white;
-    }
-    
-    .nav-tabs .nav-link.active::before {
-        width: 100%;
-    }
-    
-    .accordion {
-        --bs-accordion-border-color: none;
-        --bs-accordion-btn-focus-box-shadow: none;
-    }
-    
-    .accordion-item {
-        margin-bottom: 15px;
-        border-radius: 10px !important;
-        overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        border: none;
-        transition: all 0.3s;
-    }
-    
-    .accordion-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    
-    .accordion-button {
-        background-color: var(--light) !important;
-        color: var(--dark) !important;
-        font-weight: 600;
-        padding: 20px 25px;
-        border-radius: 10px 10px 0 0 !important;
-        transition: all 0.3s;
-    }
-    
-    .accordion-button:not(.collapsed) {
-        background-color: var(--primary) !important;
-        color: var(--light) !important;
-        box-shadow: none;
-    }
-    
-    .accordion-button::after {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23262626'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-        transition: all 0.3s;
-    }
-    
-    .accordion-button:not(.collapsed)::after {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-    }
-    
-    .accordion-body {
-        background-color: var(--light);
-        padding: 20px 25px;
-        border-radius: 0 0 10px 10px;
-        line-height: 1.7;
-    }
-    
-    .contact-cta {
-        background: var(--gray-100);
-        padding: 60px 0;
-        margin-top: 50px;
-    }
-    
-    .contact-cta h3 {
-        font-size: 2rem;
-        margin-bottom: 15px;
-    }
-    
-    .contact-cta p {
-        font-size: 1.1rem;
-        margin-bottom: 25px;
-        color: var(--gray-700);
-    }
-    
-    @media (max-width: 768px) {
-        .faq-header h1 {
-            font-size: 2.5rem;
-        }
-        
-        .nav-tabs .nav-link {
-            padding: 10px 15px;
-            margin: 5px;
-            font-size: 0.9rem;
-        }
-        
-        .search-input {
-            padding: 12px 100px 12px 15px;
-        }
-        
-        .search-btn {
-            padding: 0 15px;
-            font-size: 0.9rem;
-        }
-    }
-</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // FAQ search functionality
-    document.getElementById('faqSearch').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const accordionItems = document.querySelectorAll('.accordion-item');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        const panels = document.querySelectorAll('.panel');
         
-        accordionItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-    
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-target');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show corresponding panel
+                panels.forEach(panel => {
+                    panel.classList.remove('active');
+                    if (panel.id === `panel-${target}`) {
+                        panel.classList.add('active');
+                    }
+                });
             });
         });
+        
+        // Accordion functionality
+        const toggles = document.querySelectorAll('.ff-accordion-toggle');
+        
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const panel = toggle.nextElementSibling;
+                const isOpen = panel.classList.contains('open');
+                
+                // Close all panels in the same accordion
+                const accordion = toggle.closest('.accordion');
+                accordion.querySelectorAll('.ff-accordion-panel').forEach(p => {
+                    p.classList.remove('open');
+                    p.style.maxHeight = '0px';
+                });
+                
+                // Update all toggle aria-expanded attributes
+                accordion.querySelectorAll('.ff-accordion-toggle').forEach(t => {
+                    t.setAttribute('aria-expanded', 'false');
+                });
+                
+                // Open clicked panel if it was closed
+                if (!isOpen) {
+                    panel.classList.add('open');
+                    panel.style.maxHeight = panel.scrollHeight + 'px';
+                    toggle.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('faqSearch');
+        const searchBtn = document.getElementById('faqSearchBtn');
+        
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\\]\\$]/g, '\\$&');
+        }
+        
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+            return text.replace(regex, '<span class="ff-hit">$1</span>');
+        }
+        
+        function performSearch() {
+            const searchTerm = searchInput.value.trim();
+            
+            // Remove previous highlights
+            document.querySelectorAll('.ff-hit').forEach(hit => {
+                const parent = hit.parentNode;
+                parent.replaceChild(document.createTextNode(hit.textContent), hit);
+                parent.normalize();
+            });
+            
+            if (searchTerm === '') {
+                // Show all panels if search is empty
+                panels.forEach(panel => {
+                    panel.classList.add('active');
+                });
+                tabs.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                // Activate first tab
+                if (tabs.length > 0) {
+                    tabs[0].classList.add('active');
+                }
+                
+                // Reset all accordion items
+                document.querySelectorAll('.ff-accordion-item').forEach(item => {
+                    item.style.display = 'block';
+                    const panel = item.querySelector('.ff-accordion-panel');
+                    if (panel) {
+                        panel.classList.remove('open');
+                        panel.style.maxHeight = '0px';
+                    }
+                    const toggle = item.querySelector('.ff-accordion-toggle');
+                    if (toggle) {
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                return;
+            }
+            
+            // Hide all panels initially
+            panels.forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Search in all accordion items
+            let found = false;
+            document.querySelectorAll('.ff-accordion-item').forEach(item => {
+                const text = item.textContent || item.innerText;
+                if (text.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    found = true;
+                    item.style.display = 'block';
+                    // Show parent panel
+                    const parentPanel = item.closest('.panel');
+                    if (parentPanel) {
+                        parentPanel.classList.add('active');
+                    }
+                    // Open the accordion
+                    const panel = item.querySelector('.ff-accordion-panel');
+                    const toggle = item.querySelector('.ff-accordion-toggle');
+                    if (panel && toggle) {
+                        panel.classList.add('open');
+                        panel.style.maxHeight = panel.scrollHeight + 'px';
+                        toggle.setAttribute('aria-expanded', 'true');
+                    }
+                    
+                    // Highlight matching text
+                    const body = item.querySelector('.ff-accordion-body');
+                    if (body) {
+                        body.innerHTML = highlightText(body.innerHTML, searchTerm);
+                    }
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // If no results found, show a message
+            if (!found) {
+                console.log('No FAQ items found for search term:', searchTerm);
+            }
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', performSearch);
+        }
+        
+        if (searchBtn) {
+            searchBtn.addEventListener('click', performSearch);
+        }
+        
+        // Keyboard accessibility for search
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

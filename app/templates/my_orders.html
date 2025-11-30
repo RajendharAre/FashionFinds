@@ -17,34 +17,48 @@
         {% for order in orders %}
         <div class="order-card">
             <div class="order-header">
-                <h3>Order #{{ order.id }}</h3>
+                <div class="order-info">
+                    <h3>Order #{{ order.id }}</h3>
+                    <p class="order-date">{{ order.order_date.strftime('%B %d, %Y') }}</p>
+                </div>
                 <span class="order-status status-{{ order.status.lower().replace(' ', '-') }}">{{ order.status }}</span>
             </div>
             
             <div class="order-details">
-                <div class="order-info">
-                    <p><strong>Total Price:</strong> ₹{{ order.total_price }}</p>
-                    <p><strong>Items:</strong> {{ order.order_items|length }}</p>
+                <div class="order-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Price:</span>
+                        <span class="summary-value">₹{{ order.total_price }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Items:</span>
+                        <span class="summary-value">{{ order.order_items|length }}</span>
+                    </div>
                 </div>
                 
-                <ul class="order-items">
-                    {% for item in order.order_items %}
-                    <li class="order-item">
-                        <span>{{ item.name }}</span>
+                <div class="order-items-preview">
+                    {% for item in order.order_items[:3] %}
+                    <div class="preview-item">
+                        <span>{{ item.product.product_name }}</span>
                         <span>x{{ item.quantity }}</span>
-                    </li>
+                    </div>
                     {% endfor %}
-                </ul>
+                    {% if order.order_items|length > 3 %}
+                    <div class="preview-item more-items">
+                        <span>+{{ order.order_items|length - 3 }} more items</span>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
             
             <div class="order-actions">
                 <a href="{{ url_for('views.view_order_items', order_id=order.id) }}" class="btn btn-primary btn-sm">
-                    View Details
+                    <i class="fas fa-eye"></i> View Details
                 </a>
-                {% if order.status == 'In Transit' %}
+                {% if order.status == 'Pending' %}
                 <form action="{{ url_for('views.cancel_order', order_id=order.id) }}" method="POST" class="d-inline">
-                    <button type="submit" class="btn btn-outline btn-sm">
-                        Cancel Order
+                    <button type="submit" class="btn btn-outline btn-sm" onclick="return confirm('Are you sure you want to cancel this order?')">
+                        <i class="fas fa-times"></i> Cancel Order
                     </button>
                 </form>
                 {% endif %}
@@ -53,7 +67,10 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-5">
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
         <h3>No Orders Found</h3>
         <p class="text-muted">You haven't placed any orders yet</p>
         <a href="{{ url_for('views.homepage') }}" class="btn btn-primary mt-3">Start Shopping</a>
@@ -65,13 +82,14 @@
 {% block extra_css %}
 <style>
     .orders-header {
-        background: var(--gray-50);
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
         padding: var(--space-xl) 0;
+        color: var(--white);
     }
     
     .orders-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: var(--space-lg);
         padding: var(--space-xl) 0;
     }
@@ -82,6 +100,9 @@
         box-shadow: var(--shadow-md);
         overflow: hidden;
         transition: transform var(--transition), box-shadow var(--transition);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
     
     .order-card:hover {
@@ -90,56 +111,84 @@
     }
     
     .order-header {
-        background: var(--primary);
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
         color: var(--white);
         padding: var(--space-md) var(--space-lg);
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
+        gap: var(--space-sm);
     }
     
-    .order-header h3 {
-        margin: 0;
+    .order-info h3 {
+        margin: 0 0 var(--space-xs);
         font-size: 1.25rem;
+    }
+    
+    .order-date {
+        margin: 0;
+        font-size: 0.875rem;
+        opacity: 0.9;
     }
     
     .order-status {
         background: rgba(255, 255, 255, 0.2);
         padding: var(--space-xs) var(--space-sm);
         border-radius: var(--radius-full);
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     
     .order-details {
         padding: var(--space-lg);
+        flex: 1;
     }
     
-    .order-info {
+    .order-summary {
+        display: flex;
+        justify-content: space-between;
         margin-bottom: var(--space-md);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid var(--gray-200);
     }
     
-    .order-info p {
-        margin: var(--space-xs) 0;
+    .summary-item {
+        display: flex;
+        flex-direction: column;
     }
     
-    .order-items {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 var(--space-lg);
-        border-top: 1px solid var(--gray-200);
-        padding-top: var(--space-md);
+    .summary-label {
+        font-size: 0.875rem;
+        color: var(--gray-600);
     }
     
-    .order-item {
+    .summary-value {
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .order-items-preview {
+        margin-bottom: var(--space-lg);
+    }
+    
+    .preview-item {
         display: flex;
         justify-content: space-between;
         padding: var(--space-xs) 0;
         border-bottom: 1px solid var(--gray-100);
+        font-size: 0.875rem;
     }
     
-    .order-item:last-child {
+    .preview-item:last-child {
         border-bottom: none;
+    }
+    
+    .more-items {
+        font-style: italic;
+        color: var(--primary);
+        font-weight: 500;
     }
     
     .order-actions {
@@ -170,9 +219,39 @@
         background: var(--info);
     }
     
+    .empty-state {
+        text-align: center;
+        padding: var(--space-2xl) var(--space-lg);
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        margin: var(--space-xl) 0;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--gray-300);
+        margin-bottom: var(--space-lg);
+    }
+    
+    .empty-state h3 {
+        margin-bottom: var(--space-sm);
+        color: var(--dark);
+    }
+    
+    .empty-state .text-muted {
+        color: var(--gray-600);
+        margin-bottom: var(--space-lg);
+    }
+    
     @media (max-width: 768px) {
         .orders-container {
             grid-template-columns: 1fr;
+        }
+        
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
         }
         
         .order-actions {
@@ -181,6 +260,11 @@
         
         .order-actions .btn {
             width: 100%;
+        }
+        
+        .order-summary {
+            flex-direction: column;
+            gap: var(--space-sm);
         }
     }
 </style>

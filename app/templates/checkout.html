@@ -183,14 +183,17 @@
 
         fetch("/place_order", {
             method: "POST",
-            body: formData
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 showNotification('Order placed successfully!', 'success');
                 setTimeout(() => {
-                    window.location.href = '/my_orders'; // Redirect to 'My Orders' page
+                    window.location.href = '/payment_success/' + data.order_id; // Redirect to payment success page
                 }, 2000);
             } else {
                 showNotification('Something went wrong. Please try again.', 'error');
@@ -203,8 +206,23 @@
     }
     
     function showNotification(message, type) {
-        // Reuse the flash message system
-        const container = document.querySelector('.flash-messages-container') || createFlashContainer();
+        // Check if notification already exists to prevent duplicates
+        const existingNotifications = document.querySelectorAll(`.flash-message.flash-${type} span`);
+        for (let notification of existingNotifications) {
+            if (notification.textContent === message) {
+                return; // Don't show duplicate notifications
+            }
+        }
+        
+        // Use the existing flash container from base template instead of creating a new one
+        let container = document.querySelector('.flash-messages-container');
+        if (!container) {
+            // If no container exists, create one (fallback)
+            container = document.createElement('div');
+            container.className = 'flash-messages-container';
+            document.body.appendChild(container);
+        }
+        
         const notification = document.createElement('div');
         notification.className = `flash-message flash-${type}`;
         notification.innerHTML = `
@@ -225,11 +243,5 @@
         }, 3000);
     }
 
-    function createFlashContainer() {
-        const container = document.createElement('div');
-        container.className = 'flash-messages-container';
-        document.body.appendChild(container);
-        return container;
-    }
 </script>
 {% endblock %}

@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Management | Fashion Finds{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Admin Container */
+    .admin-container {
+        display: flex;
+        margin-top: 20px;
+        min-height: calc(100vh - 160px);
+        gap: 20px;
+        padding: 0 20px;
+        box-sizing: border-box;
+    }
+
+    /* Sidebar */
+    .admin-sidebar {
+        width: 250px;
+        background: #2d3436;
+        border-radius: 12px;
+        padding: 20px;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .admin-sidebar .account-button {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        gap: 12px;
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+    }
+
+    .admin-sidebar .account-button:hover {
+        background: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .admin-sidebar .account-button.active {
+        background: var(--primary);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Admin Content */
+    .admin-content {
+        flex: 1;
+        background: var(--white);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .admin-content-header {
+        width: 100%;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .admin-content-header h2 {
+        color: var(--dark);
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .admin-content-header p {
+        color: var(--gray-600);
+        margin: 8px 0 0 0;
+        font-size: 1.1rem;
+    }
+
+    /* Chart Container */
+    .chart-container {
+        width: 100%;
+        max-width: 1000px;
+        padding: 20px;
+        background: var(--gray-50);
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        margin-top: 20px;
+    }
+
+    #chart {
+        width: 100% !important;
+        height: 500px;
+    }
+
+    /* Error Message */
+    .error-message {
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid var(--error);
+        border-radius: 8px;
+        padding: 20px;
+        color: var(--error);
+        font-weight: 500;
+        margin: 20px 0;
+        width: 100%;
+        max-width: 1000px;
+        text-align: center;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .admin-container {
+            flex-direction: column;
+            padding: 0 15px;
+        }
+
+        .admin-sidebar {
+            width: 100%;
+            position: relative;
+            top: 0;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .admin-sidebar .account-button {
+            margin: 5px;
+        }
+
+        .admin-content {
+            margin-top: 20px;
+        }
+
+        #chart {
+            height: 400px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .admin-sidebar {
+            flex-direction: column;
+        }
+
+        .admin-sidebar .account-button {
+            width: 100%;
+            text-align: left;
+        }
+
+        .admin-content {
+            padding: 20px 15px;
+        }
+
+        .admin-content-header h2 {
+            font-size: 1.75rem;
+        }
+
+        #chart {
+            height: 300px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .admin-container {
+            padding: 0 10px;
+        }
+
+        .admin-content {
+            padding: 15px 10px;
+        }
+
+        .admin-content-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .chart-container {
+            padding: 15px 10px;
+        }
+
+        #chart {
+            height: 250px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Sidebar Navigation -->
+    <div class="admin-sidebar">
+        <a href="{{ url_for('admin.order_status') }}" class="account-button {% if active_page == 'order_status' %}active{% endif %}">
+            <i class="fas fa-tachometer-alt"></i> Order Status
+        </a>
+        <a href="{{ url_for('admin.user_types') }}" class="account-button {% if active_page == 'user_types' %}active{% endif %}">
+            <i class="fas fa-users"></i> User Types
+        </a>
+        <a href="{{ url_for('admin.order_location') }}" class="account-button {% if active_page == 'order_location' %}active{% endif %}">
+            <i class="fas fa-map-marker-alt"></i> Order Location
+        </a>
+        <a href="{{ url_for('admin.revenue') }}" class="account-button {% if active_page == 'revenue' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i> Revenue
+        </a>
+        <a href="{{ url_for('admin.inventory') }}" class="account-button {% if active_page == 'inventory' %}active{% endif %}">
+            <i class="fas fa-boxes"></i> Inventory
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+        <div class="admin-content-header">
+            <h2>
+                {% if active_page == 'order_status' %}
+                    <i class="fas fa-tachometer-alt"></i> Order Status Overview
+                {% elif active_page == 'user_types' %}
+                    <i class="fas fa-users"></i> User Types Overview
+                {% elif active_page == 'order_location' %}
+                    <i class="fas fa-map-marker-alt"></i> Order Location Overview
+                {% elif active_page == 'revenue' %}
+                    <i class="fas fa-chart-line"></i> Revenue Overview
+                {% else %}
+                    <i class="fas fa-boxes"></i> Inventory Overview
+                {% endif %}
+            </h2>
+            <p>
+                {% if active_page == 'order_status' %}
+                    Distribution of orders by status
+                {% elif active_page == 'user_types' %}
+                    Distribution of users by role
+                {% elif active_page == 'order_location' %}
+                    Distribution of orders by state
+                {% elif active_page == 'revenue' %}
+                    Revenue trends over time
+                {% else %}
+                    Product distribution across categories
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="chart-container">
+            {% if error %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i> Error: {{ error }}
+                </div>
+            {% else %}
+                <div id="chart"></div>
+                <div id="chart-data" style="display: none;">{{ graphJSON | safe }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // The graphJSON variable is passed from the Flask route
+        var graphElement = document.getElementById('chart');
+        if (graphElement) {
+            // Check if there's an error message in the DOM
+            var errorMessage = document.querySelector('.error-message');
+            if (!errorMessage) {
+                // Get the graph data from a data attribute
+                var graphDataElement = document.getElementById('chart-data');
+                if (graphDataElement) {
+                    var graphData = JSON.parse(graphDataElement.textContent);
+                    Plotly.newPlot('chart', graphData.data, graphData.layout);
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

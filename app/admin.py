@@ -335,51 +335,54 @@ import pandas as pd
 
 @admin.route('/order_status')
 def order_status():
-    # Check if current user is admin
-    if not current_user.is_authenticated or current_user.role != 'admin':
-        return redirect(url_for('views.homepage'))
+    try:
+        # Check if current user is admin
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            return redirect(url_for('views.homepage'))
 
 
-    # Query to count orders by status
-    order_stats = (db.session.query(Order.status, db.func.count(Order.id).label('count'))
-                  .group_by(Order.status)
-                  .all())
-    
-    # Extract labels and values
-    labels = [stat[0] for stat in order_stats]
-    values = [stat[1] for stat in order_stats]
+        # Query to count orders by status
+        order_stats = (db.session.query(Order.status, db.func.count(Order.id).label('count'))
+                      .group_by(Order.status)
+                      .all())
+        
+        # Extract labels and values
+        labels = [stat[0] for stat in order_stats]
+        values = [stat[1] for stat in order_stats]
 
-    # Create pie chart
-    fig = go.Figure(data=[go.Pie(
-        labels=labels,
-        values=values,
-        hole=0.4,  # Donut style
-        textinfo='label+percent',
-        hoverinfo='label+value+percent',
-        marker=dict(
-            colors=['#FF9999', '#66B2FF', '#99FF99', '#FFCC99'],  # Custom colors
-            line=dict(color='#FFFFFF', width=2)
+        # Create pie chart
+        fig = go.Figure(data=[go.Pie(
+            labels=labels,
+            values=values,
+            hole=0.4,  # Donut style
+            textinfo='label+percent',
+            hoverinfo='label+value+percent',
+            marker=dict(
+                colors=['#FF9999', '#66B2FF', '#99FF99', '#FFCC99'],  # Custom colors
+                line=dict(color='#FFFFFF', width=2)
+            )
+        )])
+
+        # Update layout
+        fig.update_layout(
+            title='Order Status Distribution',
+            title_x=0.5,  # Center title
+            showlegend=True,
+            annotations=[dict(
+                text='Orders',
+                x=0.5,
+                y=0.5,
+                font_size=20,
+                showarrow=False
+            )]
         )
-    )])
 
-    # Update layout
-    fig.update_layout(
-        title='Order Status Distribution',
-        title_x=0.5,  # Center title
-        showlegend=True,
-        annotations=[dict(
-            text='Orders',
-            x=0.5,
-            y=0.5,
-            font_size=20,
-            showarrow=False
-        )]
-    )
-
-    # Convert to JSON
-    graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-    
-    return render_template('visualisation.html', graphJSON=graphJSON)
+        # Convert to JSON
+        graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
+        
+        return render_template('inventory.html', graphJSON=graphJSON, active_page='order_status')
+    except Exception as e:
+        return render_template('inventory.html', error=str(e), active_page='order_status')
 
 
 @admin.route('/user_types')
@@ -431,10 +434,10 @@ def user_types():
 
         # Convert to JSON
         graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-        return render_template('visualisation.html', graphJSON=graphJSON)
+        return render_template('inventory.html', graphJSON=graphJSON, active_page='user_types')
 
     except Exception as e:
-        return render_template('visualisation.html', error=str(e))
+        return render_template('inventory.html', error=str(e), active_page='inventory')
     
 
 
@@ -489,10 +492,10 @@ def order_location():
 
         # Convert to JSON
         graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-        return render_template('visualisation.html', graphJSON=graphJSON)
+        return render_template('inventory.html', graphJSON=graphJSON, active_page='order_location')
 
     except Exception as e:
-        return render_template('visualisation.html', error=str(e))
+        return render_template('inventory.html', error=str(e), active_page='order_location')
   
 
 @admin.route('/revenue')
@@ -574,11 +577,11 @@ def revenue():
             print(f"graphJSON y-values: {y_values_from_json[:10] if isinstance(y_values_from_json, list) else y_values_from_json}...")
         else:
             print("Error: No data found in graphJSON")
-        return render_template('visualisation.html', graphJSON=graphJSON)
+        return render_template('inventory.html', graphJSON=graphJSON, active_page='revenue')
 
     except Exception as e:
         print(e)
-        return render_template('visualisation.html', error=str(e))
+        return render_template('inventory.html', error=str(e), active_page='revenue')
     
 @admin.route("/inventory")
 def inventory():
@@ -610,14 +613,14 @@ def inventory():
                 color=['#FF6B6B', '#4ECDC4', '#45B7D1'],  # Custom colors
                 line=dict(color='#FFFFFF', width=2)
             ),
-            hovertemplate='<b>Role</b>: %{x}<br><b>Count</b>: %{y}<extra></extra>'
+            hovertemplate='<b>Category</b>: %{x}<br><b>Count</b>: %{y}<extra></extra>'
         )])
 
         # Update layout
         fig.update_layout(
             title='Fashion Finds Inventory',
             title_x=0.5,  # Center title
-            xaxis_title='category',
+            xaxis_title='Category',
             yaxis_title='Number of Products',
             bargap=0.2,
             plot_bgcolor='rgba(0,0,0,0)',
@@ -632,8 +635,8 @@ def inventory():
 
         # Convert to JSON
         graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-        return render_template('visualisation.html', graphJSON=graphJSON)
+        return render_template('inventory.html', graphJSON=graphJSON, active_page='inventory')
 
     except Exception as e:
-        return render_template('visualisation.html', error=str(e))
+        return render_template('inventory.html', error=str(e))
     

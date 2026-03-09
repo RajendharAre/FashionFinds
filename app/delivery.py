@@ -203,7 +203,9 @@ def assign_delivery(order_id):
         print(f"////////////////////////////////////\n{e}")
         return f"{e}",400
 
-
+@delivery_bp.route('/delivery-application')
+def delivery_application():
+    return render_template('delivery_application.html')
 
 
 # @delivery_bp.route('/customer_review/<int:user_id>/<int:order_id>/<token>', methods=['GET', 'POST'])

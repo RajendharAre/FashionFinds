@@ -1,62 +1,57 @@
-<!-- <footer> section -->
+<!-- Footer -->
+<script src="{{url_for('static',filename='js/app.js')}}"></script>
 
-    
-    <script src="{{url_for('static',filename='js/app.js')}}"></script>
-    
+<div class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    Back to top
+</div>
 
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h4>About Us</h4>
-                <ul class="footer-links">
-                    <li><a href="#">Our Story</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Sustainability</a></li>
-                    <li><a href="#">Blog</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section">
-                <h4>Customer Service</h4>
-                <ul class="footer-links">
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Shipping Policy</a></li>
-                    <li><a href="#">Returns & Exchanges</a></li>
-                    <li><a href="/faqs">FAQs</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section">
-                <h4>Follow Us</h4>
-                <div class="social-media">
-                    <a href="#" class="social-link" aria-label="Facebook">
-                        <i class="fab fa-facebook"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Instagram">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Twitter">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Pinterest">
-                        <i class="fab fa-pinterest"></i>
-                    </a>
-                </div>
-                
-                <div class="newsletter">
-                    <form class="newsletter-form" onsubmit="handleSubscribe(event)">
-                        <input type="email" class="newsletter-input" 
-                               placeholder="Enter your email" required>
-                        <button type="submit" class="subscribe-btn">
-                            <i class="fas fa-envelope"></i>
-                            Subscribe
-                        </button>
-                    </form>
-                </div>
-            </div>
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>Get to Know Us</h4>
+            <ul class="footer-links">
+                <li><a href="#">About Fashion Finds</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Press Releases</a></li>
+                <li><a href="#">Sustainability</a></li>
+            </ul>
         </div>
 
-        <div class="footer-bottom">
+        <div class="footer-section">
+            <h4>Connect with Us</h4>
+            <ul class="footer-links">
+                <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
+                <li><a href="#"><i class="fab fa-pinterest"></i> Pinterest</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Make Money with Us</h4>
+            <ul class="footer-links">
+                <li><a href="#">Sell on Fashion Finds</a></li>
+                <li><a href="#">Become an Affiliate</a></li>
+                <li><a href="#">Advertise Your Products</a></li>
+                <li><a href="{{ url_for('delivery.delivery_application') }}">Become a Delivery Agent</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Let Us Help You</h4>
+            <ul class="footer-links">
+                <li><a href="{{ url_for('views.my_orders') }}">Your Orders</a></li>
+                <li><a href="{{ url_for('views.shipping_policy') }}">Shipping Rates & Policies</a></li>
+                <li><a href="{{ url_for('views.returns_exchanges') }}">Returns & Replacements</a></li>
+                <li><a href="/faqs">Help & FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="footer-bottom-inner">
+            <div class="footer-logo">Fashion<span class="logo-accent">.finds</span></div>
             <p>&copy; 2025 FashionFinds. All rights reserved.</p>
         </div>
-    </footer>
+    </div>
+</footer>

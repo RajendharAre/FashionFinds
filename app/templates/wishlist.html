@@ -1,77 +1,65 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h4 class="fw-bold text-start" style="margin-left: 40px;">
-        My <span class="text-primary">Wishlist</span> {{ wishlist_items|length }} items
-    </h4>
-    
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-3">
+<div class="wishlist-page">
+    <h1 class="wishlist-heading">Your Wishlist <span class="wishlist-count">({{ wishlist_items|length }} items)</span></h1>
+
+    {% if wishlist_items %}
+    <div class="wishlist-grid">
         {% for item in wishlist_items %}
-        <div class="col d-flex justify-content-center">
-            <div class="card shadow-sm border-0" style="width: 18rem;">
-                <div class="position-relative">
-                    <img src="{{ url_for('views.get_image', filename=item['product'].product_picture) }}" 
-                    alt="{{ item['product'].product_name }}" 
-                    width="250" 
-                    height="250">
-                    <button class="btn btn-light position-absolute top-0 end-0 m-2" onclick="removeFromWishlist({{ item['product'].id }})">&times;</button>
+        <div class="wishlist-card" id="wishlist-item-{{ item['product'].id }}">
+            <button class="wishlist-remove-btn" onclick="removeFromWishlist({{ item['product'].id }})" title="Remove">
+                <i class="fas fa-times"></i>
+            </button>
+            <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="wishlist-card-image">
+                <img src="{{ url_for('views.get_image', filename=item['product'].product_picture) }}"
+                     alt="{{ item['product'].product_name }}">
+            </a>
+            <div class="wishlist-card-content">
+                <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="wishlist-card-title">
+                    {{ item['product'].product_name }}
+                </a>
+                <div class="card-price">
+                    {% if item['product'].previous_price and item['product'].previous_price > item['product'].current_price %}
+                    <span class="price-original">&#8377;{{ item['product'].previous_price }}</span>
+                    {% endif %}
+                    <span class="price-current">
+                        <span class="price-symbol">&#8377;</span>{{ item['product'].current_price }}
+                    </span>
                 </div>
-                <div class="card-body text-center d-flex flex-column gap-2">
-                    <h6 class="card-title text-truncate">{{ item['product'].product_name }}</h6>
-                    <p style="background-color: #C4877A; color: white;">Rs.{{ item['product'].current_price }}</p>
-                    <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="btn btn-outline-dark btn-sm w-100">View Details</a>
-                    <form action="{{ url_for('views.move_to_cart', product_id=item['product'].id) }}" method="post" class="d-inline w-100">
-                        <button type="submit" class="btn btn-sm w-100" style="background-color: #C4877A; color: white;">Move to Bag</button>
+                <div class="wishlist-card-actions">
+                    <form action="{{ url_for('views.move_to_cart', product_id=item['product'].id) }}" method="post">
+                        <button type="submit" class="btn-amazon-primary btn-sm btn-block">
+                            <i class="fas fa-shopping-cart"></i> Move to Cart
+                        </button>
                     </form>
-                    
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="cart-empty">
+        <i class="far fa-heart" style="font-size:48px; color:var(--text-light); margin-bottom:16px"></i>
+        <h3>Your Wishlist is empty</h3>
+        <p>Add items you love to your wishlist. Review them anytime and easily move them to the cart.</p>
+        <a href="{{ url_for('views.homepage') }}" class="btn-amazon-primary" style="margin-top:16px">Continue Shopping</a>
+    </div>
+    {% endif %}
 </div>
 
 <script>
-    function removeFromWishlist(productId) {
-        fetch(`/remove_from_wishlist/${productId}`, {
-            method: 'POST',
-        }).then(response => {
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                alert('Failed to remove item from wishlist.');
-            }
-        });
-    }
+function removeFromWishlist(productId) {
+    fetch(`/remove_from_wishlist/${productId}`, { method: 'POST' })
+    .then(response => {
+        if (response.ok) {
+            const card = document.getElementById('wishlist-item-' + productId);
+            if (card) card.remove();
+            const remaining = document.querySelectorAll('.wishlist-card').length;
+            document.querySelector('.wishlist-count').textContent = `(${remaining} items)`;
+            if (remaining === 0) location.reload();
+        }
+    });
+}
 </script>
-
-<style>
-    .fixed-image {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
-    }
-
-    .card {
-        border-radius: 10px;
-        transition: transform 0.2s ease-in-out;
-        margin: 30px;
-    }
-
-    .card:hover {
-        transform: scale(1.02);
-    }
-
-    .container {
-        gap: 80px;
-    }
-
-    .gap-3 {
-        gap: 12px !important;
-    }
-</style>
-
 {% endblock %}

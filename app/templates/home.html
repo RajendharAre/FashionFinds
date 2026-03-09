@@ -1,139 +1,146 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<!-- Hero Slider -->
 <section class="responsive-slider">
     <div class="slider-container">
         <div class="slider-track">
-            <div class="slide">   
-                <img src="{{ url_for('static', filename='images/slaider img1.png') }}" alt="Slider Image">
+            <div class="slide">
+                <img src="{{ url_for('static', filename='images/slaider img1.png') }}" alt="Fashion Sale">
             </div>
             <div class="slide">
-                <img src="{{ url_for('static', filename='images/slaider img2.png') }}" alt="Slider Image">
+                <img src="{{ url_for('static', filename='images/slaider img2.png') }}" alt="New Arrivals">
             </div>
             <div class="slide">
-                <img src="{{ url_for('static', filename='images/slaider img4.png') }}" alt="Slider Image">
+                <img src="{{ url_for('static', filename='images/slaider img4.png') }}" alt="Trending Now">
             </div>
         </div>
     </div>
-    <button class="arrow-btn prev-btn" aria-label="Previous slide">◀</button>
-    <button class="arrow-btn next-btn" aria-label="Next slide">▶</button>
+    <button class="arrow-btn prev-btn" aria-label="Previous slide">&#10094;</button>
+    <button class="arrow-btn next-btn" aria-label="Next slide">&#10095;</button>
     <div class="slider-controls"></div>
-</section>    
+</section>
 
-<h2 class="mb-2">Featured Products</h2>
-<div class="product-container">
-    {% for product in products %}
-    <div class="card">
-        <div class="product-card">
-            {% if product.product_picture %}
-            <div class="card-image">
-                <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" 
-                     alt="{{ product.product_name }}" 
-                     class="responsive-img">
-            </div>
-            {% else %}
-            <div class="card-image no-image">No Image</div>
-            {% endif %}
-            <div class="card-content">
-                <h5 class="card-title">{{ product.product_name }}</h5>
-                <p class="card-price">Rs. {{ product.current_price }}</p>
-                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="view-btn">View Details</a>
-            </div>
-        </div>
+<!-- Category Quick-Links Section -->
+<div class="section-grid">
+    <div class="section-panel">
+        <h3 class="section-panel-title">Men's Fashion</h3>
+        <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/men-category.jpg') }}" alt="Men's Fashion" onerror="this.src='https://via.placeholder.com/300x300?text=Men'">
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="section-panel-link">Shop now</a>
     </div>
-    {% endfor %}
+    <div class="section-panel">
+        <h3 class="section-panel-title">Women's Fashion</h3>
+        <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/women-category.jpg') }}" alt="Women's Fashion" onerror="this.src='https://via.placeholder.com/300x300?text=Women'">
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="section-panel-link">Shop now</a>
+    </div>
+    <div class="section-panel">
+        <h3 class="section-panel-title">Kids' Collection</h3>
+        <a href="{{ url_for('views.products_by_category', category_name='Kids') }}" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/kids-category.jpg') }}" alt="Kids" onerror="this.src='https://via.placeholder.com/300x300?text=Kids'">
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Kids') }}" class="section-panel-link">Shop now</a>
+    </div>
+    <div class="section-panel">
+        <h3 class="section-panel-title">Shoes & Footwear</h3>
+        <a href="{{ url_for('views.products_by_category', category_name='Shoes') }}" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/shoes-category.jpg') }}" alt="Shoes" onerror="this.src='https://via.placeholder.com/300x300?text=Shoes'">
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Shoes') }}" class="section-panel-link">Shop now</a>
+    </div>
 </div>
 
-<style>
-    /* Button styles */
-    .view-btn {
-        background-color: #C4877A;
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 30px;
-        cursor: pointer;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.9rem;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        display: inline-block;
-        text-decoration: none;
-        text-align: center;
-    }
-    
-    .view-btn:hover {
-        background-color: #B3796D;
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .view-btn:active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .view-btn::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 5px;
-        height: 5px;
-        background: rgba(255, 255, 255, 0.5);
-        opacity: 0;
-        border-radius: 100%;
-        transform: scale(1, 1) translate(-50%);
-        transform-origin: 50% 50%;
-    }
-    
-    .view-btn:focus:not(:active)::after {
-        animation: ripple 0.6s ease-out;
-    }
-    
-    @keyframes ripple {
-        0% {
-            transform: scale(0, 0);
-            opacity: 0.5;
-        }
-        100% {
-            transform: scale(20, 20);
-            opacity: 0;
-        }
-    }
-    
-    /* Pulse animation on hover */
-    .view-btn:hover::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 30px;
-        animation: pulse 1.5s infinite;
-    }
-    
-    @keyframes pulse {
-        0% {
-            transform: scale(0.95);
-            opacity: 1;
-        }
-        70% {
-            transform: scale(1.05);
-            opacity: 0.7;
-        }
-        100% {
-            transform: scale(0.95);
-            opacity: 1;
-        }
-    }
-</style>
+<!-- Deal Banner -->
+<div class="deal-banner">
+    <div class="deal-banner-content">
+        <span class="deal-badge">Today's Deals</span>
+        <span class="deal-text">Up to 70% off on select fashion items</span>
+        <a href="{{ url_for('views.search') }}?query=sale" class="deal-link">See all deals</a>
+    </div>
+</div>
+
+<!-- Featured Products Carousel -->
+<div class="product-section">
+    <h2 class="product-section-title">Featured Products</h2>
+    <div class="product-scroll">
+        {% for product in products %}
+        <div class="product-card">
+            <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="card-image">
+                {% if product.product_picture %}
+                <img src="{{ url_for('views.get_image', filename=product.product_picture) }}"
+                     alt="{{ product.product_name }}">
+                {% else %}
+                <img src="https://via.placeholder.com/220x280?text=No+Image" alt="No Image">
+                {% endif %}
+                {% if product.previous_price and product.previous_price > product.current_price %}
+                <span class="discount-badge">
+                    -{{ ((product.previous_price - product.current_price) / product.previous_price * 100) | int }}%
+                </span>
+                {% endif %}
+            </a>
+            <div class="card-content">
+                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="card-title">{{ product.product_name }}</a>
+                <div class="card-rating">
+                    <span class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </span>
+                </div>
+                <div class="card-price">
+                    {% if product.previous_price and product.previous_price > product.current_price %}
+                    <span class="price-original">&#8377;{{ product.previous_price }}</span>
+                    {% endif %}
+                    <span class="price-current">
+                        <span class="price-symbol">&#8377;</span>{{ product.current_price }}
+                    </span>
+                </div>
+                <div class="card-actions">
+                    <form action="{{ url_for('views.add_to_cart', product_id=product.id) }}" method="POST" style="display:inline">
+                        <button type="submit" class="btn-amazon-primary btn-sm">Add to Cart</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- More Categories Section -->
+<div class="section-grid">
+    <div class="section-panel">
+        <h3 class="section-panel-title">Trending Accessories</h3>
+        <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/accessories-category.jpg') }}" alt="Accessories" onerror="this.src='https://via.placeholder.com/300x300?text=Accessories'">
+        </a>
+        <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}" class="section-panel-link">Explore now</a>
+    </div>
+    <div class="section-panel">
+        <h3 class="section-panel-title">New Arrivals</h3>
+        <a href="{{ url_for('views.search') }}?query=new" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/new-arrivals.jpg') }}" alt="New Arrivals" onerror="this.src='https://via.placeholder.com/300x300?text=New+Arrivals'">
+        </a>
+        <a href="{{ url_for('views.search') }}?query=new" class="section-panel-link">See what's new</a>
+    </div>
+    <div class="section-panel">
+        <h3 class="section-panel-title">Best Sellers</h3>
+        <a href="{{ url_for('views.search') }}?query=best" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/best-sellers.jpg') }}" alt="Best Sellers" onerror="this.src='https://via.placeholder.com/300x300?text=Best+Sellers'">
+        </a>
+        <a href="{{ url_for('views.search') }}?query=best" class="section-panel-link">Shop best sellers</a>
+    </div>
+    <div class="section-panel">
+        <h3 class="section-panel-title">Budget Buys Under &#8377;999</h3>
+        <a href="{{ url_for('views.search') }}?max_price=999" class="section-panel-image">
+            <img src="{{ url_for('static', filename='images/budget-buys.jpg') }}" alt="Budget" onerror="this.src='https://via.placeholder.com/300x300?text=Under+₹999'">
+        </a>
+        <a href="{{ url_for('views.search') }}?max_price=999" class="section-panel-link">See more</a>
+    </div>
+</div>
 
 {% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Become a Delivery Partner - Fashion Finds{% endblock %}
+{% block content %}
+<div class="info-page">
+    <div class="info-page-header">
+        <h1>Become a Delivery Partner</h1>
+        <p>Join our delivery network and earn</p>
+    </div>
+    <div class="info-page-body">
+        <div class="info-section">
+            <h2>Why Deliver with Fashion Finds?</h2>
+            <p><strong>Flexible Hours:</strong> Work on your own schedule.</p>
+            <p><strong>Competitive Pay:</strong> Earn per delivery with bonuses for peak hours.</p>
+            <p><strong>Growth:</strong> Build your career with us as we expand.</p>
+        </div>
+        <div class="info-section">
+            <h2>Requirements</h2>
+            <p>1. Must be 18 years or older</p>
+            <p>2. Valid government ID</p>
+            <p>3. Own a two-wheeler or four-wheeler</p>
+            <p>4. Smartphone with internet access</p>
+        </div>
+        <div class="info-section">
+            <h2>How to Apply</h2>
+            <p>Register on Fashion Finds and select <strong>"Delivery Agent"</strong> as your role during sign-up. Once approved by our admin, you can start accepting deliveries from the delivery dashboard.</p>
+            <a href="{{ url_for('auth.register') }}" class="btn-amazon-primary" style="display:inline-block; margin-top:12px;">Register Now</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

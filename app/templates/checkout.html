@@ -1,128 +1,111 @@
 {% extends "base.html" %}
 
 {% block title %}Checkout{% endblock %}
+{% block heads %}
+
+{% endblock %}
 
 {% block content %}
-<!-- Checkout Header -->
-<section class="checkout-header">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2>Checkout</h2>
-            <p>Complete your purchase</p>
+<div class="checkout-container">
+    <div class="checkout-form">
+        <h2>
+            Delivery Address
+            <button class="edit-btn" onclick="toggleAddressForm()">Change Address</button>
+        </h2>
+
+        <div class="address-display" id="addressDisplay">
+            <strong>{{ current_user.name }}</strong><br>
+            {{ current_user.address}}<br>
+            {{ current_user.city}}<br>
+            {{ current_user.state}}<br>
+            Pincode: {{ current_user.pincode }}<br>
+            Email: {{ current_user.email }}
         </div>
+
+        <div class="address-form" id="addressForm" style="display: none;">
+            <form id="addressUpdateForm">
+                <div class="form-group">
+                    <label for="firstname">First Name</label>
+                    <input type="text" name="firstname" value="{{ current_user.firstname }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastname">Last Name</label>
+                    <input type="text" name="lastname" value="{{ current_user.lastname }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="address_line_1">Address Line 1</label>
+                    <input type="text" name="address_line_1" value="{{ current_user.address_line_1 }}" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" name="city" value="{{ current_user.city }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" name="state" value="{{ current_user.state }}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pincode">Pincode</label>
+                    <input type="text" name="pincode" value="{{ current_user.pincode }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" value="{{ current_user.email }}" required>
+                </div>
+
+
+            </form>
+
+        </div>
+        <button type="button" class="submit-btn" onclick="confirmAddress()">Confirm</button>
+
+        <h2>Payment Method</h2>
+        <div class="payment-method">
+            <div class="payment-method-header">
+                <span>💵 Cash on Delivery</span>
+            </div>
+            <p style="margin-top: 10px; color: #666;">
+                Pay with cash when your order is delivered to your doorstep.
+            </p>
+        </div>
+
+        <!-- Button to Place Order (This will actually save to the database) -->
+
+        <button class="btn btn-success" id="placeOrderBtn" style="display: none;" onclick="placeOrder()">Place Order</button>
     </div>
-</section>
 
-<div class="container">
-    <div class="checkout-container">
-        <div class="checkout-form">
-            <div class="checkout-section">
-                <h3>
-                    Delivery Address
-                    <button class="btn btn-outline edit-btn" onclick="toggleAddressForm()">Change Address</button>
-                </h3>
-
-                <div class="address-display" id="addressDisplay">
-                    {% if current_user.is_authenticated %}
-                    <div class="address-card">
-                        <strong>{{ current_user.name }}</strong><br>
-                        {{ current_user.address }}<br>
-                        {{ current_user.city }}, {{ current_user.state }}<br>
-                        Pincode: {{ current_user.pincode }}<br>
-                        Email: {{ current_user.email }}
-                    </div>
-                    {% else %}
-                    <p>Please <a href="{{ url_for('auth.login') }}">login</a> to view your address information.</p>
-                    {% endif %}
-                </div>
-
-                <div class="address-form" id="addressForm" style="display: none;">
-                    <form id="addressUpdateForm">
-                        <div class="form-group">
-                            <label for="name">Full Name</label>
-                            <input type="text" name="name" value="{{ current_user.name }}" required class="form-control">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="address">Address</label>
-                            <input type="text" name="address" value="{{ current_user.address }}" required class="form-control">
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="city">City</label>
-                                <input type="text" name="city" value="{{ current_user.city }}" required class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="state">State</label>
-                                <input type="text" name="state" value="{{ current_user.state }}" required class="form-control">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="pincode">Pincode</label>
-                            <input type="text" name="pincode" value="{{ current_user.pincode }}" required class="form-control">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" name="email" value="{{ current_user.email }}" required class="form-control">
-                        </div>
-                    </form>
-                </div>
-                
-                <button type="button" class="btn btn-primary" onclick="confirmAddress()">Confirm Address</button>
-            </div>
-
-            <div class="checkout-section">
-                <h3>Payment Method</h3>
-                <div class="payment-method">
-                    <div class="payment-method-header">
-                        <span><i class="fas fa-money-bill-wave me-1"></i>Cash on Delivery</span>
-                    </div>
-                    <p class="payment-description">
-                        Pay with cash when your order is delivered to your doorstep.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Button to Place Order -->
-            <button class="btn btn-success" id="placeOrderBtn" style="display: none;" onclick="placeOrder()">Place Order</button>
+    <div class="order-summary">
+        <h2>Order Summary</h2>
+        {% for item in cart_items %}
+        <div class="order-item">
+            <span>{{ item.name }}</span>
+            <span>₹{{ item.price }}</span>
         </div>
-
-        <div class="order-summary">
-            <h3>Order Summary</h3>
-            {% for item in cart_items %}
-            <div class="order-item">
-                <span>{{ item.name }}</span>
-                <span>₹{{ item.price }}</span>
+        {% endfor %}
+        <div class="order-total">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span>₹{{ subtotal }}</span>
             </div>
-            {% endfor %}
-            
-            <div class="order-total">
-                <div class="total-row">
-                    <span>Subtotal</span>
-                    <span>₹{{ subtotal }}</span>
-                </div>
-                <div class="total-row">
-                    <span>Shipping</span>
-                    <span>₹{{ shipping }}</span>
-                </div>
-                <div class="total-row">
-                    <span>Tax</span>
-                    <span>₹{{ tax }}</span>
-                </div>
-                <div class="total-row final">
-                    <span>Total</span>
-                    <span>₹{{ total }}</span>
-                </div>
+            <div class="total-row">
+                <span>Shipping</span>
+                <span>₹{{ shipping }}</span>
+            </div>
+            <div class="total-row">
+                <span>Tax</span>
+                <span>₹{{ tax }}</span>
+            </div>
+            <div class="total-row final">
+                <span>Total</span>
+                <span>₹{{ total }}</span>
+
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
     // Toggle between displaying the address and address form
     function toggleAddressForm() {
@@ -144,8 +127,9 @@
         const formData = new FormData(form);
 
         // Extract values from the form
-        const name = formData.get('name');
-        const address = formData.get('address');
+        const firstname = formData.get('firstname');
+        const lastname = formData.get('lastname');
+        const address_line_1 = formData.get('address_line_1');
         const city = formData.get('city');
         const state = formData.get('state');
         const pincode = formData.get('pincode');
@@ -153,13 +137,12 @@
 
         // Update the frontend display
         document.getElementById('addressDisplay').innerHTML = `
-            <div class="address-card">
-                <strong>${name}</strong><br>
-                ${address}<br>
-                ${city}, ${state}<br>
-                Pincode: ${pincode}<br>
-                Email: ${email}
-            </div>
+            <strong>${firstname} ${lastname}</strong><br>
+            ${address_line_1}<br>
+            ${city}<br>
+            ${state}<br>
+            Pincode: ${pincode}<br>
+            Email: ${email}
         `;
 
         // Hide the address form and show the "Place Order" button
@@ -176,65 +159,172 @@
 
         fetch("/place_order", {
             method: "POST",
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+            body: formData
         })
-        .then(response => response.json().then(data => ({ ok: response.ok, data })))
-        .then(({ ok, data }) => {
-            if (ok && data.success) {
-                showNotification('Order placed successfully!', 'success');
-                setTimeout(() => {
-                    window.location.href = '/payment_success/' + data.order_id;
-                }, 2000);
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Order placed successfully!');
+                window.location.href = '/my_orders'; // Redirect to 'My Orders' page
             } else {
-                showNotification(data.error || 'Something went wrong. Please try again.', 'error');
+                alert('Something went wrong. Please try again.');
             }
         })
-        .catch(error => {
-            console.error('Error placing order:', error);
-            showNotification('An error occurred while placing your order.', 'error');
-        });
+        .catch(error => console.error('Error placing order:', error));
     }
-    
-    function showNotification(message, type) {
-        // Check if notification already exists to prevent duplicates
-        const existingNotifications = document.querySelectorAll(`.flash-message.flash-${type} span`);
-        for (let notification of existingNotifications) {
-            if (notification.textContent === message) {
-                return; // Don't show duplicate notifications
-            }
-        }
-        
-        // Use the existing flash container from base template instead of creating a new one
-        let container = document.querySelector('.flash-messages-container');
-        if (!container) {
-            // If no container exists, create one (fallback)
-            container = document.createElement('div');
-            container.className = 'flash-messages-container';
-            document.body.appendChild(container);
-        }
-        
-        const notification = document.createElement('div');
-        notification.className = `flash-message flash-${type}`;
-        notification.innerHTML = `
-            <div class="flash-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="flash-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
 </script>
+
+<style>
+    
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    margin: 0;
+    padding: 0;
+}
+
+.checkout-container {
+    max-width: 900px;
+    margin: 20px auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: black;  /* Set label color to black */
+}
+.edit-btn {
+    background: #007bff; /* Primary color */
+    border: none;
+    color: white; /* White text */
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    padding: 5px 10px; /* Adjust padding for better button look */
+    border-radius: 4px;
+}
+
+.edit-btn:hover {
+    background: #0056b3; /* Darker shade of the primary color for hover */
+    color: white; /* Ensure the text remains white */
+}
+
+.checkout-form {
+    flex: 2;
+}
+
+.order-summary {
+    flex: 1;
+    padding: 15px;
+    border-left: 1px solid #ddd;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.edit-btn {
+    background: none;
+    border: none;
+    color: blue;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+.edit-btn:hover {
+    color: darkblue;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.submit-btn {
+    background: green;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.submit-btn:hover {
+    background: darkgreen;
+}
+
+.submit-btn::before {
+    content: "✔";
+    font-size: 18px;
+}
+
+.submit-btn + h2 {
+    margin-top: 30px;
+}
+
+.payment-method {
+    background: #f1f1f1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.payment-method-header {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.order-total {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.final {
+    font-size: 18px;
+    color: #d9534f;
+}
+
+
+
+</style>
+
 {% endblock %}
+

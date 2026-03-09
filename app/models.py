@@ -3,24 +3,10 @@ from datetime import datetime, timezone,timedelta
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from flask_login import UserMixin
 
-# Brand Model
-class Brand(db.Model):
-    __tablename__ = 'brands'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    
-    # Relationship with products
-    products = db.relationship('Product', backref='brand', lazy=True, cascade="all, delete-orphan")
-    
-    def __repr__(self):
-        return f"<Brand {self.name}>"
-
-
 # User Model
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    custom_id = db.Column(db.String(10), unique=True, nullable=True)  # Custom ID like U0001, A0001, D0001
     name = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -32,10 +18,7 @@ class User(db.Model, UserMixin):
     reset_token = db.Column(db.String(255), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
     approved = db.Column(db.Boolean, default=False)    
-    role = db.Column(db.String(20), nullable=False)  # Increased length to accommodate longer role names
-    experience = db.Column(db.Integer, nullable=True)  # For delivery agents
-    availability = db.Column(db.String(20), nullable=True)  # For delivery agents
-    cover_letter = db.Column(db.Text, nullable=True)  # For delivery agents
+    role = db.Column(db.String(10), nullable=False)
     
     def generate_reset_token(self, secret_key):
         """Generate a unique reset token for password reset"""
@@ -72,16 +55,16 @@ class Product(db.Model):
     rating = db.Column(db.Integer, default=0)
     sale = db.Column(db.Boolean, default=False)
     discount = db.Column(db.Integer, nullable=True, default=0)
-    count = db.Column(db.Integer, nullable=False, default=0)  # Inventory count
 
-    brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'), nullable=True)
+    brand = db.Column(db.String(100), nullable=True)
     category = db.Column(db.String(100), nullable=False)  # ✅ Now category is a string field
     
+
+
     quantity_size = db.relationship('ProductSize', backref='product', lazy=True, cascade="all, delete-orphan")
     carts = db.relationship('Cart', backref='cart_product', lazy=True, cascade="all, delete-orphan")
     wishlists = db.relationship('Wishlist', backref='wishlist_product', lazy=True, cascade="all, delete-orphan")
     order_items = db.relationship('OrderItem', backref='product', lazy=True, cascade="all, delete-orphan")
-    
     def __repr__(self):
         return f"<Product {self.product_name}, Price: {self.current_price}, Category: {self.category}>"
 
@@ -127,7 +110,6 @@ class Order(db.Model):
     status = db.Column(db.String(50), nullable=False, default="Pending")  # ('Pending', 'Shipped', 'Delivered', 'Cancelled')
     order_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     delivery_date = db.Column(db.DateTime, nullable=True)
-    has_rated = db.Column(db.Boolean, default=False)
 
     order_items = db.relationship('OrderItem', backref='order', lazy=True, cascade="all, delete-orphan")
     delivery_person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
@@ -140,9 +122,7 @@ class Order(db.Model):
     mail = db.Column(db.String(50), nullable=False)
 
     def calculate_total_price(self):
-        # Access order items through the relationship
-        # Type ignore needed for linter compatibility with SQLAlchemy relationships
-        self.total_price = sum(item.subtotal for item in self.order_items)  # type: ignore
+        self.total_price = sum(item.subtotal for item in self.order_items)
         db.session.commit()
 
     def __repr__(self):

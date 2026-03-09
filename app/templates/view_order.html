@@ -4,13 +4,13 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="fw-bold text-center text-primary"><i class="fas fa-box me-2"></i>Order Details</h2>
+    <h2 class="fw-bold text-center text-primary">📦 Order Details</h2>
     <div class="card p-4 shadow-lg border-0 rounded-3">
         <h4 class="fw-bold text-dark">Order ID: #{{ order.id }}</h4>
         <p class="text-muted">Placed on: {{ order.order_date.strftime('%d %B %Y, %I:%M %p') }}</p>
         <p class="fw-semibold">Status: <span class="badge bg-info text-white">{{ order.status }}</span></p>
 
-        <h5 class="mt-4"><i class="fas fa-shopping-bag me-2"></i>Items in this Order</h5>
+        <h5 class="mt-4">🛍️ Items in this Order</h5>
         <ul class="list-group mb-3">
             {% for item in order_items %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -23,25 +23,25 @@
             {% endfor %}
         </ul>
 
-        <h5 class="fw-bold"><i class="fas fa-map-marker-alt me-2"></i>Delivery Address</h5>
+        <h5 class="fw-bold">📍 Delivery Address</h5>
         <p>
             {{ order.customer_name }}<br>
             {{ order.address_line_1 }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
             Email: {{ order.mail }}
         </p>
 
-        <h5 class="fw-bold"><i class="fas fa-wallet me-2"></i>Payment Summary</h5>
+        <h5 class="fw-bold">💰 Payment Summary</h5>
         <p class="d-flex justify-content-between"><span class="fw-semibold">Total:</span> <strong class="text-dark">₹{{ order.total_price }}</strong></p>
 
         {% if order.status == 'Pending' %}
         <form action="{{ url_for('views.cancel_order', order_id=order.id) }}" method="POST">
-            <button type="submit" class="btn btn-danger w-100 mt-3"><i class="fas fa-times-circle me-1"></i>Cancel Order</button>
+            <button type="submit" class="btn btn-danger w-100 mt-3">❌ Cancel Order</button>
         </form>
         {% endif %}
 
         <!-- Back to Orders Button -->
         <div class="text-center mt-4">
-            <a href="{{ url_for('views.my_orders') }}" class="btn btn-secondary w-100"><i class="fas fa-arrow-left me-1"></i>Back to Orders</a>
+            <a href="{{ url_for('views.my_orders') }}" class="btn btn-secondary w-100">⬅️ Back to Orders</a>
         </div>
 
     </div>

@@ -1,187 +1,77 @@
 {% extends 'base.html' %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/wishlist.css') }}?v={{ range(1, 1000) | random }}">
-{% endblock %}
-
 {% block content %}
-<!-- Wishlist Header -->
-<section class="wishlist-header">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2>My Wishlist</h2>
-            <p>{{ wishlist_items|length }} items in your wishlist</p>
-        </div>
-    </div>
-</section>
-
-<div class="container">
-    {% if wishlist_items %}
-    <div class="product-container">
+<div class="container mt-5">
+    <h4 class="fw-bold text-start" style="margin-left: 40px;">
+        My <span class="text-primary">Wishlist</span> {{ wishlist_items|length }} items
+    </h4>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-3">
         {% for item in wishlist_items %}
-        <div class="product-card" data-product-id="{{ item['product'].id }}">
-            <button type="button" class="wishlist-btn active" data-product-id="{{ item['product'].id }}" aria-label="Remove from wishlist">
-                <i class="fas fa-heart"></i>
-            </button>
-            
-            <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="product-image-link">
-                <div class="product-image">
-                    <img src="{{ url_for('views.get_image', filename=item['product'].product_picture) }}" alt="{{ item['product'].product_name }}">
+        <div class="col d-flex justify-content-center">
+            <div class="card shadow-sm border-0" style="width: 18rem;">
+                <div class="position-relative">
+                    <img src="{{ url_for('views.get_image', filename=item['product'].product_picture) }}" 
+                    alt="{{ item['product'].product_name }}" 
+                    width="250" 
+                    height="250">
+                    <button class="btn btn-light position-absolute top-0 end-0 m-2" onclick="removeFromWishlist({{ item['product'].id }})">&times;</button>
                 </div>
-            </a>
-            
-            <div class="product-info">
-                <h3 class="product-title">{{ item['product'].product_name }}</h3>
-                
-                <div class="price-container">
-                    <span class="discounted-price">₹{{ item['product'].current_price }}</span>
-                </div>
-                
-                <div class="product-actions">
-                    <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="btn btn-secondary btn-sm">
-                        View Details
-                    </a>
-                    <form action="{{ url_for('views.move_to_cart', product_id=item['product'].id) }}" method="post" class="move-to-cart-form">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            Move to Cart
-                        </button>
+                <div class="card-body text-center d-flex flex-column gap-2">
+                    <h6 class="card-title text-truncate">{{ item['product'].product_name }}</h6>
+                    <p style="background-color: #C4877A; color: white;">Rs.{{ item['product'].current_price }}</p>
+                    <a href="{{ url_for('views.product_info', product_id=item['product'].id) }}" class="btn btn-outline-dark btn-sm w-100">View Details</a>
+                    <form action="{{ url_for('views.move_to_cart', product_id=item['product'].id) }}" method="post" class="d-inline w-100">
+                        <button type="submit" class="btn btn-sm w-100" style="background-color: #C4877A; color: white;">Move to Bag</button>
                     </form>
+                    
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <h3>Your wishlist is empty</h3>
-        <p>Add some products to your wishlist to save them for later</p>
-        <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Continue Shopping</a>
-    </div>
-    {% endif %}
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    // Add to Cart Functionality
-    async function addToCart(productId) {
-        try {
-            const response = await fetch(`/add_to_cart/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
+    function removeFromWishlist(productId) {
+        fetch(`/remove_from_wishlist/${productId}`, {
+            method: 'POST',
+        }).then(response => {
             if (response.ok) {
-                showNotification('Product added to cart!', 'success');
-                await updateCartCount();
+                window.location.reload();
             } else {
-                showNotification('Failed to add product to cart', 'error');
+                alert('Failed to remove item from wishlist.');
             }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    }
-
-    function showNotification(message, type) {
-        // Check if notification already exists to prevent duplicates
-        const existingNotifications = document.querySelectorAll(`.flash-message.flash-${type} span`);
-        for (let notification of existingNotifications) {
-            if (notification.textContent === message) {
-                return; // Don't show duplicate notifications
-            }
-        }
-        
-        // Use the existing flash container from base template instead of creating a new one
-        let container = document.querySelector('.flash-messages-container');
-        if (!container) {
-            // If no container exists, create one (fallback)
-            container = document.createElement('div');
-            container.className = 'flash-messages-container';
-            document.body.appendChild(container);
-        }
-        
-        const notification = document.createElement('div');
-        notification.className = `flash-message flash-${type}`;
-        notification.innerHTML = `
-            <div class="flash-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="flash-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Use global updateCartCount function
-    async function updateCartCount() {
-        await window.updateCartCount();
-    }
-    
-    // Remove from Wishlist Functionality
-    async function removeFromWishlist(productId) {
-        // Find the product card to remove it after successful removal
-        const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-        
-        try {
-            const response = await fetch(`/remove_from_wishlist/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            
-            if (response.ok) {
-                showNotification('Product removed from wishlist!', 'success');
-                // Update wishlist count
-                await window.updateWishlistCount();
-                
-                // Remove the product card from the DOM with animation
-                if (productCard) {
-                    productCard.style.opacity = '0';
-                    productCard.style.transform = 'translateX(100px)';
-                    productCard.style.transition = 'all 0.3s ease';
-                    
-                    setTimeout(() => {
-                        productCard.remove();
-                        
-                        // Check if wishlist is now empty
-                        const productContainer = document.querySelector('.product-container');
-                        if (productContainer && productContainer.children.length === 0) {
-                            // Reload the page to show empty state
-                            location.reload();
-                        }
-                    }, 300);
-                }
-            } else {
-                showNotification('Failed to remove product from wishlist', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    }
-    
-    // Initialize event listeners for wishlist buttons
-    document.addEventListener('DOMContentLoaded', function() {
-        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
-        wishlistButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const productId = this.getAttribute('data-product-id');
-                if (productId) {
-                    // Show confirmation dialog
-                    if (confirm('Are you sure you want to remove this product from your wishlist?')) {
-                        removeFromWishlist(productId);
-                    }
-                }
-            });
         });
-    });
+    }
 </script>
+
+<style>
+    .fixed-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .card {
+        border-radius: 10px;
+        transition: transform 0.2s ease-in-out;
+        margin: 30px;
+    }
+
+    .card:hover {
+        transform: scale(1.02);
+    }
+
+    .container {
+        gap: 80px;
+    }
+
+    .gap-3 {
+        gap: 12px !important;
+    }
+</style>
+
 {% endblock %}

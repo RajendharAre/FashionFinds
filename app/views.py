@@ -1,807 +1,914 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, session
-from flask_login import login_required, current_user
-from flask_mail import Message, Mail
-from app.models import Product, Brand, Cart, Wishlist, User, Order, OrderItem, ProductSize, db
-from sqlalchemy import func, or_, desc
-import random
+
+# from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session, flash, json, send_from_directory
+# from app.models import Product, Brand, Cart, Wishlist, User, Order, OrderItem, ProductSize
+# from app import db
+# from flask_login import login_required
+# import random, string, os
+
+# views = Blueprint('views', __name__)
+
+# # Define UPLOAD_FOLDER for image uploads
+# BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # Root directory of the app
+# UPLOAD_FOLDER = os.path.join(BASE_DIR, "app", "media")
+
+# if not os.path.exists(UPLOAD_FOLDER):
+#     os.makedirs(UPLOAD_FOLDER)
+
+# @views.route('/')
+# def homepage():
+#     products_list = Product.query.all()  
+#     return render_template('home.html', products=products_list)
+
+# @views.route('/media/<path:filename>')
+# def get_image(filename):
+#     print(f"Requesting file: {filename}")  
+#     file_path = os.path.join(UPLOAD_FOLDER, filename).replace("\\", "/")
+#     print(f"Serving file from: {file_path}")  
+#     if not os.path.exists(file_path):
+#         print(f"File not found: {file_path}")
+#         return "File not found", 404
+#     return send_from_directory(UPLOAD_FOLDER, filename)
+
+
+
+# @views.route('/category/<string:category_name>')
+# def products_by_category(category_name):
+#     products = Product.query.filter_by(category=category_name).all()
+#     return render_template('category.html', products=products, category_name=category_name)
+
+
+# ### updated cart 
+# @login_required
+# @views.route('/cart')
+# def show_cart():
+#     if 'user_id' not in session:
+#         return render_template("cart.html")
+
+#     user_id = session['user_id']
+#     cart_items = db.session.query(Cart, Product).join(Product, Cart.product_id == Product.id).filter(Cart.user_id == user_id).all()
+    
+#     total_mrp = sum(cart.quantity * product.previous_price for cart, product in cart_items)
+#     total_discount = sum(cart.quantity * product.discount for cart, product in cart_items if product.discount)
+#     total_amount = int(total_mrp - total_discount)  # Ensure final amount is an integer
+    
+#     return render_template("cart.html", cart_items=cart_items, total_mrp=total_mrp, total_discount=total_discount, total_amount=total_amount)
+
+# @views.route('/add_to_cart/<int:product_id>', methods=['POST'])
+# def add_to_cart(product_id):
+#     if 'user_id' not in session:
+#         return render_template("cart.html")
+
+#     product = Product.query.get_or_404(product_id)
+#     user_id = session['user_id']
+
+#     cart_item = Cart.query.filter_by(user_id=user_id, product_id=product.id).first()
+#     if cart_item:
+#         cart_item.quantity += 1
+#     else:
+#         new_cart_item = Cart(user_id=user_id, product_id=product.id, quantity=1)
+#         db.session.add(new_cart_item)
+
+#     db.session.commit()
+#     flash("Product added to cart!", "success")
+#     return redirect(url_for('views.show_cart'))
+
+# @views.route('/remove_from_cart/<int:product_id>', methods=['POST'])
+# def remove_from_cart(product_id):
+#     if 'user_id' not in session:
+#         return render_template("cart.html")
+
+#     user_id = session['user_id']
+#     cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+#     if cart_item:
+#         db.session.delete(cart_item)
+#         db.session.commit()
+#         flash("Product removed from cart!", "success")
+#     else:
+#         flash("Product not found in cart!", "danger")
+
+#     return redirect(url_for('views.show_cart'))
+
+
+# @views.route('/move_to_cart/<int:product_id>', methods=['POST'])
+# def move_to_cart(product_id):
+#     if 'user_id' not in session:
+#         return render_template("cart.html")
+
+#     user_id = session['user_id']
+
+#     # Check if item exists in wishlist
+#     wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
+#     if wishlist_item:
+#         # Move item to cart
+#         cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+#         if cart_item:
+#             cart_item.quantity += 1  # Increase quantity if already exists
+#         else:
+#             new_cart_item = Cart(user_id=user_id, product_id=product_id, quantity=1)
+#             db.session.add(new_cart_item)
+
+#         # Remove from wishlist
+#         db.session.delete(wishlist_item)
+#         db.session.commit()
+
+#         flash("Item moved to cart!", "success")
+#     else:
+#         flash("Item not found in wishlist!", "danger")
+
+#     return redirect(url_for('views.show_wishlist'))
+
+
+# @views.route('/update_cart_quantity/<int:product_id>', methods=['POST'])
+# def update_cart_quantity(product_id):
+#     if 'user_id' not in session:
+#         return jsonify({"success": False, "error": "Login required"}), 403
+
+#     user_id = session['user_id']
+#     new_quantity = int(request.form.get('quantity', 1))
+
+#     cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+#     if cart_item:
+#         cart_item.quantity = new_quantity
+#         db.session.commit()
+
+#     total_mrp = sum(cart.quantity * product.previous_price for cart, product in db.session.query(Cart, Product).join(Product).filter(Cart.user_id == user_id).all())
+#     total_discount = sum(cart.quantity * product.discount for cart, product in db.session.query(Cart, Product).join(Product).filter(Cart.user_id == user_id).all() if product.discount)
+#     total_amount = int(total_mrp - total_discount)
+
+#     return jsonify({"success": True, "total_amount": total_amount})
+
+# ### this button code that add cart to wishlist
+
+# @views.route('/move_to_wishlist/<int:product_id>', methods=['POST'])
+# def move_to_wishlist(product_id):
+#     if 'user_id' not in session:
+#         return render_template("wishlist.html")
+
+#     user_id = session['user_id']
+
+#     # Check if item exists in cart
+#     cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+#     if cart_item:
+#         # Check if item already exists in wishlist
+#         wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
+#         if not wishlist_item:
+#             new_wishlist_item = Wishlist(user_id=user_id, product_id=product_id)
+#             db.session.add(new_wishlist_item)
+
+#         # Remove from cart
+#         db.session.delete(cart_item)
+#         db.session.commit()
+
+#         flash("Item moved to wishlist!", "success")
+#     else:
+#         flash("Item not found in cart!", "danger")
+
+#     return redirect(url_for('views.show_cart'))
+
+# ### Updated wishlist
+
+# @views.route('/wishlist')
+# def show_wishlist():
+#     if 'user_id' not in session:
+#         return render_template("wishlist.html")
+
+#     wishlist = db.session.query(Wishlist, Product).join(Product, Wishlist.product_id == Product.id)\
+#         .filter(Wishlist.user_id == session['user_id']).all()
+    
+#     wishlist_items = [{"wishlist": item[0], "product": item[1]} for item in wishlist]
+#     return render_template('wishlist.html', wishlist_items=wishlist_items)
+
+# @views.route('/add_to_wishlist/<int:product_id>', methods=['POST'])
+# def wishlist_add(product_id):
+#     if 'user_id' not in session:
+#         return render_template("wishlist.html")
+
+#     existing_item = Wishlist.query.filter_by(user_id=session['user_id'], product_id=product_id).first()
+#     if not existing_item:
+#         new_wishlist_item = Wishlist(user_id=session['user_id'], product_id=product_id)
+#         db.session.add(new_wishlist_item)
+#         db.session.commit()
+    
+#     return redirect(url_for('views.show_wishlist'))
+
+
+# @views.route('/remove_from_wishlist/<int:product_id>', methods=['POST'])
+# def remove_from_wishlist(product_id):
+#     if 'user_id' not in session:
+#         return render_template("wishlist.html")
+
+#     wishlist_item = Wishlist.query.filter_by(user_id=session['user_id'], product_id=product_id).first()
+#     if wishlist_item:
+#         db.session.delete(wishlist_item)
+#         db.session.commit()
+#         flash("Product removed from wishlist!", "success")
+#     else:
+#         flash("Product not found in wishlist!", "danger")
+    
+#     return redirect(url_for('views.show_wishlist'))
+
+
+# @views.route('/search', methods=['GET'])
+# def search():
+#     query = request.args.get('query', '').strip()
+#     category_name = request.args.get('category', '').strip()
+#     # brand_name = request.args.get('brand', '').strip()
+#     min_price = request.args.get('min_price', type=float)
+#     max_price = request.args.get('max_price', type=float)
+#     color = request.args.get('color', '').strip()
+
+#     # Start filtering products
+#     search_query = Product.query
+
+#     if query:
+#         search_query = search_query.filter(
+#             (Product.product_name.ilike(f"%{query}%")) | (Product.description.ilike(f"%{query}%"))
+#         )
+#     if category_name:
+#         search_query = search_query.filter(Product.category.ilike(f"%{category_name}%"))
+#     # if brand_name:
+#         # search_query = search_query.join(Brand).filter(Brand.name.ilike(f"%{brand_name}%"))
+#     if color:
+#         search_query = search_query.filter(Product.color.ilike(f"%{color}%"))
+#     if min_price is not None:
+#         search_query = search_query.filter(Product.current_price >= min_price)
+#     if max_price is not None:
+#         search_query = search_query.filter(Product.current_price <= max_price)
+
+#     search_results = search_query.all()
+
+#     categories = db.session.query(Product.category).distinct()
+#     # brands = Brand.query.all()
+#     colors = db.session.query(Product.color).distinct()  # Fetch unique colors
+
+#     return render_template(
+#         'search_results.html',
+#         products=search_results,
+#         query=query,
+#         category=category_name,
+#         # brand=brand_name,
+#         min_price=min_price,
+#         max_price=max_price,
+#         color=color,
+#         categories=[c[0] for c in categories],
+#         # brands=brands,
+#         colors=[c[0] for c in colors]  # Pass colors correctly
+#     )
+
+
+
+
+
+# #suggested Product code
+# @views.route('/product/<int:product_id>')
+# def product_info(product_id):
+#     product = Product.query.get_or_404(product_id)
+
+#     # Fetch product sizes (if available)
+#     sizes = ProductSize.query.filter_by(product_id=product.id).all()
+
+#     # Fetch 4 completely random products (excluding the current product)
+#     suggested_products = Product.query.filter(Product.id != product.id).order_by(db.func.random()).limit(4).all()
+
+#     return render_template("product_details.html", product=product, sizes=sizes, suggested_products=suggested_products)
+
+
+
+# # @views.route('/checkout')
+# # def checkout():
+# #     cart_items = session.get('cart', [])
+# #     if not cart_items:
+# #         return render_template('checkout.html', cart_items=[], subtotal=0, shipping=0, tax=0, total=0)
+
+# #     subtotal = sum(item['price'] for item in cart_items)
+# #     shipping = 50 if subtotal > 0 else 0
+# #     tax = round(subtotal * 0.05, 2)
+# #     total = subtotal + shipping + tax
+
+# #     return render_template('checkout.html', cart_items=cart_items, subtotal=subtotal, shipping=shipping, tax=tax, total=total)
+
+
+
+# @views.route('/checkout', methods=['GET', 'POST'])
+# # @login_required
+# def checkout():
+#     user_id = session.get('user_id')
+#     if not user_id:
+#         flash('You must be logged in to proceed!', 'danger')
+#         return redirect(url_for('views.login'))
+
+#     cart_items_db = Cart.query.filter_by(user_id=user_id).all()
+#     if not cart_items_db:
+#         flash('Your cart is empty!', 'danger')
+#         return redirect(url_for('views.cart'))
+
+#     cart_items = []
+#     subtotal = 0
+#     for cart_item in cart_items_db:
+#         product = Product.query.get(cart_item.product_id)
+#         if product:
+#             cart_items.append({
+#                 'id': cart_item.product_id,
+#                 'name': product.product_name,
+#                 'price': product.current_price,
+#                 'quantity': cart_item.quantity
+#             })
+#             subtotal += product.current_price * cart_item.quantity
+
+#     shipping = 40
+#     tax = subtotal * 0.05  # 5% tax
+#     total = subtotal + shipping + tax
+
+#     return render_template(
+#         'checkout.html',
+#         cart_items=cart_items,
+#         subtotal=round(subtotal, 2),
+#         shipping=round(shipping, 2),
+#         tax=round(tax, 2),
+#         total=round(total, 2)
+#     )
+
+# @views.route('/place_order', methods=['POST'])
+# # @login_required
+# def place_order():
+#     user_id = session.get('user_id')
+#     if not user_id:
+#         flash('You must be logged in to place an order!', 'danger')
+#         return redirect(url_for('views.login'))
+
+#     user = User.query.get(user_id)
+#     if not user:
+#         flash('User not found!', 'danger')
+#         return redirect(url_for('views.login'))
+
+#     address_line_1 = request.form.get('address_line_1')
+#     state = request.form.get('state')
+#     city = request.form.get('city')
+#     pincode = request.form.get('pincode')
+#     firstname = request.form.get('firstname')
+#     lastname = request.form.get('lastname')
+#     email = request.form.get('email')
+
+#     cart_items_db = Cart.query.filter_by(user_id=user_id).all()
+#     if not cart_items_db:
+#         flash('Your cart is empty!', 'danger')
+#         return redirect(url_for('views.checkout'))
+
+#     new_order = Order(
+#         user_id=user_id,
+#         customer_name=f"{firstname} {lastname}",
+#         address_line_1=address_line_1,
+#         state=state,
+#         city=city,
+#         pincode=pincode,
+#         total_price=0,
+#         status="Pending",
+#         mail=email
+#     )
+#     db.session.add(new_order)
+#     db.session.commit()
+    
+#     total_price = 0
+#     for cart_item in cart_items_db:
+#         product = Product.query.get(cart_item.product_id)
+#         if not product:
+#             flash(f"Product with ID {cart_item.product_id} not found.", 'danger')
+#             continue
+
+#         total_cost = product.current_price * cart_item.quantity
+#         total_price += total_cost
+
+#         order_item = OrderItem(
+#             order_id=new_order.id,
+#             product_id=cart_item.product_id,
+#             quantity=cart_item.quantity,
+#             unit_price=product.current_price,
+#             subtotal=total_cost
+#         )
+#         db.session.add(order_item)
+        
+#         product.count -= cart_item.quantity
+
+#     new_order.total_price = total_price
+    
+#     Cart.query.filter_by(user_id=user_id).delete()
+#     db.session.commit()
+
+#     return jsonify({"success": True})
+
+# @views.route('/my_orders')
+# # @login_required
+# def my_orders():
+#     user_id = session.get('user_id')
+#     if not user_id:
+#         flash('You must be logged in to view your orders!', 'danger')
+#         return redirect(url_for('views.login'))
+
+#     orders = Order.query.filter_by(user_id=user_id).all()
+#     orders_with_items = []
+#     for order in orders:
+#         order_items = OrderItem.query.filter_by(order_id=order.id).all()
+#         items_data = [{'name': item.product.product_name, 'quantity': item.quantity} for item in order_items]
+
+#         orders_with_items.append({
+#             'id': order.id,
+#             'status': order.status,
+#             'total_price': order.total_price,
+#             'order_items': items_data
+#         })
+
+#     return render_template('my_orders.html', orders=orders_with_items)
+
+# @views.route('/order/<int:order_id>', methods=['GET'])
+# # @login_required
+# def view_order_items(order_id):
+#     order = Order.query.get(order_id)
+#     if not order or order.user_id != session.get('user_id'):
+#         flash('Order not found!', 'danger')
+#         return redirect(url_for('views.my_orders'))
+
+#     order_items = OrderItem.query.filter_by(order_id=order.id).all()
+#     return render_template('view_order.html', order=order, order_items=order_items)
+
+
+# @views.route('/cancel_order/<int:order_id>', methods=['POST'])
+# # @login_required
+# def cancel_order(order_id):
+#     user_id = session.get('user_id')
+#     if not user_id:
+#         flash('You must be logged in to cancel orders!', 'danger')
+#         return redirect(url_for('views.login'))
+
+#     order = Order.query.get_or_404(order_id)
+#     if order.user_id != user_id:
+#         flash('You can only cancel your own orders.', 'danger')
+#         return redirect(url_for('views.my_orders'))
+
+#     order.status = 'Cancelled'
+    
+#     order_items = OrderItem.query.filter_by(order_id=order_id).all()
+#     for order_item in order_items:
+#         product = Product.query.get(order_item.product_id)
+#         product.count += order_item.quantity
+
+#     db.session.commit()
+#     return redirect(url_for('views.my_orders'))
+
+
+# @views.route('/faqs', methods=['GET', 'POST'])
+# def faqs():
+#     return render_template('faqs.html')
+
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session, flash, send_from_directory
+from app.models import Product, Cart, Wishlist, User, Order, OrderItem,ProductSize
+from app import db
+from flask_login import login_required
 import os
 
 views = Blueprint('views', __name__)
 
-# Define UPLOAD_FOLDER for views (same as in admin)
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+# Define UPLOAD_FOLDER for image uploads
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # Root directory of the app
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "app", "media")
 
-# ============= HOMEPAGE =============
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 @views.route('/')
 def homepage():
-    """Enhanced homepage with featured content"""
-    brands_list = Brand.query.all()
-    
-    # Get trending products (most ordered)
-    trending_products = db.session.query(Product)\
-        .join(OrderItem)\
-        .group_by(Product.id)\
-        .order_by(func.count(OrderItem.id).desc())\
-        .limit(20).all()
-    
-    # Fallback to all products if no orders yet
-    if not trending_products:
-        trending_products = Product.query.order_by(func.random()).limit(20).all()
+    products_list = Product.query.all()  
+    return render_template('home.html', products=products_list)
 
-    # Collect wishlisted product IDs for the current user so the heart renders filled
-    wishlisted_ids = set()
-    if current_user.is_authenticated:
-        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
+@views.route('/media/<path:filename>')
+def get_image(filename):
+    file_path = os.path.join(UPLOAD_FOLDER, filename).replace("\\", "/")
+    if not os.path.exists(file_path):
+        return "File not found", 404
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
-    return render_template('home.html',
-                         brands=brands_list,
-                         products=trending_products,
-                         wishlisted_ids=wishlisted_ids)
-
-
-# ============= BRAND PAGES =============
-@views.route('/brand/<int:brand_id>')
-def brand_info(brand_id):
-    """Brand detail page with all products"""
-    brand_data = Brand.query.get_or_404(brand_id)
-    brand_items = Product.query.filter_by(brand_id=brand_id)\
-        .order_by(Product.rating.desc()).all()
-
-    wishlisted_ids = set()
-    if current_user.is_authenticated:
-        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
-    
-    return render_template('brand_details.html', 
-                         brand=brand_data, 
-                         products=brand_items,
-                         wishlisted_ids=wishlisted_ids)
-
-
-# ============= CATEGORY PAGES =============
 @views.route('/category/<string:category_name>')
 def products_by_category(category_name):
-    """Category page with sorting and filtering"""
-    page = request.args.get('page', 1, type=int)
-    sort_by = request.args.get('sort', 'popularity')
-    per_page = 24
-    
-    # Base query
-    query = Product.query.filter_by(category=category_name)
-    
-    # Apply sorting
-    if sort_by == 'price_low':
-        query = query.order_by(Product.current_price.asc())
-    elif sort_by == 'price_high':
-        query = query.order_by(Product.current_price.desc())
-    elif sort_by == 'rating':
-        query = query.order_by(Product.rating.desc())
-    elif sort_by == 'newest':
-        query = query.order_by(Product.id.desc())
-    else:  # popularity
-        query = query.order_by(Product.count.desc())
-    
-    # Paginate
-    paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-
-    wishlisted_ids = set()
-    if current_user.is_authenticated:
-        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
-
-    return render_template('category.html',
-                         products=paginated.items,
-                         pagination=paginated,
-                         category=category_name,
-                         sort_by=sort_by,
-                         wishlisted_ids=wishlisted_ids)
+    products = Product.query.filter_by(category=category_name).all()
+    return render_template('category.html', products=products, category_name=category_name)
 
 
-# ============= PRODUCT DETAIL =============
+
+#suggested Product code
 @views.route('/product/<int:product_id>')
 def product_info(product_id):
-    """Enhanced product detail page with recommendations"""
     product = Product.query.get_or_404(product_id)
-    
-    # Get product sizes
+
+    # Fetch product sizes (if available)
     sizes = ProductSize.query.filter_by(product_id=product.id).all()
-    
-    # Get similar products (same category and brand)
-    similar_products = Product.query\
-        .filter(Product.id != product.id)\
-        .filter(Product.category == product.category)\
-        .filter(Product.brand_id == product.brand_id)\
-        .order_by(func.random())\
-        .limit(4).all()
-    
-    # If not enough, add from same category
-    if len(similar_products) < 4:
-        additional = Product.query\
-            .filter(Product.id != product.id)\
-            .filter(Product.category == product.category)\
-            .filter(Product.id.notin_([p.id for p in similar_products]))\
-            .order_by(func.random())\
-            .limit(4 - len(similar_products)).all()
-        similar_products.extend(additional)
-    
-    # Check if user has this in wishlist
-    in_wishlist = False
-    if 'user_id' in session:
-        in_wishlist = Wishlist.query.filter_by(
-            user_id=session['user_id'], 
-            product_id=product_id
-        ).first() is not None
-    
-    return render_template('product_details.html', 
-                         product=product, 
-                         sizes=sizes, 
-                         suggested_products=similar_products,
-                         in_wishlist=in_wishlist)
+
+    # Fetch 4 completely random products (excluding the current product)
+    suggested_products = Product.query.filter(Product.id != product.id).order_by(db.func.random()).limit(4).all()
+
+    return render_template("product_details.html", product=product, sizes=sizes, suggested_products=suggested_products)
 
 
-# ============= SEARCH FUNCTIONALITY =============
 @views.route('/search', methods=['GET'])
 def search():
-    """Enhanced search with multiple filters"""
     query = request.args.get('query', '').strip()
-    category = request.args.get('category', '')
-    brand = request.args.get('brand', '')
+    category_name = request.args.get('category', '').strip()
+    # brand_name = request.args.get('brand', '').strip()
     min_price = request.args.get('min_price', type=float)
     max_price = request.args.get('max_price', type=float)
-    color = request.args.get('color', '')
-    sort_by = request.args.get('sort', 'relevance')
-    page = request.args.get('page', 1, type=int)
-    per_page = 24
-    
-    # Start with base query
+    color = request.args.get('color', '').strip()
+
+    # Start filtering products
     search_query = Product.query
-    
-    # Text search
+
     if query:
         search_query = search_query.filter(
-            or_(
-                Product.product_name.ilike(f'%{query}%'),
-                Product.description.ilike(f'%{query}%')
-            )
+            (Product.product_name.ilike(f"%{query}%")) | (Product.description.ilike(f"%{query}%"))
         )
-    
-    # Apply filters
-    if category:
-        search_query = search_query.filter(Product.category == category)
-    
-    if brand:
-        search_query = search_query.join(Brand).filter(Brand.name == brand)
-    
+    if category_name:
+        search_query = search_query.filter(Product.category.ilike(f"%{category_name}%"))
+    # if brand_name:
+        # search_query = search_query.join(Brand).filter(Brand.name.ilike(f"%{brand_name}%"))
     if color:
-        search_query = search_query.filter(Product.color.ilike(f'%{color}%'))
-    
+        search_query = search_query.filter(Product.color.ilike(f"%{color}%"))
     if min_price is not None:
         search_query = search_query.filter(Product.current_price >= min_price)
-    
     if max_price is not None:
         search_query = search_query.filter(Product.current_price <= max_price)
-    
-    # Apply sorting
-    if sort_by == 'price_low':
-        search_query = search_query.order_by(Product.current_price.asc())
-    elif sort_by == 'price_high':
-        search_query = search_query.order_by(Product.current_price.desc())
-    elif sort_by == 'rating':
-        search_query = search_query.order_by(Product.rating.desc())
-    elif sort_by == 'newest':
-        search_query = search_query.order_by(Product.id.desc())
-    else:  # relevance
-        if query:
-            # Simple relevance: products with query in name first
-            search_query = search_query.order_by(
-                Product.product_name.ilike(f'%{query}%').desc(),
-                Product.rating.desc()
-            )
-    
-    # Paginate results
-    paginated = search_query.paginate(page=page, per_page=per_page, error_out=False)
-    
-    # Get filter options
-    categories = db.session.query(Product.category).distinct().all()
-    brands = Brand.query.all()
-    colors = db.session.query(Product.color).filter(Product.color.isnot(None)).distinct().all()
-    
-    # Get price range
-    price_range = db.session.query(
-        func.min(Product.current_price),
-        func.max(Product.current_price)
-    ).first()
 
-    wishlisted_ids = set()
-    if current_user.is_authenticated:
-        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
-    
+    search_results = search_query.all()
+
+    categories = db.session.query(Product.category).distinct()
+    # brands = Brand.query.all()
+    colors = db.session.query(Product.color).distinct()  # Fetch unique colors
+
     return render_template(
         'search_results.html',
-        products=paginated.items,
-        pagination=paginated,
+        products=search_results,
         query=query,
-        filters={
-            'category': category,
-            'brand': brand,
-            'color': color,
-            'min_price': min_price,
-            'max_price': max_price,
-            'sort_by': sort_by
-        },
-        filter_options={
-            'categories': [c[0] for c in categories],
-            'brands': brands,
-            'colors': [c[0] for c in colors if c[0]],
-            'price_range': price_range
-        },
-        total_results=paginated.total,
-        wishlisted_ids=wishlisted_ids
+        category=category_name,
+        # brand=brand_name,
+        min_price=min_price,
+        max_price=max_price,
+        color=color,
+        categories=[c[0] for c in categories],
+        # brands=brands,
+        colors=[c[0] for c in colors]  # Pass colors correctly
     )
 
 
-# ============= CART FUNCTIONALITY =============
+### Updated Cart - Only for logged-in users
+from flask_login import current_user
 @views.route('/cart')
 @login_required
 def show_cart():
-    """Enhanced cart view with recommendations"""
-    user_id = current_user.id
-    
-    # Get cart items with product details
-    cart_data = db.session.query(Cart, Product)\
-        .join(Product, Cart.product_id == Product.id)\
+    user_id = current_user.id  # Get the user ID directly from current_user (handled by flask_login)
+
+    # Fetch cart items specific to the logged-in user
+    cart_items = db.session.query(Cart, Product).join(Product, Cart.product_id == Product.id)\
         .filter(Cart.user_id == user_id).all()
-    
-    # Calculate totals
-    cart_items = {}
-    total_mrp = 0
-    total_discount = 0
-    
-    for cart, product in cart_data:
-        item_mrp = cart.quantity * product.previous_price
-        item_discount = cart.quantity * (product.previous_price - product.current_price)
-        
-        cart_items[product.id] = {
-            'product_name': product.product_name,
-            'image': product.product_picture,
-            'price': product.current_price,
-            'original_price': product.previous_price,
-            'quantity': cart.quantity,
-            'subtotal': cart.quantity * product.current_price
-        }
-        
-        total_mrp += item_mrp
-        total_discount += item_discount
-    
-    total_amount = int(total_mrp - total_discount)
-    
-    # Get recommended products
-    if cart_items:
-        # Get categories of items in cart
-        cart_categories = db.session.query(Product.category)\
-            .join(Cart).filter(Cart.user_id == user_id)\
-            .distinct().all()
-        
-        categories = [c[0] for c in cart_categories]
-        
-        # Recommend products from same categories
-        recommendations = Product.query\
-            .filter(Product.category.in_(categories))\
-            .filter(Product.id.notin_(cart_items.keys()))\
-            .order_by(func.random())\
-            .limit(4).all()
-    else:
-        recommendations = []
-    
-    return render_template('cart.html', 
-                         cart_items=cart_items,
-                         total_mrp=total_mrp,
-                         discount_mrp=total_discount,
-                         total_amount=total_amount,
-                         recommendations=recommendations)
+
+    # Ensure if the cart is empty, show an appropriate message
+    if not cart_items:
+        flash("Your cart is empty!", "info")
+
+    # Calculate total MRP, discount, and amount for the cart items
+    total_mrp = sum(cart.quantity * product.current_price for cart, product in cart_items)
+    total_discount = sum(cart.quantity * product.discount for cart, product in cart_items if product.discount)
+    total_amount = int(total_mrp - total_discount)  # Ensure final amount is an integer
+    print(f"total_amount : {total_amount}")
+    # Pass the correct cart data and calculation results to the template
+    return render_template(
+        "cart.html", 
+        cart_items=cart_items, 
+        total_mrp=total_mrp, 
+        total_discount=total_discount, 
+        total_amount=total_amount
+    )
 
 
 @views.route('/add_to_cart/<int:product_id>', methods=['POST'])
 @login_required
-def cart_add(product_id):
-    """Add product to cart"""
-    
+def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
-    user_id = current_user.id
-    quantity = request.form.get('quantity', 1, type=int)
-    
-    # Check if already in cart
-    cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
-    
+    user_id = current_user.id  # Use current_user to get user_id instead of session
+
+    cart_item = Cart.query.filter_by(user_id=user_id, product_id=product.id).first()
     if cart_item:
-        cart_item.quantity += quantity
+        cart_item.quantity += 1
     else:
-        new_cart_item = Cart()
-        new_cart_item.user_id = user_id
-        new_cart_item.product_id = product_id
-        new_cart_item.quantity = quantity
+        new_cart_item = Cart(user_id=user_id, product_id=product.id, quantity=1)
         db.session.add(new_cart_item)
-    
+
     db.session.commit()
-    
-    if request.is_json:
-        return jsonify({'success': True, 'message': 'Added to cart'})
-    
-    flash('Product added to cart!', 'success')
+    flash("Product added to cart!", "success")
     return redirect(url_for('views.show_cart'))
 
 
 @views.route('/remove_from_cart/<int:product_id>', methods=['POST'])
 @login_required
-def cart_remove(product_id):
-    """Remove product from cart"""
-    user_id = current_user.id
+def remove_from_cart(product_id):
+    user_id = current_user.id  # Use current_user to get user_id instead of session
     cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
-    
     if cart_item:
         db.session.delete(cart_item)
         db.session.commit()
-        flash('Product removed from cart!', 'success')
-    
+        flash("Product removed from cart!", "success")
+    else:
+        flash("Product not found in cart!", "danger")
+
     return redirect(url_for('views.show_cart'))
+
+
+@views.route('/move_to_cart/<int:product_id>', methods=['POST'])
+@login_required
+def move_to_cart(product_id):
+    user_id = current_user.id  # Use current_user to get user_id instead of session
+
+    # Check if item exists in wishlist
+    wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
+    if wishlist_item:
+        # Move item to cart
+        cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+        if cart_item:
+            cart_item.quantity += 1  # Increase quantity if already exists
+        else:
+            new_cart_item = Cart(user_id=user_id, product_id=product_id, quantity=1)
+            db.session.add(new_cart_item)
+
+        # Remove from wishlist
+        db.session.delete(wishlist_item)
+        db.session.commit()
+
+        flash("Item moved to cart!", "success")
+    else:
+        flash("Item not found in wishlist!", "danger")
+
+    return redirect(url_for('views.show_wishlist'))
 
 
 @views.route('/update_cart_quantity/<int:product_id>', methods=['POST'])
 @login_required
 def update_cart_quantity(product_id):
-    """Update cart item quantity"""
-    user_id = current_user.id
-    new_quantity = request.form.get('quantity', 1, type=int)
-    
-    if new_quantity < 1:
-        return jsonify({'error': 'Invalid quantity'}), 400
-    
+    user_id = current_user.id  
+    new_quantity = int(request.form.get('quantity', 1))
+
+    # Fetch the cart item
     cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
-    
     if cart_item:
         cart_item.quantity = new_quantity
         db.session.commit()
-        
-        # Recalculate totals
-        cart_data = db.session.query(Cart, Product)\
-            .join(Product).filter(Cart.user_id == user_id).all()
-        
-        total_mrp = sum(c.quantity * p.previous_price for c, p in cart_data)
-        total_discount = sum(c.quantity * (p.previous_price - p.current_price) for c, p in cart_data)
-        total_amount = int(total_mrp - total_discount)
-        
-        return jsonify({
-            'success': True,
-            'total_mrp': total_mrp,
-            'discount_mrp': total_discount,
-            'total_amount': total_amount
-        })
-    
-    return jsonify({'error': 'Item not found'}), 404
+
+    # Fetch updated cart details
+    cart_items = db.session.query(Cart, Product).join(Product).filter(Cart.user_id == user_id).all()
+
+    # Ensure all values are initialized to avoid 'undefined' issues
+    total_price = sum(cart.quantity * product.current_price for cart, product in cart_items)
+    total_discount = sum(cart.quantity * (product.discount or 0) for cart, product in cart_items)  # Handle None discount
+    total_amount = int(total_price - total_discount)
+
+    return jsonify({
+        "success": True,
+        "total_mrp": total_price,
+        "discount_mrp": total_discount,
+        "total_amount": total_amount
+    })
 
 
-# ============= WISHLIST FUNCTIONALITY =============
 @views.route('/wishlist')
 @login_required
 def show_wishlist():
-    """Enhanced wishlist view"""
-    wishlist_data = db.session.query(Wishlist, Product)\
-        .join(Product, Wishlist.product_id == Product.id)\
-        .filter(Wishlist.user_id == current_user.id).all()
+    user_id = current_user.id  # Use current_user to get user_id instead of session
+    wishlist = db.session.query(Wishlist, Product).join(Product, Wishlist.product_id == Product.id)\
+        .filter(Wishlist.user_id == user_id).all()
     
-    # Create a list of dictionaries with wishlist and product information
-    wishlist_items = []
-    for wishlist, product in wishlist_data:
-        wishlist_items.append({
-            'wishlist': wishlist,
-            'product': product
-        })
-    
+    wishlist_items = [{"wishlist": item[0], "product": item[1]} for item in wishlist]
     return render_template('wishlist.html', wishlist_items=wishlist_items)
 
 
 @views.route('/add_to_wishlist/<int:product_id>', methods=['POST'])
 @login_required
 def wishlist_add(product_id):
-    """Add product to wishlist"""
-    user_id = current_user.id
-    
-    # Check if already in wishlist
-    existing_item = Wishlist.query.filter_by(
-        user_id=user_id, 
-        product_id=product_id
-    ).first()
-    
+    user_id = current_user.id  # Use current_user to get user_id instead of session
+    existing_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
     if not existing_item:
-        new_wishlist_item = Wishlist()
-        new_wishlist_item.user_id = user_id
-        new_wishlist_item.product_id = product_id
+        new_wishlist_item = Wishlist(user_id=user_id, product_id=product_id)
         db.session.add(new_wishlist_item)
         db.session.commit()
-        
-        if request.is_json:
-            return jsonify({'success': True, 'message': 'Added to wishlist'})
-        
-        flash('Added to wishlist!', 'success')
-    else:
-        if request.is_json:
-            return jsonify({'info': 'Already in wishlist'})
-        flash('Already in wishlist', 'info')
-    
-    return redirect(request.referrer or url_for('views.show_wishlist'))
-
-
-@views.route('/toggle_wishlist/<int:product_id>', methods=['POST'])
-@login_required
-def toggle_wishlist(product_id):
-    """Toggle product in/out of wishlist – always returns JSON."""
-    product = Product.query.get_or_404(product_id)
-    existing = Wishlist.query.filter_by(
-        user_id=current_user.id,
-        product_id=product_id
-    ).first()
-    if existing:
-        db.session.delete(existing)
-        db.session.commit()
-        return jsonify({'wishlisted': False, 'message': 'Removed from wishlist'})
-    else:
-        item = Wishlist(user_id=current_user.id, product_id=product_id)
-        db.session.add(item)
-        db.session.commit()
-        return jsonify({'wishlisted': True, 'message': 'Added to wishlist'})
-
-
-@views.route('/remove_from_wishlist/<int:product_id>', methods=['POST'])
-@login_required
-def remove_from_wishlist(product_id):
-    """Remove product from wishlist"""
-    wishlist_item = Wishlist.query.filter_by(
-        user_id=current_user.id,
-        product_id=product_id
-    ).first()
-    
-    if wishlist_item:
-        db.session.delete(wishlist_item)
-        db.session.commit()
-        flash('Removed from wishlist!', 'success')
     
     return redirect(url_for('views.show_wishlist'))
 
 
-@views.route('/move_to_cart/<int:product_id>', methods=['POST'])
+# @views.route('/remove_from_wishlist/<int:product_id>', methods=['POST'])
+# @login_required
+# def remove_from_wishlist(product_id):
+#     user_id = current_user.id  # Use current_user to get user_id instead of session
+#     wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
+#     print(f"wishlist_item : {wishlist_item}, user_id : {user_id}, product_id : {product_id}")
+#     if wishlist_item:
+#         db.session.delete(wishlist_item)
+#         db.session.commit()
+#         flash("Product removed from wishlist!", "success")
+#     else:
+#         flash("Product not found in wishlist!", "danger")
+    
+#     return redirect(url_for('views.show_wishlist'))
+
+@views.route('/move_to_wishlist/<int:product_id>', methods=['POST'])
 @login_required
-def move_to_cart(product_id):
-    """Move item from wishlist to cart"""
-    user_id = current_user.id
-    
-    # Remove from wishlist
-    wishlist_item = Wishlist.query.filter_by(
-        user_id=user_id, 
-        product_id=product_id
-    ).first()
-    
+def move_to_wishlist(product_id):
+    user_id = current_user.id  # Use current_user to get user_id instead of session
+    wishlist_item = Wishlist(user_id=user_id, product_id=product_id)
+    print(f"wishlist_item : {wishlist_item}, user_id : {user_id}, product_id : {product_id}")
     if wishlist_item:
-        # Add to cart
-        cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
-        if cart_item:
-            cart_item.quantity += 1
-        else:
-            new_cart_item = Cart()
-            new_cart_item.user_id = user_id
-            new_cart_item.product_id = product_id
-            new_cart_item.quantity = 1
-            db.session.add(new_cart_item)
-        
-        # Remove from wishlist
-        db.session.delete(wishlist_item)
+        db.session.add(wishlist_item)
         db.session.commit()
-        
-        flash('Moved to cart!', 'success')
+        flash("Product moved to wishlist!", "success")
+    else:
+        flash("Product not found in wishlist!", "danger")
     
-    return redirect(url_for('views.show_cart'))
+    return redirect(url_for('views.show_wishlist'))
 
 
-# ============= CHECKOUT & ORDERS =============
-@views.route('/checkout')
+@views.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    """Checkout page"""
-    user_id = current_user.id
-    user = User.query.get(user_id)
-    
-    # Get cart items
-    cart_data = db.session.query(Cart, Product)\
-        .join(Product).filter(Cart.user_id == user_id).all()
-    
-    if not cart_data:
-        flash('Your cart is empty', 'warning')
-        return redirect(url_for('views.show_cart'))
-    
-    # Calculate totals
-    subtotal = sum(c.quantity * p.current_price for c, p in cart_data)
-    shipping = 0 if subtotal > 999 else 50
-    tax = round(subtotal * 0.05, 2)
-    total = subtotal + shipping + tax
-    
-    cart_items = [{
-        'name': p.product_name,
-        'price': p.current_price,
-        'quantity': c.quantity,
-        'product_id': p.id
-    } for c, p in cart_data]
-    
-    return render_template('checkout.html',
-                         cart_items=cart_items,
-                         subtotal=subtotal,
-                         shipping=shipping,
-                         tax=tax,
-                         total=total,
-                         current_user=user)
+    user_id = current_user.id  # Use current_user.id instead of session
+    cart_items_db = Cart.query.filter_by(user_id=user_id).all()
+
+    if not cart_items_db:
+        flash('Your cart is empty!', 'danger')
+        return redirect(url_for('views.cart'))
+
+    cart_items = []
+    subtotal = 0
+    discount = 45  # Apply the discount if applicable
+
+    for cart_item in cart_items_db:
+        product = Product.query.get(cart_item.product_id)
+        if product:
+            cart_items.append({
+                'id': cart_item.product_id,
+                'name': product.product_name,
+                'price': product.current_price,  # Ensure this value is correct
+                'quantity': cart_item.quantity
+            })
+            subtotal += product.current_price * cart_item.quantity
+    print(cart_items)
+    # Get total_amount from query parameters if passed, otherwise use the calculated subtotal
+    total_amount = request.args.get('total_amount', type=float)
+
+    if total_amount is None:
+        total_amount = subtotal
+
+    # Recalculate based on total_amount
+    tax = total_amount * 0.05  # 5% tax
+    shipping = 40
+    total = total_amount - discount + shipping + tax  # Apply discount correctly
+
+    print(f"Subtotal: {subtotal}, Discount: {discount}, Tax: {tax}, Shipping: {shipping}, Total: {total}")
+
+    return render_template(
+        'checkout.html',
+        cart_items=cart_items,
+        subtotal=round(subtotal, 2),
+        discount=round(discount, 2),
+        shipping=round(shipping, 2),
+        tax=round(tax, 2),
+        total=round(total, 2)
+    )
 
 
 @views.route('/place_order', methods=['POST'])
 @login_required
 def place_order():
-    """Place an order"""
     user_id = current_user.id
-    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+    user = User.query.get(user_id)
+    if not user:
+        flash('User not found!', 'danger')
+        return redirect(url_for('views.login'))
 
-    # Get form data
-    data = request.form
-    customer_name = data.get('name', '').strip()
-    address_line_1 = data.get('address', '').strip()
-    city = data.get('city')
-    state = data.get('state')
-    pincode = data.get('pincode')
-    email = data.get('email')
+    address_line_1 = request.form.get('address_line_1')
+    state = request.form.get('state')
+    city = request.form.get('city')
+    pincode = request.form.get('pincode')
+    firstname = request.form.get('firstname')
+    lastname = request.form.get('lastname')
+    email = request.form.get('email')
 
-    # Get cart items
-    cart_data = db.session.query(Cart, Product)\
-        .join(Product).filter(Cart.user_id == user_id).all()
+    cart_items_db = Cart.query.filter_by(user_id=user_id).all()
+    if not cart_items_db:
+        flash('Your cart is empty!', 'danger')
+        return redirect(url_for('views.checkout'))
 
-    if not cart_data:
-        if is_ajax:
-            return jsonify({'error': 'Cart is empty'}), 400
-        flash('Your cart is empty', 'warning')
-        return redirect(url_for('views.show_cart'))
-
-    # Calculate total
-    total = sum(c.quantity * p.current_price for c, p in cart_data)
-
-    # Create order
-    new_order = Order()
-    new_order.user_id = user_id
-    new_order.customer_name = customer_name
-    new_order.address_line_1 = address_line_1
-    new_order.city = city
-    new_order.state = state
-    new_order.pincode = pincode
-    new_order.mail = email
-    new_order.total_price = total
-    new_order.status = 'Pending'
-
+    # Create a new order (without a product_id in the Order table)
+    if( len(firstname) or len(lastname) ):
+        new_order = Order(
+            user_id=user_id,
+            customer_name=f"{firstname} {lastname}",
+            address_line_1=address_line_1,
+            state=state,
+            city=city,
+            pincode=pincode,
+            total_price=0,
+            status="In Transit",
+            mail=email
+        )
+    else :
+        new_order = Order(
+            user_id=user_id,
+            customer_name=user.name,
+            address_line_1= user.address,
+            state= user.state,
+            city= user.city,
+            pincode= user.pincode,
+            total_price=0,
+            status="In Transit",
+            mail= user.email
+        )
+    print(f" firstname : {len(firstname)}")
     db.session.add(new_order)
-    db.session.flush()  # Get order ID
+    db.session.commit()  # Commit to get the new order ID
 
-    # Add order items
-    for cart, product in cart_data:
-        # Validate stock only when inventory has been explicitly set (count > 0)
-        if product.count > 0 and product.count < cart.quantity:
-            db.session.rollback()
-            msg = f"Insufficient stock for '{product.product_name}'. Only {product.count} left."
-            if is_ajax:
-                return jsonify({'error': msg}), 400
-            flash(msg, 'danger')
-            return redirect(url_for('views.show_cart'))
+    total_price = 0
+    for cart_item in cart_items_db:
+        product = Product.query.get(cart_item.product_id)
+        total_cost = product.current_price * cart_item.quantity
+        total_price += total_cost
 
-        order_item = OrderItem()
-        order_item.order_id = new_order.id
-        order_item.product_id = product.id
-        order_item.quantity = cart.quantity
-        order_item.unit_price = product.current_price
-        order_item.subtotal = cart.quantity * product.current_price
+        # Create OrderItem for each cart item (link the OrderItem to the new order)
+        order_item = OrderItem(
+            order_id=new_order.id,  # Link the OrderItem to the new order
+            product_id=cart_item.product_id,  # Correctly set the product_id here
+            quantity=cart_item.quantity,
+            unit_price=product.current_price,
+            subtotal=total_cost
+        )
         db.session.add(order_item)
 
-        # Update product stock
-        product.count -= cart.quantity
+        # Reduce the product count based on quantity
+        # product.count -= cart_item.quantity
 
-    # Clear cart
+    # Update the total price in the Order (based on OrderItems)
+    new_order.total_price = total_price
+    db.session.commit()  # Commit the changes for Order and OrderItems
+
+    # Empty the cart
     Cart.query.filter_by(user_id=user_id).delete()
-
     db.session.commit()
 
-    if is_ajax:
-        return jsonify({'success': True, 'order_id': new_order.id})
-
-    flash('Order placed successfully!', 'success')
-    return render_template('payment_success.html', order=new_order)
-
+    return jsonify({"success": True})
 
 @views.route('/my_orders')
 @login_required
 def my_orders():
-    """View user's orders"""
-    orders = Order.query.filter_by(user_id=current_user.id)\
-        .order_by(Order.order_date.desc()).all()
-    
-    return render_template('my_orders.html', orders=orders)
 
+    orders = Order.query.filter_by(user_id=current_user.id).all()
+    orders_with_items = []
+    for order in orders:
+        order_items = OrderItem.query.filter_by(order_id=order.id).all()
+        items_data = [{'name': item.product.product_name, 'quantity': item.quantity} for item in order_items]
 
-@views.route('/view_order_items/<int:order_id>')
+        orders_with_items.append({
+            'id': order.id,
+            'status': order.status,
+            'total_price': order.total_price,
+            'order_items': items_data
+        })
+
+    return render_template('my_orders.html', orders=orders_with_items)
+
+@views.route('/order/<int:order_id>', methods=['GET'])
 @login_required
 def view_order_items(order_id):
-    """View detailed order items"""
-    order = Order.query.filter_by(
-        id=order_id, 
-        user_id=current_user.id
-    ).first_or_404()
-    
-    return render_template('order_details.html', order=order)
+    order = Order.query.get(order_id)
+    if not order or order.user_id != current_user.id :
+        # print(not order, order.user_id , current_user.id )
+        flash('Order not found!', 'danger')
+        return redirect(url_for('views.my_orders'))
+
+    order_items = OrderItem.query.filter_by(order_id=order.id).all()
+    return render_template('view_order.html', order=order, order_items=order_items)
 
 
 @views.route('/cancel_order/<int:order_id>', methods=['POST'])
 @login_required
 def cancel_order(order_id):
-    """Cancel an order"""
-    order = Order.query.filter_by(
-        id=order_id, 
-        user_id=current_user.id
-    ).first_or_404()
-    
-    if order.status != 'Pending':
-        flash('Order cannot be cancelled', 'error')
+    user_id = current_user.id
+    order = Order.query.get_or_404(order_id)
+    if order.user_id != user_id:
+        flash('You can only cancel your own orders.', 'danger')
         return redirect(url_for('views.my_orders'))
-    
-    # Restore product stock
-    for item in order.order_items:
-        product = Product.query.get(item.product_id)
-        if product:
-            product.count += item.quantity
-    
+
     order.status = 'Cancelled'
-    db.session.commit()
     
-    flash('Order cancelled successfully', 'success')
+    # order_items = OrderItem.query.filter_by(order_id=order_id).all()
+    # for order_item in order_items:
+    #     product = Product.query.get(order_item.product_id)
+    #     product.quantity += order_item.quantity
+
+    db.session.commit()
     return redirect(url_for('views.my_orders'))
 
 
-@views.route('/payment_success/<int:order_id>')
-@login_required
-def payment_success(order_id):
-    """Display payment success page"""
-    order = Order.query.filter_by(
-        id=order_id, 
-        user_id=current_user.id
-    ).first_or_404()
-    
-    return render_template('payment_success.html', order=order)
-
-
-# ============= API ENDPOINTS =============
-@views.route('/api/products/trending')
-def api_trending_products():
-    """API endpoint for trending products"""
-    limit = request.args.get('limit', 10, type=int)
-    
-    products = db.session.query(Product)\
-        .join(OrderItem)\
-        .group_by(Product.id)\
-        .order_by(func.count(OrderItem.id).desc())\
-        .limit(limit).all()
-    
-    return jsonify([{
-        'id': p.id,
-        'name': p.product_name,
-        'price': p.current_price,
-        'image': p.product_picture,
-        'rating': p.rating
-    } for p in products])
-
-
-@views.route('/api/cart/count')
-def api_cart_count():
-    """Get cart item count"""
-    if not current_user.is_authenticated:
-        return jsonify({'count': 0})
-    count = Cart.query.filter_by(user_id=current_user.id).count()
-    return jsonify({'count': count})
-
-
-@views.route('/api/wishlist/count')
-def api_wishlist_count():
-    """Get wishlist item count"""
-    if not current_user.is_authenticated:
-        return jsonify({'count': 0})
-    count = Wishlist.query.filter_by(user_id=current_user.id).count()
-    return jsonify({'count': count})
-
-
-# Add get_image route for serving product images
-@views.route('/media/<path:filename>')
-def get_image(filename):
-    """Serve product images from the media folder"""
-    file_path = os.path.join(UPLOAD_FOLDER, filename).replace("\\", "/")
-    if not os.path.exists(file_path):
-        return "File not found", 404
-    return send_from_directory(UPLOAD_FOLDER, filename)
-
-
-@views.route('/contact')
-def contact():
-    """Display contact page"""
-    return render_template('contact.html')
-
-
-@views.route('/faqs')
+@views.route('/faqs', methods=['GET', 'POST'])
 def faqs():
     return render_template('faqs.html')
-
-
-@views.route('/shipping-policy')
-def shipping_policy():
-    return render_template('shipping_policy.html')
-
-
-@views.route('/returns-exchanges')
-def returns_exchanges():
-    return render_template('returns_exchanges.html')
-
-
-@views.route('/size-guide')
-def size_guide():
-    return render_template('size_guide.html')
-
-
-@views.route('/track-order')
-def track_order():
-    return render_template('track_order.html')
-
-
-@views.route('/privacy-policy')
-def privacy_policy():
-    return render_template('privacy_policy.html')
-
-
-@views.route('/terms-of-service')
-def terms_of_service():
-    return render_template('terms_of_service.html')
-
-
-@views.route('/send_contact_email', methods=['POST'])
-def send_contact_email():
-    """Send contact email"""
-    try:
-        from app import mail  # Import mail from app context
-        from flask import current_app
-
-        data = request.get_json()
-
-        name = data.get('name')
-        email = data.get('email')
-        subject = data.get('subject')
-        message = data.get('message')
-
-        admin_email = current_app.config.get('MAIL_USERNAME', '')
-
-        # Create email message
-        msg = Message(
-            subject=f"Contact Form: {subject}",
-            recipients=[admin_email],
-            body=f"""New contact form submission:
-
-Name: {name}
-Email: {email}
-Subject: {subject}
-
-Message:
-{message}
-"""
-        )
-
-        # Send email
-        mail.send(msg)
-
-        return jsonify({'success': True, 'message': 'Email sent successfully'})
-        
-    except Exception as e:
-        print(f"Error sending email: {str(e)}")
-        return jsonify({'success': False, 'message': 'Failed to send email'}), 500

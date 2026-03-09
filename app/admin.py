@@ -1,15 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory
-from .models import User, Product, ProductSize, Brand, db, Order
+from .models import User, Product, ProductSize,  db, Order
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
 import os
-import json
 from .forms import ProductForm
-from plotly import graph_objects as go
-from plotly.utils import PlotlyJSONEncoder
-import plotly.express as px
-import pandas as pd
 
 # Define the Blueprint
 admin = Blueprint('admin', __name__)
@@ -26,27 +20,32 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 ### ✅ Admin Dashboard Route
 @admin.route('/admin_dashboard')
-@login_required
+# @login_required
 def admin_dashboard():
+    if not current_user.is_authenticated:
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('auth.login'))
+    
     if current_user.role != 'admin':
         return redirect(url_for('views.homepage'))
     
     total_users = User.query.count()
     pending_approvals = User.query.filter_by(approved=False).count()
-    # Get pending delivery applications
-    pending_delivery_applications = User.query.filter_by(role='delivery_agent', approved=False).count()
     
     return render_template(
         'admin_dashboard.html',
         total_users=total_users,
-        pending_approvals=pending_approvals,
-        pending_delivery_applications=pending_delivery_applications
+        pending_approvals=pending_approvals
     )
 
 ### ✅ Add Products Route
 @admin.route('/add_products', methods=['GET', 'POST'])
 @login_required
 def add_products():
+    if not current_user.is_authenticated:
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('auth.login'))
+    
     if current_user.role != 'admin':
         flash('Unauthorized access', 'danger')
         return redirect(url_for('views.homepage'))
@@ -68,13 +67,6 @@ def add_products():
                 file_path = None
 
             # Create product
-            brand_name = form.brand.data
-            brand_obj = Brand.query.filter_by(name=brand_name).first()
-            if not brand_obj:
-                brand_obj = Brand(name=brand_name)
-                db.session.add(brand_obj)
-                db.session.flush()
-
             new_product = Product(
                 product_name=form.product_name.data,
                 product_picture=file_path,
@@ -85,7 +77,7 @@ def add_products():
                 category=form.category.data,
                 color=form.color.data,
                 discount=form.discount.data,
-                brand_id=brand_obj.id
+                brand=form.brand.data
             )
 
             db.session.add(new_product)
@@ -133,8 +125,12 @@ def add_products():
 
 ### ✅ View Products Route
 @admin.route('/view_products')
-@login_required
+# @login_required
 def view_products():
+    if not current_user.is_authenticated:
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('auth.login'))
+    
     if current_user.role != 'admin':
         flash('Unauthorized access', 'danger')
         return redirect(url_for('views.homepage'))
@@ -144,11 +140,7 @@ def view_products():
 
 
 @admin.route("/delete-item/<id>", methods=['GET','POST'])
-@login_required
 def delete_item(id):
-    if current_user.role != 'admin':
-        flash('Unauthorized access', 'danger')
-        return redirect(url_for('views.homepage'))
     try:
         item_to_delete = Product.query.get(id)
         # Delete associated sizes
@@ -170,11 +162,7 @@ def delete_item(id):
     return redirect('/admin/view_products')
 
 @admin.route('/update-item/<int:product_id>', methods=['GET', 'POST'])
-@login_required
 def update_item(product_id):
-    if current_user.role != 'admin':
-        flash('Unauthorized access', 'danger')
-        return redirect(url_for('views.homepage'))
     product = Product.query.get_or_404(product_id)
     form = ProductForm(obj=product)
 
@@ -189,14 +177,7 @@ def update_item(product_id):
         product.category = request.form.get("category")
         product.sale = request.form.get("sale") == "true"
         product.discount = int(request.form.get("discount", product.discount))
-        brand_name = request.form.get("brand")
-        if brand_name:
-            brand_obj = Brand.query.filter_by(name=brand_name).first()
-            if not brand_obj:
-                brand_obj = Brand(name=brand_name)
-                db.session.add(brand_obj)
-                db.session.flush()
-            product.brand_id = brand_obj.id
+        product.brand = request.form.get("brand")
         product.color = request.form.get("color")
 
         # Handling image upload
@@ -293,41 +274,18 @@ def role_approval():
 def approve_user(id):
     try:
         user = User.query.get_or_404(id)
-        user.approved = True
-        
-        # If this is a delivery agent, generate their credentials
-        if user.role == 'delivery_agent' and not user.custom_id:
-            # Generate custom ID
-            prefix = "D"
-            last_user = User.query.filter(User.custom_id.like(f"{prefix}%")).order_by(User.id.desc()).first()
-            if last_user and last_user.custom_id:
-                try:
-                    last_number = int(last_user.custom_id[1:])
-                    new_number = last_number + 1
-                except:
-                    new_number = 1
-            else:
-                new_number = 1
-            
-            custom_id = f"{prefix}{new_number:04d}"
-            user.custom_id = custom_id
-            
-            # Generate email and password
-            user.email = f"delivery_{custom_id}@fashionfinds.com"
-            user.password = generate_password_hash(f"FF_{custom_id}", method="pbkdf2:sha256")
-        
+        user.approved = True  # Make sure this field exists in your User model
         db.session.commit()
         return {"message": "User approved successfully"}, 200
     except Exception as e:
         print("Error approving user:", e)
-        db.session.rollback()
         return {"error": "Failed to approve user"}, 500
 
 @admin.route('/reject-user/<int:id>', methods=['POST'])
 def reject_user(id):
     try:
         user = User.query.get_or_404(id)
-        user.approved = False
+        user.is_approved = False  # Make sure this field exists in your User model
         db.session.commit()
         return {"message": "User rejected successfully"}, 200
     except Exception as e:
@@ -340,58 +298,61 @@ def reject_user(id):
 @admin.route("/visualisation")
 def visualisation():
     return redirect(url_for("admin.inventory"))
+    return render_template("Visualisation.html")
 
+from plotly import graph_objects as go
+import json
+from plotly.utils import PlotlyJSONEncoder
+import plotly.express as px
+import pandas as pd
 
 @admin.route('/order_status')
 def order_status():
-    try:
-        # Check if current user is admin
-        if not current_user.is_authenticated or current_user.role != 'admin':
-            return redirect(url_for('views.homepage'))
+    # Check if current user is admin
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return redirect(url_for('views.homepage'))
 
 
-        # Query to count orders by status
-        order_stats = (db.session.query(Order.status, db.func.count(Order.id).label('count'))
-                      .group_by(Order.status)
-                      .all())
-        
-        # Extract labels and values
-        labels = [stat[0] for stat in order_stats]
-        values = [stat[1] for stat in order_stats]
+    # Query to count orders by status
+    order_stats = (db.session.query(Order.status, db.func.count(Order.id).label('count'))
+                  .group_by(Order.status)
+                  .all())
+    
+    # Extract labels and values
+    labels = [stat[0] for stat in order_stats]
+    values = [stat[1] for stat in order_stats]
 
-        # Create pie chart
-        fig = go.Figure(data=[go.Pie(
-            labels=labels,
-            values=values,
-            hole=0.4,  # Donut style
-            textinfo='label+percent',
-            hoverinfo='label+value+percent',
-            marker=dict(
-                colors=['#FF9999', '#66B2FF', '#99FF99', '#FFCC99'],  # Custom colors
-                line=dict(color='#FFFFFF', width=2)
-            )
-        )])
-
-        # Update layout
-        fig.update_layout(
-            title='Order Status Distribution',
-            title_x=0.5,  # Center title
-            showlegend=True,
-            annotations=[dict(
-                text='Orders',
-                x=0.5,
-                y=0.5,
-                font_size=20,
-                showarrow=False
-            )]
+    # Create pie chart
+    fig = go.Figure(data=[go.Pie(
+        labels=labels,
+        values=values,
+        hole=0.4,  # Donut style
+        textinfo='label+percent',
+        hoverinfo='label+value+percent',
+        marker=dict(
+            colors=['#FF9999', '#66B2FF', '#99FF99', '#FFCC99'],  # Custom colors
+            line=dict(color='#FFFFFF', width=2)
         )
+    )])
 
-        # Convert to JSON
-        graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-        
-        return render_template('inventory.html', graphJSON=graphJSON, active_page='order_status')
-    except Exception as e:
-        return render_template('inventory.html', error=str(e), active_page='order_status')
+    # Update layout
+    fig.update_layout(
+        title='Order Status Distribution',
+        title_x=0.5,  # Center title
+        showlegend=True,
+        annotations=[dict(
+            text='Orders',
+            x=0.5,
+            y=0.5,
+            font_size=20,
+            showarrow=False
+        )]
+    )
+
+    # Convert to JSON
+    graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
+    
+    return render_template('visualisation.html', graphJSON=graphJSON)
 
 
 @admin.route('/user_types')
@@ -443,10 +404,10 @@ def user_types():
 
         # Convert to JSON
         graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-        return render_template('inventory.html', graphJSON=graphJSON, active_page='user_types')
+        return render_template('visualisation.html', graphJSON=graphJSON)
 
     except Exception as e:
-        return render_template('inventory.html', error=str(e), active_page='inventory')
+        return render_template('visualisation.html', error=str(e))
     
 
 
@@ -501,10 +462,10 @@ def order_location():
 
         # Convert to JSON
         graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-        return render_template('inventory.html', graphJSON=graphJSON, active_page='order_location')
+        return render_template('visualisation.html', graphJSON=graphJSON)
 
     except Exception as e:
-        return render_template('inventory.html', error=str(e), active_page='order_location')
+        return render_template('visualisation.html', error=str(e))
   
 
 @admin.route('/revenue')
@@ -586,11 +547,11 @@ def revenue():
             print(f"graphJSON y-values: {y_values_from_json[:10] if isinstance(y_values_from_json, list) else y_values_from_json}...")
         else:
             print("Error: No data found in graphJSON")
-        return render_template('inventory.html', graphJSON=graphJSON, active_page='revenue')
+        return render_template('visualisation.html', graphJSON=graphJSON)
 
     except Exception as e:
         print(e)
-        return render_template('inventory.html', error=str(e), active_page='revenue')
+        return render_template('visualisation.html', error=str(e))
     
 @admin.route("/inventory")
 def inventory():
@@ -622,14 +583,14 @@ def inventory():
                 color=['#FF6B6B', '#4ECDC4', '#45B7D1'],  # Custom colors
                 line=dict(color='#FFFFFF', width=2)
             ),
-            hovertemplate='<b>Category</b>: %{x}<br><b>Count</b>: %{y}<extra></extra>'
+            hovertemplate='<b>Role</b>: %{x}<br><b>Count</b>: %{y}<extra></extra>'
         )])
 
         # Update layout
         fig.update_layout(
             title='Fashion Finds Inventory',
             title_x=0.5,  # Center title
-            xaxis_title='Category',
+            xaxis_title='category',
             yaxis_title='Number of Products',
             bargap=0.2,
             plot_bgcolor='rgba(0,0,0,0)',
@@ -644,8 +605,8 @@ def inventory():
 
         # Convert to JSON
         graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
-        return render_template('inventory.html', graphJSON=graphJSON, active_page='inventory')
+        return render_template('visualisation.html', graphJSON=graphJSON)
 
     except Exception as e:
-        return render_template('inventory.html', error=str(e))
+        return render_template('visualisation.html', error=str(e))
     

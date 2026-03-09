@@ -2,248 +2,90 @@
 
 {% block title %}{{ category }} - Category{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/category.css') }}?v={{ range(1, 1000) | random }}">
-{% endblock %}
-
 {% block content %}
-<!-- Category Header -->
-<section class="category-header">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2>{{ category }} Collection</h2>
-            <p>Explore the latest trends in {{ category }} fashion</p>
-        </div>
+<div class="container py-5">
+    <!-- Category Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-uppercase">{{ category }} Collection</h2>
+        <p class="text-muted">Explore the latest trends in {{ category }} fashion.</p>
     </div>
-</section>
 
-<!-- Filter & Sort Section -->
-<section class="filter-sort-section">
-    <div class="container">
-        <div class="filter-container">
-            <div class="filter-results">
-                <p>{{ products|length }} products found</p>
-            </div>
-            <div class="filter-controls">
-                <select class="filter-select" id="sortSelect" onchange="sortProducts()">
-                    <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Sort by Popularity</option>
-                    <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
-                    <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
-                    <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Top Rated</option>
-                    <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
-                </select>
-            </div>
-        </div>
-    </div>
-</section>
+    <!-- Proper Grid Layout (Fixes Overlapping) -->
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card product-card shadow-sm border-0 p-3 h-100">
+                <div class="position-relative">
+                    <!-- Wishlist Button -->
+                    <form action="{{ url_for('views.wishlist_add', product_id=product.id) }}" method="POST">
+                        <button type="submit" class="btn btn-outline-danger btn-sm wishlist-btn">❤️</button>
+                    </form>
+                    <!-- Product Image -->
+                    <img src="{{ url_for('admin.get_image', filename=product.product_picture) }}" class="card-img-top product-img" alt="{{ product.product_name }}">
+                </div>
 
-<!-- Category Products -->
-<section class="category-products">
-    <div class="container">
-        {% if products %}
-        <div class="product-container">
-            {% for product in products %}
-            <div class="product-card" data-product-id="{{ product.id }}">
-                {% if product.discount > 0 %}
-                <span class="discount-badge">-{{ product.discount }}%</span>
-                {% endif %}
-                
-                <button class="wishlist-btn {% if wishlisted_ids is defined and product.id in wishlisted_ids %}active{% endif %}"
-                        data-product-id="{{ product.id }}"
-                        data-url="{{ url_for('views.toggle_wishlist', product_id=product.id) }}"
-                        aria-label="Toggle wishlist">
-                    <i class="{% if wishlisted_ids is defined and product.id in wishlisted_ids %}fas{% else %}far{% endif %} fa-heart"></i>
-                </button>
-                
-                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
-                    <div class="product-image">
-                        <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" alt="{{ product.product_name }}" loading="lazy">
-                    </div>
-                </a>
-                
-                <div class="product-info">
-                    {% if product.brand %}
-                    <p class="product-brand">{{ product.brand.name }}</p>
-                    {% endif %}
-                    <h3 class="product-title">{{ product.product_name }}</h3>
-                    
-                    <div class="product-rating">
-                        {% for i in range(5) %}
-                            <i class="fas fa-star {% if i >= product.rating %}star-empty{% endif %}"></i>
-                        {% endfor %}
-                        <span class="rating-count">({{ product.count }})</span>
-                    </div>
-                    
-                    <div class="price-container">
-                        <span class="discounted-price">&#8377;{{ product.current_price }}</span>
-                        {% if product.previous_price > product.current_price %}
-                        <span class="original-price">&#8377;{{ product.previous_price }}</span>
-                        {% if product.discount > 0 %}
-                        <span class="discount-percent">{{ product.discount }}% off</span>
-                        {% endif %}
-                        {% endif %}
-                    </div>
-                    
-                    <div class="product-actions">
-                        <form action="{{ url_for('views.cart_add', product_id=product.id) }}" method="POST" class="add-to-cart-form">
-                            <button type="submit" class="btn-add-cart">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                        </form>
-                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn-view-detail">
-                            View Details
-                        </a>
+                <!-- Product Details -->
+                <div class="card-body text-center d-flex flex-column">
+                    <h6 class="card-title fw-bold">{{ product.product_name }}</h6>
+                    <p class="text-muted small flex-grow-1">{{ product.description[:50] }}...</p>
+                    <p class="text-danger fw-bold">
+                        <span class="text-muted small"><s>₹{{ product.previous_price }}</s></span> 
+                        ₹{{ product.current_price }}
+                    </p>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-center gap-2">
+                            <form action="{{ url_for('views.add_to_cart', product_id=product.id) }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-primary" style="margin-right: 10px;">Add to Cart</button>
+                            </form>
+                            <form action="{{ url_for('views.product_info', product_id=product.id) }}">
+                                <button type="submit" class="btn btn-sm btn-primary">View Details</button>
+                            </form>
+                            <!-- <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn btn-sm btn-outline-secondary">View Details</a> -->
+                        </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
-        
-        <!-- Pagination -->
-        {% if pagination.pages > 1 %}
-        <div class="pagination">
-            {% if pagination.has_prev %}
-                <a href="{{ url_for('views.products_by_category', category_name=category, page=pagination.prev_num, sort=sort_by) }}">&laquo;</a>
-            {% else %}
-                <span class="disabled">&laquo;</span>
-            {% endif %}
-            
-            {% for page_num in pagination.iter_pages() %}
-                {% if page_num %}
-                    {% if page_num != pagination.page %}
-                        <a href="{{ url_for('views.products_by_category', category_name=category, page=page_num, sort=sort_by) }}">{{ page_num }}</a>
-                    {% else %}
-                        <span class="current">{{ page_num }}</span>
-                    {% endif %}
-                {% else %}
-                    <span class="disabled">&hellip;</span>
-                {% endif %}
-            {% endfor %}
-            
-            {% if pagination.has_next %}
-                <a href="{{ url_for('views.products_by_category', category_name=category, page=pagination.next_num, sort=sort_by) }}">&raquo;</a>
-            {% else %}
-                <span class="disabled">&raquo;</span>
-            {% endif %}
-        </div>
-        {% endif %}
-        
-        {% else %}
-        <div class="no-products">
-            <h3>No products found in this category</h3>
-            <p>Check back later for new arrivals</p>
-            <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Browse All Products</a>
-        </div>
-        {% endif %}
+        {% endfor %}
     </div>
-</section>
 
-<!-- Back to Home Button -->
-<div class="back-to-home">
-    <div class="container">
-        <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Back to Home</a>
+    <!-- Back to Home Button -->
+    <div class="text-center mt-5">
+        <a href="{{ url_for('views.homepage') }}" class="btn btn-lg btn-primary">Back to Home</a>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    // Add to Cart Functionality
-    async function addToCart(productId) {
-        try {
-            const response = await fetch(`/add_to_cart/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok) {
-                showNotification('Product added to cart!', 'success');
-                await updateCartCount();
-            } else {
-                showNotification('Failed to add product to cart', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
+<!-- Fix CSS -->
+<style>
+    .product-card {
+        min-width: 280px;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
     }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .wishlist-btn {
+        position: absolute;
+        top: 0px;
+        right: 10px;
+        background: white;
+        border-radius: 50%;
+        padding: 5px 8px;
+    }
+    .product-img {
+        height: 200px;
+        width: 200px;
+        object-fit: contain;
+        padding: 10px;
+    }
+</style>
 
-    // Add to Wishlist Functionality
-    async function addToWishlist(productId) {
-        const btn = event.currentTarget;
-        
-        try {
-            const response = await fetch(`/add_to_wishlist/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok) {
-                btn.classList.add('active');
-                showNotification('Added to wishlist!', 'success');
-                await updateWishlistCount();
-            } else {
-                showNotification('Failed to add to wishlist', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    }
-
-    function showNotification(message, type) {
-        // Check if notification already exists to prevent duplicates
-        const existingNotifications = document.querySelectorAll(`.flash-message.flash-${type} span`);
-        for (let notification of existingNotifications) {
-            if (notification.textContent === message) {
-                return; // Don't show duplicate notifications
-            }
-        }
-        
-        // Use the existing flash container from base template instead of creating a new one
-        let container = document.querySelector('.flash-messages-container');
-        if (!container) {
-            // If no container exists, create one (fallback)
-            container = document.createElement('div');
-            container.className = 'flash-messages-container';
-            document.body.appendChild(container);
-        }
-        
-        const notification = document.createElement('div');
-        notification.className = `flash-message flash-${type}`;
-        notification.innerHTML = `
-            <div class="flash-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="flash-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Use global updateCartCount function
-    async function updateCartCount() {
-        await window.updateCartCount();
-    }
-        
-    // Use global updateWishlistCount function
-    async function updateWishlistCount() {
-        await window.updateWishlistCount();
-    }
-    
-    // Sort products function
-    function sortProducts() {
-        const sortValue = document.getElementById('sortSelect').value;
-        const category = "{{ category }}";
-        window.location.href = `/category/${category}?sort=${sortValue}`;
-    }
-</script>
 {% endblock %}

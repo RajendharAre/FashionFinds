@@ -1,284 +1,139 @@
 {% extends 'base.html' %}
 
-{% block title %}FashionFinds - Your Ultimate Fashion Destination{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-{% endblock %}
-
 {% block content %}
-<!-- Hero Slider -->
-<section class="hero-slider">
+
+<section class="responsive-slider">
     <div class="slider-container">
-        <div class="slider-track" id="heroSlider">
-            <div class="slide">
-                <img src="{{ url_for('static', filename='images/slaider img1.png') }}" alt="Fashion Collection 1">
-                <div class="slide-content">
-                    <h1 class="slide-title">Summer Collection 2024</h1>
-                    <p class="slide-subtitle">Discover the latest trends</p>
-                    <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="slide-btn">Shop Now</a>
-                </div>
+        <div class="slider-track">
+            <div class="slide">   
+                <img src="{{ url_for('static', filename='images/slaider img1.png') }}" alt="Slider Image">
             </div>
             <div class="slide">
-                <img src="{{ url_for('static', filename='images/slaider img2.png') }}" alt="Fashion Collection 2">
-                <div class="slide-content">
-                    <h1 class="slide-title">Exclusive Deals</h1>
-                    <p class="slide-subtitle">Up to 50% off on selected items</p>
-                    <a href="{{ url_for('views.search') }}" class="slide-btn">Explore Deals</a>
-                </div>
+                <img src="{{ url_for('static', filename='images/slaider img2.png') }}" alt="Slider Image">
             </div>
             <div class="slide">
-                <img src="{{ url_for('static', filename='images/slaider img4.png') }}" alt="Fashion Collection 3">
-                <div class="slide-content">
-                    <h1 class="slide-title">New Arrivals</h1>
-                    <p class="slide-subtitle">Fresh styles just for you</p>
-                    <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="slide-btn">Discover More</a>
-                </div>
+                <img src="{{ url_for('static', filename='images/slaider img4.png') }}" alt="Slider Image">
             </div>
         </div>
     </div>
-    <button class="arrow-btn prev-btn" aria-label="Previous slide">
-        <i class="fas fa-chevron-left"></i>
-    </button>
-    <button class="arrow-btn next-btn" aria-label="Next slide">
-        <i class="fas fa-chevron-right"></i>
-    </button>
-    <div class="slider-controls" id="sliderDots"></div>
-</section>
+    <button class="arrow-btn prev-btn" aria-label="Previous slide">◀</button>
+    <button class="arrow-btn next-btn" aria-label="Next slide">▶</button>
+    <div class="slider-controls"></div>
+</section>    
 
-<!-- Category Quick Access -->
-<section class="category-section fade-up">
-    <div class="container">
-        <div class="section-header">
-            <h2>Shop by Category</h2>
-            <p>Find exactly what you're looking for</p>
-        </div>
-        <div class="category-grid">
-            <a href="{{ url_for('views.products_by_category', category_name='Men') }}" class="category-card">
-                <div class="category-image">
-                    <i class="fas fa-male"></i>
-                </div>
-                <h3>Men's Fashion</h3>
-                <p>Explore Collection</p>
-            </a>
-            <a href="{{ url_for('views.products_by_category', category_name='Women') }}" class="category-card">
-                <div class="category-image">
-                    <i class="fas fa-female"></i>
-                </div>
-                <h3>Women's Fashion</h3>
-                <p>Explore Collection</p>
-            </a>
-            <a href="{{ url_for('views.products_by_category', category_name='Kids') }}" class="category-card">
-                <div class="category-image">
-                    <i class="fas fa-child"></i>
-                </div>
-                <h3>Kids Fashion</h3>
-                <p>Explore Collection</p>
-            </a>
-            <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}" class="category-card">
-                <div class="category-image">
-                    <i class="fas fa-gem"></i>
-                </div>
-                <h3>Accessories</h3>
-                <p>Explore Collection</p>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Featured Brands -->
-<!-- Featured Brands -->
-<section class="brands-section fade-up">
-  <div class="container">
-    <div class="section-header">
-      <h2>Featured Brands</h2>
-      <p>Shop from your favorite brands</p>
-    </div>
-
-    <!-- New Wrapper Added -->
-    <div class="brand-container-wrapper">
-      <div class="brand-container">
-        {% for brand in brands %}
-        <a href="{{ url_for('views.brand_info', brand_id=brand.id) }}" class="brand-card">
-          <div class="brand-image brand-avatar">
-            <span>{{ brand.name[0] | upper }}</span>
-          </div>
-          <div class="brand-overlay">
-            <h3>{{ brand.name }}</h3>
-            <span class="brand-badge">Explore</span>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Featured Products -->
-<section class="products-section fade-up">
-    <div class="container">
-        <div class="section-header">
-            <h2>Trending Now</h2>
-            <p>Most popular products this week</p>
-            <a href="{{ url_for('views.search') }}" class="view-all-btn">View All <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="product-container" id="productsGrid">
-            {% for product in products %}
-            <div class="product-card" data-product-id="{{ product.id }}">
-                {% if product.discount > 0 %}
-                <span class="discount-badge">-{{ product.discount }}%</span>
-                {% endif %}
-
-                <button class="wishlist-btn {% if wishlisted_ids is defined and product.id in wishlisted_ids %}active{% endif %}"
-                        data-product-id="{{ product.id }}"
-                        data-url="{{ url_for('views.toggle_wishlist', product_id=product.id) }}"
-                        aria-label="Toggle wishlist">
-                    <i class="{% if wishlisted_ids is defined and product.id in wishlisted_ids %}fas{% else %}far{% endif %} fa-heart"></i>
-                </button>
-
-                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
-                    <div class="product-image">
-                        <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" alt="{{ product.product_name }}" loading="lazy">
-                    </div>
-                </a>
-
-                <div class="product-info">
-                    {% if product.brand %}
-                    <p class="product-brand">{{ product.brand.name }}</p>
-                    {% endif %}
-                    <h3 class="product-title">{{ product.product_name }}</h3>
-
-                    <div class="product-rating">
-                        {% for i in range(5) %}
-                            <i class="fas fa-star {% if i >= product.rating %}star-empty{% endif %}"></i>
-                        {% endfor %}
-                        <span class="rating-count">({{ product.count }})</span>
-                    </div>
-
-                    <div class="price-container">
-                        <span class="discounted-price">&#8377;{{ product.current_price }}</span>
-                        {% if product.previous_price > product.current_price %}
-                        <span class="original-price">&#8377;{{ product.previous_price }}</span>
-                        {% if product.discount > 0 %}
-                        <span class="discount-percent">{{ product.discount }}% off</span>
-                        {% endif %}
-                        {% endif %}
-                    </div>
-
-                    <div class="product-actions">
-                        <form method="POST" action="{{ url_for('views.cart_add', product_id=product.id) }}" class="add-to-cart-form">
-                            <button type="submit" class="btn-add-cart">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                        </form>
-                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn-view-detail">
-                            View Details
-                        </a>
-                    </div>
-                </div>
+<h2 class="mb-2">Featured Products</h2>
+<div class="product-container">
+    {% for product in products %}
+    <div class="card">
+        <div class="product-card">
+            {% if product.product_picture %}
+            <div class="card-image">
+                <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" 
+                     alt="{{ product.product_name }}" 
+                     class="responsive-img">
             </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<!-- Special Offers Banner -->
-<section class="offers-banner fade-up">
-    <div class="container">
-        <div class="offers-grid">
-            <div class="offer-card">
-                <div class="offer-icon">
-                    <i class="fas fa-truck"></i>
-                </div>
-                <h3>Free Shipping</h3>
-                <p>On orders above ₹999</p>
-            </div>
-            <div class="offer-card">
-                <div class="offer-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h3>Secure Payment</h3>
-                <p>100% secure transactions</p>
-            </div>
-            <div class="offer-card">
-                <div class="offer-icon">
-                    <i class="fas fa-undo"></i>
-                </div>
-                <h3>Easy Returns</h3>
-                <p>30-day return policy</p>
-            </div>
-            <div class="offer-card">
-                <div class="offer-icon">
-                    <i class="fas fa-headset"></i>
-                </div>
-                <h3>24/7 Support</h3>
-                <p>Dedicated customer service</p>
+            {% else %}
+            <div class="card-image no-image">No Image</div>
+            {% endif %}
+            <div class="card-content">
+                <h5 class="card-title">{{ product.product_name }}</h5>
+                <p class="card-price">Rs. {{ product.current_price }}</p>
+                <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="view-btn">View Details</a>
             </div>
         </div>
     </div>
-</section>
+    {% endfor %}
+</div>
 
-<!-- JavaScript for Slider -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const slider = document.getElementById('heroSlider');
-    const slides = slider.querySelectorAll('.slide');
-    const dotsContainer = document.getElementById('sliderDots');
-    let currentIndex = 0;
-    
-    // Create dots
-    slides.forEach((_, i) => {
-        const dot = document.createElement('span');
-        dot.classList.add('slider-dot');
-        if (i === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => goToSlide(i));
-        dotsContainer.appendChild(dot);
-    });
-    
-    const dots = dotsContainer.querySelectorAll('.slider-dot');
-    
-    function goToSlide(index) {
-        currentIndex = index;
-        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
-        
-        // Update dots
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentIndex);
-        });
+<style>
+    /* Button styles */
+    .view-btn {
+        background-color: #C4877A;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        text-decoration: none;
+        text-align: center;
     }
     
-    function nextSlide() {
-        currentIndex = (currentIndex + 1) % slides.length;
-        goToSlide(currentIndex);
+    .view-btn:hover {
+        background-color: #B3796D;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
     
-    function prevSlide() {
-        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-        goToSlide(currentIndex);
+    .view-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
-    // Auto slide
-    let slideInterval = setInterval(nextSlide, 5000);
+    .view-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+    }
     
-    // Pause on hover
-    slider.addEventListener('mouseenter', () => clearInterval(slideInterval));
-    slider.addEventListener('mouseleave', () => {
-        slideInterval = setInterval(nextSlide, 5000);
-    });
+    .view-btn:focus:not(:active)::after {
+        animation: ripple 0.6s ease-out;
+    }
     
-    // Arrow buttons
-    document.querySelector('.prev-btn').addEventListener('click', () => {
-        prevSlide();
-        clearInterval(slideInterval);
-        slideInterval = setInterval(nextSlide, 5000);
-    });
+    @keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
+        }
+        100% {
+            transform: scale(20, 20);
+            opacity: 0;
+        }
+    }
     
-    document.querySelector('.next-btn').addEventListener('click', () => {
-        nextSlide();
-        clearInterval(slideInterval);
-        slideInterval = setInterval(nextSlide, 5000);
-    });
-});
-</script>
+    /* Pulse animation on hover */
+    .view-btn:hover::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(0.95);
+            opacity: 1;
+        }
+        70% {
+            transform: scale(1.05);
+            opacity: 0.7;
+        }
+        100% {
+            transform: scale(0.95);
+            opacity: 1;
+        }
+    }
+</style>
+
 {% endblock %}

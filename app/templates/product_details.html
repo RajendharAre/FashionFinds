@@ -3,181 +3,67 @@
 {% block title %}{{ product.product_name }} - Product Details{% endblock %}
 
 {% block content %}
-<!-- Product Details -->
-<section class="product-details">
-    <div class="container">
-        <div class="product-detail-container">
-            <div class="product-detail-image">
-                {% if product.product_picture %}
-                <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" alt="{{ product.product_name }}">
-                {% else %}
-                <div class="no-image">No Image Available</div>
-                {% endif %}
-            </div>
-            
-            <div class="product-detail-info">
-                <h1 class="product-title">{{ product.product_name }}</h1>
-                <p class="product-description">{{ product.description }}</p>
-                
-                <div class="product-rating">
-                    {% for i in range(5) %}
-                        <i class="fas fa-star {% if i >= product.rating %}star-empty{% endif %}"></i>
-                    {% endfor %}
-                    <span class="rating-count">({{ product.count }} reviews)</span>
-                </div>
-                
-                <div class="price-container">
-                    <span class="discounted-price">₹{{ product.current_price }}</span>
-                    {% if product.previous_price > product.current_price %}
-                    <span class="original-price">₹{{ product.previous_price }}</span>
-                    {% endif %}
-                </div>
-                
-                <div class="product-meta">
-                    <p><strong>Category:</strong> {{ product.category }}</p>
-                    <p><strong>Color:</strong> {{ product.color }}</p>
-                    
-                    <div class="stock-info">
-                        <strong>Stock:</strong>
-                        {% for size in product.quantity_size %}
-                        <span class="size-stock {% if size.quantity < 10 %}low-stock{% else %}in-stock{% endif %}">
-                            {{ size.size }}: {{ size.quantity }}
-                        </span>
-                        {% if not loop.last %} | {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-                
-                <div class="product-actions">
-                    <form action="{{ url_for('views.cart_add', product_id=product.id) }}" method="POST" class="add-to-cart-form">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                    </form>
-                    
-                    <form action="{{ url_for('views.wishlist_add', product_id=product.id) }}" method="POST" class="wishlist-form">
-                        <button type="submit" class="btn btn-secondary">
-                            <i class="far fa-heart"></i> Add to Wishlist
-                        </button>
-                    </form>
-                </div>
-                
-                <div class="back-to-shopping">
-                    <a href="{{ url_for('views.homepage') }}" class="btn btn-outline">
-                        <i class="fas fa-arrow-left"></i> Continue Shopping
-                    </a>
-                </div>
-            </div>
+<style>
+    .size-value {
+        width: 40px;
+        font-weight: 500;
+    }
+
+    .quantity-value {
+        width: 40px;
+    }
+
+    .low-stock {
+        color: #e53935;
+    }
+
+    .in-stock {
+        color: #43a047;
+    }
+</style>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6 text-center">
+        </div>
+        {% if product.product_picture %}
+        <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" 
+             alt="{{ product.product_name }}" 
+             width="250" 
+             height="250">
+         {% else %}
+        No Image
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>{{ product.product_name }}</h2>
+            <p>{{ product.description }}</p>
+            <p class="text-danger fw-bold">
+                <span class="text-muted small"><s>₹{{ product.previous_price }}</s></span> ₹{{ product.current_price }}
+            </p>
+            <p><strong>Category:</strong> {{ product.category }}</p>
+            <p><strong>Color:</strong> {{ product.color }}</p>
+            <!-- <p><strong>Stock:</strong> {{ product.stock }}</p> -->
+            <p><strong>Stock:</strong> 
+                {% for sizes in product.quantity_size %}
+                    <tr>
+                        <td class="size-value">{{ sizes.size }}</td> -
+                        <td class="quantity-value {% if sizes.quantity < 10 %}low-stock{% else %}in-stock{% endif %}">
+                            {{ sizes.quantity }}
+                        </td> {% if product.quantity_size | length > 1 %} | {% endif %}
+                    </tr>
+                {% endfor %}
+            </p>
+
+
+          
+
+            <!-- ❤️ Add to Wishlist Form -->
+            <form action="{{ url_for('views.wishlist_add', product_id=product.id) }}" method="POST">
+                <button type="submit" class="btn btn-outline-danger mt-2">❤️ Add to Wishlist</button>
+            </form>
+
         </div>
     </div>
-</section>
-
-<!-- Related Products -->
-<section class="related-products">
-    <div class="container">
-        <div class="section-header">
-            <h2>Related Products</h2>
-            <p>You might also like these products</p>
-        </div>
-        <!-- Related products would be populated here if implemented -->
-        <div class="text-center py-5">
-            <p class="text-muted">Related products feature coming soon</p>
-        </div>
     </div>
-</section>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Add to Cart Functionality
-    async function addToCart(productId) {
-        try {
-            const response = await fetch(`/add_to_cart/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok) {
-                showNotification('Product added to cart!', 'success');
-                await updateCartCount();
-            } else {
-                showNotification('Failed to add product to cart', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    }
-
-    // Add to Wishlist Functionality
-    async function addToWishlist(productId) {
-        const btn = event.currentTarget;
-        
-        try {
-            const response = await fetch(`/add_to_wishlist/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok) {
-                btn.classList.add('active');
-                showNotification('Added to wishlist!', 'success');
-                await updateWishlistCount();
-            } else {
-                showNotification('Failed to add to wishlist', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    }
-
-    function showNotification(message, type) {
-        // Check if notification already exists to prevent duplicates
-        const existingNotifications = document.querySelectorAll(`.flash-message.flash-${type} span`);
-        for (let notification of existingNotifications) {
-            if (notification.textContent === message) {
-                return; // Don't show duplicate notifications
-            }
-        }
-        
-        // Use the existing flash container from base template instead of creating a new one
-        let container = document.querySelector('.flash-messages-container');
-        if (!container) {
-            // If no container exists, create one (fallback)
-            container = document.createElement('div');
-            container.className = 'flash-messages-container';
-            document.body.appendChild(container);
-        }
-        
-        const notification = document.createElement('div');
-        notification.className = `flash-message flash-${type}`;
-        notification.innerHTML = `
-            <div class="flash-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="flash-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Use global updateCartCount function
-    async function updateCartCount() {
-        await window.updateCartCount();
-    }
-        
-    // Use global updateWishlistCount function
-    async function updateWishlistCount() {
-        await window.updateWishlistCount();
-    }
-</script>
+</div>
 {% endblock %}

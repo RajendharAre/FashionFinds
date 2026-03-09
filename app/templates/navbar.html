@@ -8,7 +8,7 @@
 
         <!-- Main Navigation -->
         <div class="main-nav">
-            <a href="{{ url_for('views.homepage') }}" class="nav-item" data-page="home" title="Home">
+            <a href="{{ url_for('views.homepage') }}" class="nav-item" title="Home">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
@@ -32,10 +32,9 @@
         <!-- Search -->
         <form action="{{ url_for('views.search') }}" method="GET" class="search-container">
             <div class="search-bar">
-                <input type="text" name="query" id="searchInput" class="search-input" placeholder="Search..." autocomplete="off">
+                <input type="text" name="query" id="searchInput" class="search-input" placeholder="Search fashion..." autocomplete="off">
                 <button type="submit" class="search-button" aria-label="Search"><i class="fas fa-search"></i></button>
             </div>
-            <div id="searchSuggestions" class="search-suggestions" style="display:none;"></div>
         </form>
 
         <!-- Actions -->
@@ -61,26 +60,103 @@
                         {% if current_user.role == 'admin' %}
                             <a href="{{ url_for('admin.admin_dashboard') }}" class="dropdown-item"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a>
                         {% endif %}
-                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        {% if current_user.role == 'delivery_agent' %}
+                            <a href="{{ url_for('delivery.dashboard') }}" class="dropdown-item"><i class="fas fa-truck"></i> Delivery Dashboard</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item logout-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     {% else %}
                         <a href="{{ url_for('auth.login') }}" class="dropdown-item"><i class="fas fa-sign-in-alt"></i> Login</a>
                         <a href="{{ url_for('auth.register') }}" class="dropdown-item"><i class="fas fa-user-plus"></i> Register</a>
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Hamburger (mobile) -->
+            <div class="hamburger" id="hamburger" aria-label="Toggle menu" role="button" tabindex="0">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ url_for('views.homepage') }}"><i class="fas fa-home"></i> Home</a>
+        <a href="{{ url_for('views.products_by_category', category_name='Men') }}"><i class="fas fa-male"></i> Men</a>
+        <a href="{{ url_for('views.products_by_category', category_name='Women') }}"><i class="fas fa-female"></i> Women</a>
+        <a href="{{ url_for('views.products_by_category', category_name='Kids') }}"><i class="fas fa-child"></i> Kids</a>
+        <a href="{{ url_for('views.products_by_category', category_name='Accessories') }}"><i class="fas fa-gem"></i> Accessories</a>
+        <a href="{{ url_for('views.products_by_category', category_name='Shoes') }}"><i class="fas fa-shoe-prints"></i> Shoes</a>
+        <div class="mobile-menu-divider"></div>
+        <a href="{{ url_for('views.show_cart') }}"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="{{ url_for('views.show_wishlist') }}"><i class="fas fa-heart"></i> Wishlist</a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('views.my_orders') }}"><i class="fas fa-box"></i> My Orders</a>
+            <a href="{{ url_for('auth.account') }}"><i class="fas fa-user"></i> My Profile</a>
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a>
+            {% endif %}
+            {% if current_user.role == 'delivery_agent' %}
+                <a href="{{ url_for('delivery.dashboard') }}"><i class="fas fa-truck"></i> Delivery Dashboard</a>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Register</a>
+        {% endif %}
+        <!-- Mobile Search -->
+        <form action="{{ url_for('views.search') }}" method="GET" class="mobile-search-form">
+            <input type="text" name="query" placeholder="Search fashion..." class="mobile-search-input">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    // Active nav link
     const currentPath = window.location.pathname;
     document.querySelectorAll('.nav-item').forEach(item => {
         if (item.getAttribute('href') === currentPath) item.classList.add('active');
     });
 
-    // Hide scrollbar fix
-    document.documentElement.style.overflowX = 'hidden';
-    document.body.style.overflowX = 'hidden';
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (hamburger && mobileMenu) {
+        const toggle = () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('open');
+        };
+        hamburger.addEventListener('click', toggle);
+        hamburger.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') toggle(); });
+        // Close on outside click
+        document.addEventListener('click', e => {
+            if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('open');
+            }
+        });
+    }
+
+    // Cart & wishlist badge counts
+    async function updateBadges() {
+        try {
+            const [cartRes, wishRes] = await Promise.all([
+                fetch('/api/cart/count'),
+                fetch('/api/wishlist/count')
+            ]);
+            if (cartRes.ok) {
+                const c = await cartRes.json();
+                document.querySelectorAll('#cartCount').forEach(el => el.textContent = c.count || 0);
+            }
+            if (wishRes.ok) {
+                const w = await wishRes.json();
+                document.querySelectorAll('#wishlistCount').forEach(el => el.textContent = w.count || 0);
+            }
+        } catch (_) {}
+    }
+    updateBadges();
 });
 </script>

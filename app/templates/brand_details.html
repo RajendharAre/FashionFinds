@@ -24,11 +24,12 @@
                 <span class="discount-badge">-{{ product.discount }}%</span>
                 {% endif %}
                 
-                <form action="{{ url_for('views.wishlist_add', product_id=product.id) }}" method="POST" class="wishlist-form">
-                    <button type="submit" class="wishlist-btn" aria-label="Add to wishlist">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </form>
+                <button class="wishlist-btn {% if wishlisted_ids is defined and product.id in wishlisted_ids %}active{% endif %}"
+                        data-product-id="{{ product.id }}"
+                        data-url="{{ url_for('views.toggle_wishlist', product_id=product.id) }}"
+                        aria-label="Toggle wishlist">
+                    <i class="{% if wishlisted_ids is defined and product.id in wishlisted_ids %}fas{% else %}far{% endif %} fa-heart"></i>
+                </button>
                 
                 <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
                     <div class="product-image">

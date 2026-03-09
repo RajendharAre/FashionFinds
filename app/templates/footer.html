@@ -96,7 +96,8 @@
     <div class="footer-bottom">
         <div class="footer-bottom-container">
             <div class="copyright">
-                <p>&copy; <span id="currentYear">2024</span> FashionFinds. All rights reserved. | Made with <i class="fas fa-heart"></i> by <a href="#">Team FashionFinds</a></p>
+                <p>&copy; <span id="currentYear"></span> FashionFinds. All rights reserved. | Made with <i class="fas fa-heart"></i> by <a href="#">Team FashionFinds</a></p>
+                <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
             </div>
             
             <!-- Payment Methods -->

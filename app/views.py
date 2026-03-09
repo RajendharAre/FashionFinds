@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, session
 from flask_login import login_required, current_user
 from flask_mail import Message, Mail
 from app.models import Product, Brand, Cart, Wishlist, User, Order, OrderItem, ProductSize, db
@@ -28,10 +28,16 @@ def homepage():
     # Fallback to all products if no orders yet
     if not trending_products:
         trending_products = Product.query.order_by(func.random()).limit(20).all()
-    
-    return render_template('home.html', 
-                         brands=brands_list, 
-                         products=trending_products)
+
+    # Collect wishlisted product IDs for the current user so the heart renders filled
+    wishlisted_ids = set()
+    if current_user.is_authenticated:
+        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
+
+    return render_template('home.html',
+                         brands=brands_list,
+                         products=trending_products,
+                         wishlisted_ids=wishlisted_ids)
 
 
 # ============= BRAND PAGES =============
@@ -41,10 +47,15 @@ def brand_info(brand_id):
     brand_data = Brand.query.get_or_404(brand_id)
     brand_items = Product.query.filter_by(brand_id=brand_id)\
         .order_by(Product.rating.desc()).all()
+
+    wishlisted_ids = set()
+    if current_user.is_authenticated:
+        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
     
     return render_template('brand_details.html', 
                          brand=brand_data, 
-                         products=brand_items)
+                         products=brand_items,
+                         wishlisted_ids=wishlisted_ids)
 
 
 # ============= CATEGORY PAGES =============
@@ -72,12 +83,17 @@ def products_by_category(category_name):
     
     # Paginate
     paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-    
-    return render_template('category.html', 
+
+    wishlisted_ids = set()
+    if current_user.is_authenticated:
+        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
+
+    return render_template('category.html',
                          products=paginated.items,
                          pagination=paginated,
                          category=category_name,
-                         sort_by=sort_by)
+                         sort_by=sort_by,
+                         wishlisted_ids=wishlisted_ids)
 
 
 # ============= PRODUCT DETAIL =============
@@ -194,6 +210,10 @@ def search():
         func.min(Product.current_price),
         func.max(Product.current_price)
     ).first()
+
+    wishlisted_ids = set()
+    if current_user.is_authenticated:
+        wishlisted_ids = {w.product_id for w in Wishlist.query.filter_by(user_id=current_user.id).all()}
     
     return render_template(
         'search_results.html',
@@ -214,7 +234,8 @@ def search():
             'colors': [c[0] for c in colors if c[0]],
             'price_range': price_range
         },
-        total_results=paginated.total
+        total_results=paginated.total,
+        wishlisted_ids=wishlisted_ids
     )
 
 
@@ -297,7 +318,7 @@ def cart_add(product_id):
         new_cart_item = Cart()
         new_cart_item.user_id = user_id
         new_cart_item.product_id = product_id
-        new_cart_item.quantity = 1
+        new_cart_item.quantity = quantity
         db.session.add(new_cart_item)
     
     db.session.commit()
@@ -409,12 +430,32 @@ def wishlist_add(product_id):
     return redirect(request.referrer or url_for('views.show_wishlist'))
 
 
+@views.route('/toggle_wishlist/<int:product_id>', methods=['POST'])
+@login_required
+def toggle_wishlist(product_id):
+    """Toggle product in/out of wishlist – always returns JSON."""
+    product = Product.query.get_or_404(product_id)
+    existing = Wishlist.query.filter_by(
+        user_id=current_user.id,
+        product_id=product_id
+    ).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({'wishlisted': False, 'message': 'Removed from wishlist'})
+    else:
+        item = Wishlist(user_id=current_user.id, product_id=product_id)
+        db.session.add(item)
+        db.session.commit()
+        return jsonify({'wishlisted': True, 'message': 'Added to wishlist'})
+
+
 @views.route('/remove_from_wishlist/<int:product_id>', methods=['POST'])
 @login_required
 def remove_from_wishlist(product_id):
     """Remove product from wishlist"""
     wishlist_item = Wishlist.query.filter_by(
-        user_id=current_user.id, 
+        user_id=current_user.id,
         product_id=product_id
     ).first()
     
@@ -502,26 +543,30 @@ def checkout():
 def place_order():
     """Place an order"""
     user_id = current_user.id
-    
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+
     # Get form data
     data = request.form
-    customer_name = f"{data.get('firstname')} {data.get('lastname')}"
-    address_line_1 = data.get('address_line_1')
+    customer_name = data.get('name', '').strip()
+    address_line_1 = data.get('address', '').strip()
     city = data.get('city')
     state = data.get('state')
     pincode = data.get('pincode')
     email = data.get('email')
-    
+
     # Get cart items
     cart_data = db.session.query(Cart, Product)\
         .join(Product).filter(Cart.user_id == user_id).all()
-    
+
     if not cart_data:
-        return jsonify({'error': 'Cart is empty'}), 400
-    
+        if is_ajax:
+            return jsonify({'error': 'Cart is empty'}), 400
+        flash('Your cart is empty', 'warning')
+        return redirect(url_for('views.show_cart'))
+
     # Calculate total
     total = sum(c.quantity * p.current_price for c, p in cart_data)
-    
+
     # Create order
     new_order = Order()
     new_order.user_id = user_id
@@ -533,12 +578,21 @@ def place_order():
     new_order.mail = email
     new_order.total_price = total
     new_order.status = 'Pending'
-    
+
     db.session.add(new_order)
     db.session.flush()  # Get order ID
-    
+
     # Add order items
     for cart, product in cart_data:
+        # Validate stock only when inventory has been explicitly set (count > 0)
+        if product.count > 0 and product.count < cart.quantity:
+            db.session.rollback()
+            msg = f"Insufficient stock for '{product.product_name}'. Only {product.count} left."
+            if is_ajax:
+                return jsonify({'error': msg}), 400
+            flash(msg, 'danger')
+            return redirect(url_for('views.show_cart'))
+
         order_item = OrderItem()
         order_item.order_id = new_order.id
         order_item.product_id = product.id
@@ -546,22 +600,20 @@ def place_order():
         order_item.unit_price = product.current_price
         order_item.subtotal = cart.quantity * product.current_price
         db.session.add(order_item)
-        
+
         # Update product stock
         product.count -= cart.quantity
-    
+
     # Clear cart
     Cart.query.filter_by(user_id=user_id).delete()
-    
+
     db.session.commit()
-    
-    # Check if the request is an AJAX/fetch request
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+
+    if is_ajax:
         return jsonify({'success': True, 'order_id': new_order.id})
-    
+
     flash('Order placed successfully!', 'success')
     return render_template('payment_success.html', order=new_order)
-    # return redirect(url_for('views.my_orders'))
 
 
 @views.route('/my_orders')
@@ -719,34 +771,35 @@ def send_contact_email():
     """Send contact email"""
     try:
         from app import mail  # Import mail from app context
-        
+        from flask import current_app
+
         data = request.get_json()
-        
+
         name = data.get('name')
         email = data.get('email')
         subject = data.get('subject')
         message = data.get('message')
-        
+
+        admin_email = current_app.config.get('MAIL_USERNAME', '')
+
         # Create email message
         msg = Message(
             subject=f"Contact Form: {subject}",
-            sender='help@fashionfinds.com',  # This will be the visible sender
-            recipients=['arerajendhar33@gmail.com'],  # Your actual email
-            body=f"""
-            New contact form submission:
-            
-            Name: {name}
-            Email: {email}
-            Subject: {subject}
-            
-            Message:
-            {message}
-            """
+            recipients=[admin_email],
+            body=f"""New contact form submission:
+
+Name: {name}
+Email: {email}
+Subject: {subject}
+
+Message:
+{message}
+"""
         )
-        
+
         # Send email
         mail.send(msg)
-        
+
         return jsonify({'success': True, 'message': 'Email sent successfully'})
         
     except Exception as e:

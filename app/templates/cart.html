@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}?v={{ range(1, 1000) | random }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}?v=2.0">
 {% endblock %}
 
 {% block content %}
@@ -81,7 +81,7 @@
     </div>
     {% else %}
     <div class="empty-state">
-        <h3>Your cart is empty 🛒</h3>
+        <h3>Your cart is empty</h3>
         <p>Add some products to your cart to continue shopping</p>
         <a href="{{ url_for('views.homepage') }}" class="btn btn-primary">Continue Shopping</a>
     </div>

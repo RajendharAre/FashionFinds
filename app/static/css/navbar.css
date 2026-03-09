@@ -373,6 +373,62 @@ html, body {
     color: var(--primary);
 }
 
+.mobile-menu.open {
+    display: flex;
+}
+
+.mobile-menu-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 4px 0;
+}
+
+.mobile-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-search-input {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-full);
+    padding: 8px 14px;
+    color: var(--white);
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.mobile-search-input::placeholder {
+    color: var(--gray-400);
+}
+
+.mobile-search-form button {
+    background: var(--primary);
+    border: none;
+    color: var(--white);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.logout-item {
+    color: #e53935 !important;
+}
+
+.logout-item:hover {
+    background: #fff5f5 !important;
+    color: #c62828 !important;
+}
+
 /* =========================
    RESPONSIVE DESIGN
    ========================= */

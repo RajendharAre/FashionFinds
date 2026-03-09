@@ -1,66 +1,43 @@
-from flask import Blueprint,render_template,flash,url_for,redirect,current_app,request,session
-from .models import Order,User,Product,OrderItem
-from . import db
-from flask_login import current_user,login_required
+from flask import Blueprint, render_template, flash, url_for, redirect, current_app, request, session
+from .models import Order, User, Product, OrderItem
+from . import db, mail
+from flask_login import current_user, login_required
 from flask_mail import Message
-
-delivery_bp = Blueprint('delivery',__name__)
-
 from datetime import datetime
-from flask_mail import Message # type: ignore
-from . import mail
+
+delivery_bp = Blueprint('delivery', __name__)
 
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-
-
-
-
-def send_email(user, order, token):
-    print("send_email function called")
-    print(user, order, token)
-    # rating_url = url_for(
-    #     "delivery.customer_review",
-    #     user_id=user.id,
-    #     order_id=order.id,
-    #     token=token,
-    #     _external=True,
-    # )
+def send_email(user, order_item, token):
     rating_url = url_for(
-    "delivery.customer_review",
-    user_id=user.id,
-    order_id=order.order_id,
-    token=token,
-    _external=True,
-)
+        "delivery.customer_review",
+        user_id=user.id,
+        order_id=order_item.order_id,
+        token=token,
+        _external=True,
+    )
 
-    product = Product.query.get_or_404(order.product_id)
-    orders = Order.query.get_or_404(order.order_id)
-    # Email configuration
-    smtp_server = "smtp.gmail.com"
-    port = 587
-    sender_email = "arerajendhar33@gmail.com"
-    password = "aiun nsnp auvd nrbt"
-    receiver_email = orders.mail
-    subject = 'Rate the Product'
-    body = f"Hello {orders.customer_name}, \n\nYour order : {product.product_name} with ID {orders.id} has been successfully delivered. Thank you for choosing us!\n\nTo rate the delivered products click : {rating_url}\n\nBest regards,\nYour Delivery Team\n\n"
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["To"] = receiver_email
-    message["Subject"] = subject
-    message.attach(MIMEText(body, "plain"))
+    product = Product.query.get_or_404(order_item.product_id)
+    order = Order.query.get_or_404(order_item.order_id)
+
+    body = (
+        f"Hello {order.customer_name},\n\n"
+        f"Your order: {product.product_name} (Order ID: {order.id}) has been successfully delivered. "
+        f"Thank you for choosing us!\n\n"
+        f"To rate the delivered product, click: {rating_url}\n\n"
+        f"Best regards,\nYour Delivery Team\n"
+    )
+
+    msg = Message(
+        subject='Rate the Product',
+        recipients=[order.mail],
+        body=body,
+    )
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, sender_password)
-            server.send_message(message)
+        mail.send(msg)
         print("Email sent successfully!")
-    except smtplib.SMTPAuthenticationError:
-        print("Authentication error. Please check your email and password.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred sending email: {e}")
 
 
 @delivery_bp.route('/customer_review/<int:user_id>/<int:order_id>/<token>', methods=['GET', 'POST'])

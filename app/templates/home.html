@@ -8,7 +8,7 @@
 
 {% block content %}
 <!-- Hero Slider -->
-<section class="hero-slider fade-up">
+<section class="hero-slider">
     <div class="slider-container">
         <div class="slider-track" id="heroSlider">
             <div class="slide">
@@ -100,12 +100,12 @@
       <div class="brand-container">
         {% for brand in brands %}
         <a href="{{ url_for('views.brand_info', brand_id=brand.id) }}" class="brand-card">
-          <div class="brand-image">
-            <img src="{{ url_for('static', filename=brand.logo) }}" alt="{{ brand.name }}" loading="lazy">
+          <div class="brand-image brand-avatar">
+            <span>{{ brand.name[0] | upper }}</span>
           </div>
           <div class="brand-overlay">
             <h3>{{ brand.name }}</h3>
-            <span class="brand-badge">Up to 60% OFF</span>
+            <span class="brand-badge">Explore</span>
           </div>
         </a>
         {% endfor %}
@@ -129,43 +129,50 @@
                 {% if product.discount > 0 %}
                 <span class="discount-badge">-{{ product.discount }}%</span>
                 {% endif %}
-                
-                <form method="POST" action="{{ url_for('views.wishlist_add', product_id=product.id) }}" class="wishlist-form">
-                    <button type="submit" class="wishlist-btn" aria-label="Add to wishlist">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </form>
-                
+
+                <button class="wishlist-btn {% if wishlisted_ids is defined and product.id in wishlisted_ids %}active{% endif %}"
+                        data-product-id="{{ product.id }}"
+                        data-url="{{ url_for('views.toggle_wishlist', product_id=product.id) }}"
+                        aria-label="Toggle wishlist">
+                    <i class="{% if wishlisted_ids is defined and product.id in wishlisted_ids %}fas{% else %}far{% endif %} fa-heart"></i>
+                </button>
+
                 <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
                     <div class="product-image">
                         <img src="{{ url_for('views.get_image', filename=product.product_picture) }}" alt="{{ product.product_name }}" loading="lazy">
                     </div>
                 </a>
-                
+
                 <div class="product-info">
+                    {% if product.brand %}
+                    <p class="product-brand">{{ product.brand.name }}</p>
+                    {% endif %}
                     <h3 class="product-title">{{ product.product_name }}</h3>
-                    
+
                     <div class="product-rating">
                         {% for i in range(5) %}
                             <i class="fas fa-star {% if i >= product.rating %}star-empty{% endif %}"></i>
                         {% endfor %}
                         <span class="rating-count">({{ product.count }})</span>
                     </div>
-                    
+
                     <div class="price-container">
-                        <span class="discounted-price">₹{{ product.current_price }}</span>
+                        <span class="discounted-price">&#8377;{{ product.current_price }}</span>
                         {% if product.previous_price > product.current_price %}
-                        <span class="original-price">₹{{ product.previous_price }}</span>
+                        <span class="original-price">&#8377;{{ product.previous_price }}</span>
+                        {% if product.discount > 0 %}
+                        <span class="discount-percent">{{ product.discount }}% off</span>
+                        {% endif %}
                         {% endif %}
                     </div>
-                    
+
                     <div class="product-actions">
                         <form method="POST" action="{{ url_for('views.cart_add', product_id=product.id) }}" class="add-to-cart-form">
-                            <button type="submit" class="btn btn-primary btn-sm">
+                            <button type="submit" class="btn-add-cart">
                                 <i class="fas fa-shopping-cart"></i> Add to Cart
                             </button>
                         </form>
-                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn btn-secondary btn-sm">
+                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn-view-detail">
                             View Details
                         </a>
                     </div>

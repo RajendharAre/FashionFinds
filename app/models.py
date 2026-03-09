@@ -127,6 +127,7 @@ class Order(db.Model):
     status = db.Column(db.String(50), nullable=False, default="Pending")  # ('Pending', 'Shipped', 'Delivered', 'Cancelled')
     order_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     delivery_date = db.Column(db.DateTime, nullable=True)
+    has_rated = db.Column(db.Boolean, default=False)
 
     order_items = db.relationship('OrderItem', backref='order', lazy=True, cascade="all, delete-orphan")
     delivery_person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)

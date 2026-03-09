@@ -135,8 +135,43 @@ document.addEventListener("DOMContentLoaded", function () {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             // Add your social media tracking/redirect logic here
-            console.log(`Redirecting to: ${this.href}`);
         });
     });
 
-    
+// ========================================
+// Scroll Reveal via Intersection Observer
+// ========================================
+(function () {
+    if (!('IntersectionObserver' in window)) {
+        // Fallback: show all hidden elements immediately
+        document.querySelectorAll('.reveal, .fade-up').forEach(function (el) {
+            el.classList.add('is-visible', 'visible');
+        });
+        return;
+    }
+
+    const observer = new IntersectionObserver(
+        function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    // Support both naming conventions used in the project
+                    entry.target.classList.add('is-visible', 'visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
+
+    function attachObserver() {
+        document.querySelectorAll('.reveal, .fade-up').forEach(function (el) {
+            observer.observe(el);
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachObserver);
+    } else {
+        attachObserver();
+    }
+})();

@@ -59,11 +59,12 @@
                 <span class="discount-badge">-{{ product.discount }}%</span>
                 {% endif %}
                 
-                <form action="{{ url_for('views.wishlist_add', product_id=product.id) }}" method="POST" class="wishlist-form">
-                    <button type="submit" class="wishlist-btn" aria-label="Add to wishlist">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </form>
+                <button class="wishlist-btn {% if wishlisted_ids is defined and product.id in wishlisted_ids %}active{% endif %}"
+                        data-product-id="{{ product.id }}"
+                        data-url="{{ url_for('views.toggle_wishlist', product_id=product.id) }}"
+                        aria-label="Toggle wishlist">
+                    <i class="{% if wishlisted_ids is defined and product.id in wishlisted_ids %}fas{% else %}far{% endif %} fa-heart"></i>
+                </button>
                 
                 <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="product-image-link">
                     <div class="product-image">
@@ -72,6 +73,9 @@
                 </a>
                 
                 <div class="product-info">
+                    {% if product.brand %}
+                    <p class="product-brand">{{ product.brand.name }}</p>
+                    {% endif %}
                     <h3 class="product-title">{{ product.product_name }}</h3>
                     
                     <div class="product-rating">
@@ -82,19 +86,22 @@
                     </div>
                     
                     <div class="price-container">
-                        <span class="discounted-price">₹{{ product.current_price }}</span>
+                        <span class="discounted-price">&#8377;{{ product.current_price }}</span>
                         {% if product.previous_price > product.current_price %}
-                        <span class="original-price">₹{{ product.previous_price }}</span>
+                        <span class="original-price">&#8377;{{ product.previous_price }}</span>
+                        {% if product.discount > 0 %}
+                        <span class="discount-percent">{{ product.discount }}% off</span>
+                        {% endif %}
                         {% endif %}
                     </div>
                     
                     <div class="product-actions">
                         <form action="{{ url_for('views.cart_add', product_id=product.id) }}" method="POST" class="add-to-cart-form">
-                            <button type="submit" class="btn btn-primary btn-sm">
+                            <button type="submit" class="btn-add-cart">
                                 <i class="fas fa-shopping-cart"></i> Add to Cart
                             </button>
                         </form>
-                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn btn-secondary btn-sm">
+                        <a href="{{ url_for('views.product_info', product_id=product.id) }}" class="btn-view-detail">
                             View Details
                         </a>
                     </div>

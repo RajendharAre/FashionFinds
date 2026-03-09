@@ -1,10 +1,15 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory
-from .models import User, Product, ProductSize,  db, Order
+from .models import User, Product, ProductSize, Brand, db, Order
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
 import os
+import json
 from .forms import ProductForm
+from plotly import graph_objects as go
+from plotly.utils import PlotlyJSONEncoder
+import plotly.express as px
+import pandas as pd
 
 # Define the Blueprint
 admin = Blueprint('admin', __name__)
@@ -21,12 +26,8 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 ### ✅ Admin Dashboard Route
 @admin.route('/admin_dashboard')
-# @login_required
+@login_required
 def admin_dashboard():
-    if not current_user.is_authenticated:
-        flash('Unauthorized access', 'danger')
-        return redirect(url_for('auth.login'))
-    
     if current_user.role != 'admin':
         return redirect(url_for('views.homepage'))
     
@@ -46,10 +47,6 @@ def admin_dashboard():
 @admin.route('/add_products', methods=['GET', 'POST'])
 @login_required
 def add_products():
-    if not current_user.is_authenticated:
-        flash('Unauthorized access', 'danger')
-        return redirect(url_for('auth.login'))
-    
     if current_user.role != 'admin':
         flash('Unauthorized access', 'danger')
         return redirect(url_for('views.homepage'))
@@ -71,6 +68,13 @@ def add_products():
                 file_path = None
 
             # Create product
+            brand_name = form.brand.data
+            brand_obj = Brand.query.filter_by(name=brand_name).first()
+            if not brand_obj:
+                brand_obj = Brand(name=brand_name)
+                db.session.add(brand_obj)
+                db.session.flush()
+
             new_product = Product(
                 product_name=form.product_name.data,
                 product_picture=file_path,
@@ -81,7 +85,7 @@ def add_products():
                 category=form.category.data,
                 color=form.color.data,
                 discount=form.discount.data,
-                brand=form.brand.data
+                brand_id=brand_obj.id
             )
 
             db.session.add(new_product)
@@ -129,12 +133,8 @@ def add_products():
 
 ### ✅ View Products Route
 @admin.route('/view_products')
-# @login_required
+@login_required
 def view_products():
-    if not current_user.is_authenticated:
-        flash('Unauthorized access', 'danger')
-        return redirect(url_for('auth.login'))
-    
     if current_user.role != 'admin':
         flash('Unauthorized access', 'danger')
         return redirect(url_for('views.homepage'))
@@ -144,7 +144,11 @@ def view_products():
 
 
 @admin.route("/delete-item/<id>", methods=['GET','POST'])
+@login_required
 def delete_item(id):
+    if current_user.role != 'admin':
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('views.homepage'))
     try:
         item_to_delete = Product.query.get(id)
         # Delete associated sizes
@@ -166,7 +170,11 @@ def delete_item(id):
     return redirect('/admin/view_products')
 
 @admin.route('/update-item/<int:product_id>', methods=['GET', 'POST'])
+@login_required
 def update_item(product_id):
+    if current_user.role != 'admin':
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('views.homepage'))
     product = Product.query.get_or_404(product_id)
     form = ProductForm(obj=product)
 
@@ -181,7 +189,14 @@ def update_item(product_id):
         product.category = request.form.get("category")
         product.sale = request.form.get("sale") == "true"
         product.discount = int(request.form.get("discount", product.discount))
-        product.brand = request.form.get("brand")
+        brand_name = request.form.get("brand")
+        if brand_name:
+            brand_obj = Brand.query.filter_by(name=brand_name).first()
+            if not brand_obj:
+                brand_obj = Brand(name=brand_name)
+                db.session.add(brand_obj)
+                db.session.flush()
+            product.brand_id = brand_obj.id
         product.color = request.form.get("color")
 
         # Handling image upload
@@ -312,7 +327,7 @@ def approve_user(id):
 def reject_user(id):
     try:
         user = User.query.get_or_404(id)
-        user.is_approved = False  # Make sure this field exists in your User model
+        user.approved = False
         db.session.commit()
         return {"message": "User rejected successfully"}, 200
     except Exception as e:
@@ -325,13 +340,7 @@ def reject_user(id):
 @admin.route("/visualisation")
 def visualisation():
     return redirect(url_for("admin.inventory"))
-    return render_template("Visualisation.html")
 
-from plotly import graph_objects as go
-import json
-from plotly.utils import PlotlyJSONEncoder
-import plotly.express as px
-import pandas as pd
 
 @admin.route('/order_status')
 def order_status():

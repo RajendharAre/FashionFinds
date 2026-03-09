@@ -19,17 +19,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ range(1, 1000) | random }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.2">
     
     <!-- Navbar Stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}?v={{ range(1, 1000) | random }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}?v=2.2">
 
     <!-- Home Page Stylesheet  -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v={{ range(1, 1000) | random }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=2.2">
     <style>
     html, body {
         overflow-x: hidden !important;
-        overflow-y: auto !important;
     }
     .nav-container, .navbar {
         overflow: visible !important;
@@ -67,7 +66,7 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="main-content" style="margin-top: 80px; padding-top: 20px;">
+    <main class="main-content" style="margin-top: 72px; padding-top: 0;">
         {% block content %}
         <!-- Page content goes here -->
         {% endblock %}
@@ -77,14 +76,12 @@
         .main-content {
             width: 100%;
             max-width: 100vw;
-            overflow-x: hidden;
-            overflow-y: auto;
             box-sizing: border-box;
             padding-right: 0;
             padding-left: 0;
             margin-right: 0;
             margin-left: 0;
-            padding-top: 20px;
+            padding-top: 0;
         }
         
         /* Ensure all content sections respect viewport width */
@@ -96,25 +93,26 @@
         /* Fix for any potential overflow issues */
         body > * {
             max-width: 100vw !important;
-            overflow-x: hidden !important;
         }
         
         /* Responsive adjustments for different screen sizes */
         @media (max-width: 1200px) {
             .main-content {
-                padding-top: 15px;
+                padding-top: 0;
             }
         }
         
         @media (max-width: 992px) {
             .main-content {
-                padding-top: 10px;
+                padding-top: 0;
+                margin-top: 64px;
             }
         }
         
         @media (max-width: 768px) {
             .main-content {
-                padding-top: 5px;
+                padding-top: 0;
+                margin-top: 58px;
                 padding-left: var(--space-sm);
                 padding-right: var(--space-sm);
             }
@@ -123,6 +121,7 @@
         @media (max-width: 576px) {
             .main-content {
                 padding-top: 0;
+                margin-top: 54px;
                 padding-left: var(--space-xs);
                 padding-right: var(--space-xs);
             }
@@ -161,12 +160,12 @@
                         <i class="fas fa-robot"></i>
                     </div>
                     <div class="message-content">
-                        <p>Hi! 👋 I'm here to help. Ask me about:</p>
+                        <p>Hi there! I'm here to help. Ask me about:</p>
                         <div class="quick-replies">
-                            <button class="quick-reply" data-message="shipping policy">📦 Shipping</button>
-                            <button class="quick-reply" data-message="return policy">🔄 Returns</button>
-                            <button class="quick-reply" data-message="track order">📍 Track Order</button>
-                            <button class="quick-reply" data-message="payment methods">💳 Payment</button>
+                            <button class="quick-reply" data-message="shipping policy"><i class="fas fa-box"></i> Shipping</button>
+                            <button class="quick-reply" data-message="return policy"><i class="fas fa-undo-alt"></i> Returns</button>
+                            <button class="quick-reply" data-message="track order"><i class="fas fa-map-marker-alt"></i> Track Order</button>
+                            <button class="quick-reply" data-message="payment methods"><i class="fas fa-credit-card"></i> Payment</button>
                         </div>
                     </div>
                 </div>
@@ -197,7 +196,7 @@
     </button>
 
     <!-- Main JavaScript -->
-    <script src="{{ url_for('static', filename='js/app.js') }}?v={{ range(1, 1000) | random }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=2.2"></script>
     
 
     
@@ -229,26 +228,22 @@
             // Handle flash messages
             const flashMessages = document.querySelectorAll('.flash-message');
             flashMessages.forEach(message => {
-                // Check if this message has a close button
-                const hasCloseButton = message.querySelector('.flash-close');
-                // Check if the message has actual content
                 const messageContent = message.querySelector('.flash-content span');
                 const isMessageEmpty = !messageContent || messageContent.textContent.trim() === '';
-                
-                // For debugging - log message info to console
-                console.log('Flash message:', {
-                    element: message,
-                    hasCloseButton: !!hasCloseButton,
-                    content: messageContent ? messageContent.textContent : 'No content',
-                    isEmpty: isMessageEmpty
-                });
-                
+
                 if (isMessageEmpty) {
-                    // Remove empty messages immediately
                     message.remove();
+                    return;
                 }
-                // Note: We no longer auto-dismiss messages with close buttons
-                // All server-generated flash messages have close buttons and should remain until manually closed
+
+                // Auto-dismiss success and info messages after 5 seconds
+                const isAutoClose = message.classList.contains('flash-success') || message.classList.contains('flash-info');
+                if (isAutoClose) {
+                    setTimeout(() => {
+                        message.classList.add('fade-out');
+                        setTimeout(() => message.remove(), 300);
+                    }, 5000);
+                }
             });
 
             // Back to Top Button
@@ -450,6 +445,66 @@
             });
         }
         */
+
+        // ========================================
+        // Wishlist Heart Toggle (AJAX)
+        // ========================================
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.wishlist-btn[data-url]');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const icon = btn.querySelector('i');
+            const url = btn.dataset.url;
+
+            // Optimistic UI update
+            const wasActive = btn.classList.contains('active');
+            btn.classList.toggle('active');
+            if (icon) {
+                if (wasActive) {
+                    icon.classList.replace('fas', 'far');
+                } else {
+                    icon.classList.replace('far', 'fas');
+                }
+            }
+
+            fetch(url, { method: 'POST' })
+                .then(function(response) {
+                    const ct = response.headers.get('content-type') || '';
+                    if (response.status === 401 || !ct.includes('application/json')) {
+                        // Not logged in — revert and redirect
+                        btn.classList.toggle('active');
+                        if (icon) {
+                            if (wasActive) icon.classList.replace('far', 'fas');
+                            else icon.classList.replace('fas', 'far');
+                        }
+                        window.location.href = '/auth/login';
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    // Reconcile server state (undo optimistic if mismatched)
+                    if (data.wishlisted) {
+                        btn.classList.add('active');
+                        if (icon) { icon.classList.remove('far'); icon.classList.add('fas'); }
+                    } else {
+                        btn.classList.remove('active');
+                        if (icon) { icon.classList.remove('fas'); icon.classList.add('far'); }
+                    }
+                    updateWishlistCount();
+                })
+                .catch(function() {
+                    // Revert optimistic update on network error
+                    btn.classList.toggle('active');
+                    if (icon) {
+                        if (wasActive) icon.classList.replace('far', 'fas');
+                        else icon.classList.replace('fas', 'far');
+                    }
+                });
+        });
     </script>
 
     <style>

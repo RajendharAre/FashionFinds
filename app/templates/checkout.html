@@ -25,8 +25,8 @@
                 <div class="address-display" id="addressDisplay">
                     {% if current_user.is_authenticated %}
                     <div class="address-card">
-                        <strong>{{ current_user.firstname }} {{ current_user.lastname }}</strong><br>
-                        {{ current_user.address_line_1 }}<br>
+                        <strong>{{ current_user.name }}</strong><br>
+                        {{ current_user.address }}<br>
                         {{ current_user.city }}, {{ current_user.state }}<br>
                         Pincode: {{ current_user.pincode }}<br>
                         Email: {{ current_user.email }}
@@ -38,20 +38,14 @@
 
                 <div class="address-form" id="addressForm" style="display: none;">
                     <form id="addressUpdateForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="firstname">First Name</label>
-                                <input type="text" name="firstname" value="{{ current_user.firstname }}" required class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="lastname">Last Name</label>
-                                <input type="text" name="lastname" value="{{ current_user.lastname }}" required class="form-control">
-                            </div>
-                        </div>
-                        
                         <div class="form-group">
-                            <label for="address_line_1">Address Line 1</label>
-                            <input type="text" name="address_line_1" value="{{ current_user.address_line_1 }}" required class="form-control">
+                            <label for="name">Full Name</label>
+                            <input type="text" name="name" value="{{ current_user.name }}" required class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" name="address" value="{{ current_user.address }}" required class="form-control">
                         </div>
                         
                         <div class="form-row">
@@ -84,7 +78,7 @@
                 <h3>Payment Method</h3>
                 <div class="payment-method">
                     <div class="payment-method-header">
-                        <span>💵 Cash on Delivery</span>
+                        <span><i class="fas fa-money-bill-wave me-1"></i>Cash on Delivery</span>
                     </div>
                     <p class="payment-description">
                         Pay with cash when your order is delivered to your doorstep.
@@ -150,9 +144,8 @@
         const formData = new FormData(form);
 
         // Extract values from the form
-        const firstname = formData.get('firstname');
-        const lastname = formData.get('lastname');
-        const address_line_1 = formData.get('address_line_1');
+        const name = formData.get('name');
+        const address = formData.get('address');
         const city = formData.get('city');
         const state = formData.get('state');
         const pincode = formData.get('pincode');
@@ -161,8 +154,8 @@
         // Update the frontend display
         document.getElementById('addressDisplay').innerHTML = `
             <div class="address-card">
-                <strong>${firstname} ${lastname}</strong><br>
-                ${address_line_1}<br>
+                <strong>${name}</strong><br>
+                ${address}<br>
                 ${city}, ${state}<br>
                 Pincode: ${pincode}<br>
                 Email: ${email}
@@ -188,15 +181,15 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (ok && data.success) {
                 showNotification('Order placed successfully!', 'success');
                 setTimeout(() => {
-                    window.location.href = '/payment_success/' + data.order_id; // Redirect to payment success page
+                    window.location.href = '/payment_success/' + data.order_id;
                 }, 2000);
             } else {
-                showNotification('Something went wrong. Please try again.', 'error');
+                showNotification(data.error || 'Something went wrong. Please try again.', 'error');
             }
         })
         .catch(error => {

@@ -460,7 +460,7 @@
 #     return render_template('faqs.html')
 
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session, flash, send_from_directory
-from app.models import Product, Cart, Wishlist, User, Order, OrderItem,ProductSize
+from app.models import Product, Brand, Cart, Wishlist, User, Order, OrderItem, ProductSize
 from app import db
 from flask_login import login_required
 import os

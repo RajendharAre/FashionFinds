@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory
-from .models import User, Product, ProductSize,  db, Order
+from .models import User, Product, Brand, ProductSize, db, Order
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
@@ -66,6 +66,16 @@ def add_products():
             else:
                 file_path = None
 
+            # Look up or create Brand
+            brand_name = form.brand.data.strip() if form.brand.data else None
+            brand_obj = None
+            if brand_name:
+                brand_obj = Brand.query.filter_by(name=brand_name).first()
+                if not brand_obj:
+                    brand_obj = Brand(name=brand_name)
+                    db.session.add(brand_obj)
+                    db.session.flush()
+
             # Create product
             new_product = Product(
                 product_name=form.product_name.data,
@@ -77,7 +87,7 @@ def add_products():
                 category=form.category.data,
                 color=form.color.data,
                 discount=form.discount.data,
-                brand=form.brand.data
+                brand_id=brand_obj.id if brand_obj else None
             )
 
             db.session.add(new_product)
@@ -177,7 +187,17 @@ def update_item(product_id):
         product.category = request.form.get("category")
         product.sale = request.form.get("sale") == "true"
         product.discount = int(request.form.get("discount", product.discount))
-        product.brand = request.form.get("brand")
+        # Convert brand name to brand_id
+        brand_name = request.form.get("brand", "").strip()
+        if brand_name:
+            brand_obj = Brand.query.filter_by(name=brand_name).first()
+            if not brand_obj:
+                brand_obj = Brand(name=brand_name)
+                db.session.add(brand_obj)
+                db.session.flush()
+            product.brand_id = brand_obj.id
+        else:
+            product.brand_id = None
         product.color = request.form.get("color")
 
         # Handling image upload

@@ -42,6 +42,17 @@ class User(db.Model, UserMixin):
         return f"<User {self.name}>"
 
 
+# Brand Model
+class Brand(db.Model):
+    __tablename__ = 'brands'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    products = db.relationship('Product', backref='brand', lazy=True)
+
+    def __repr__(self):
+        return f"<Brand {self.name}>"
+
+
 # Product Model
 class Product(db.Model):
     __tablename__ = 'products'
@@ -55,10 +66,9 @@ class Product(db.Model):
     rating = db.Column(db.Integer, default=0)
     sale = db.Column(db.Boolean, default=False)
     discount = db.Column(db.Integer, nullable=True, default=0)
-
-    brand = db.Column(db.String(100), nullable=True)
-    category = db.Column(db.String(100), nullable=False)  # ✅ Now category is a string field
-    
+    category = db.Column(db.String(100), nullable=False)
+    brand_id = db.Column(db.Integer, db.ForeignKey('brands.id'), nullable=True)
+    count = db.Column(db.Integer, nullable=False, default=0)
 
 
     quantity_size = db.relationship('ProductSize', backref='product', lazy=True, cascade="all, delete-orphan")

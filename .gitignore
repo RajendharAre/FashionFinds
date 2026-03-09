@@ -1,0 +1,9 @@
+instance/users.db
+instance/*.db
+__pycache__/
+*.pyc
+venv/
+.env
+.env.local
+migrations/__pycache__/
+migrations/versions/__pycache__/

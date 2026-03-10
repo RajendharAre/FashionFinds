@@ -861,16 +861,26 @@ def place_order():
 @login_required
 def my_orders():
 
-    orders = Order.query.filter_by(user_id=current_user.id).all()
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.order_date.desc()).all()
     orders_with_items = []
     for order in orders:
         order_items = OrderItem.query.filter_by(order_id=order.id).all()
-        items_data = [{'name': item.product.product_name, 'quantity': item.quantity} for item in order_items]
+        items_data = [{
+            'name': item.product.product_name,
+            'quantity': item.quantity,
+            'unit_price': item.unit_price,
+            'subtotal': item.subtotal,
+            'image': item.product.product_picture,
+            'product_id': item.product.id,
+        } for item in order_items]
 
         orders_with_items.append({
             'id': order.id,
             'status': order.status,
             'total_price': order.total_price,
+            'order_date': order.order_date,
+            'delivery_date': order.delivery_date,
+            'customer_name': order.customer_name,
             'order_items': items_data
         })
 

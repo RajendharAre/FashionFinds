@@ -1,5 +1,5 @@
 from flask import Blueprint,render_template,flash,url_for,redirect,current_app,request,session
-from .models import Order,User,Product,OrderItem
+from .models import Order,User,Product,OrderItem,AppSetting,DeliveryApplication,ApplicationReminder
 from . import db
 from flask_login import current_user,login_required
 from flask_mail import Message
@@ -203,9 +203,58 @@ def assign_delivery(order_id):
         print(f"////////////////////////////////////\n{e}")
         return f"{e}",400
 
-@delivery_bp.route('/delivery-application')
+@delivery_bp.route('/delivery-application', methods=['GET', 'POST'])
+@login_required
 def delivery_application():
-    return render_template('delivery_application.html')
+    applications_open = AppSetting.get('delivery_applications_open', 'false') == 'true'
+
+    # Check if user already applied
+    existing_application = DeliveryApplication.query.filter_by(user_id=current_user.id).order_by(DeliveryApplication.applied_at.desc()).first()
+
+    # Check if user already set a reminder
+    has_reminder = ApplicationReminder.query.filter_by(user_id=current_user.id).first() is not None
+
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'apply' and applications_open:
+            if existing_application and existing_application.status == 'pending':
+                flash('You already have a pending application.', 'warning')
+            else:
+                vehicle_type = request.form.get('vehicle_type', '').strip()
+                license_number = request.form.get('license_number', '').strip()
+                experience = request.form.get('experience', '').strip()
+                availability = request.form.get('availability', '').strip()
+
+                if not all([vehicle_type, license_number, availability]):
+                    flash('Please fill all required fields.', 'danger')
+                else:
+                    app_entry = DeliveryApplication(
+                        user_id=current_user.id,
+                        vehicle_type=vehicle_type,
+                        license_number=license_number,
+                        experience=experience,
+                        availability=availability,
+                    )
+                    db.session.add(app_entry)
+                    db.session.commit()
+                    flash('Application submitted successfully! We will review it shortly.', 'success')
+                    return redirect(url_for('delivery.delivery_application'))
+
+        elif action == 'remind':
+            if not has_reminder:
+                reminder = ApplicationReminder(user_id=current_user.id, email=current_user.email)
+                db.session.add(reminder)
+                db.session.commit()
+                has_reminder = True
+                flash('We will notify you when applications open!', 'success')
+            else:
+                flash('You are already on the reminder list.', 'info')
+
+    return render_template('delivery_application.html',
+                           applications_open=applications_open,
+                           existing_application=existing_application,
+                           has_reminder=has_reminder)
 
 
 # @delivery_bp.route('/customer_review/<int:user_id>/<int:order_id>/<token>', methods=['GET', 'POST'])

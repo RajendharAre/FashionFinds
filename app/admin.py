@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory
-from .models import User, Product, Brand, ProductSize, db, Order
+from .models import User, Product, Brand, ProductSize, db, Order, AppSetting, DeliveryApplication, ApplicationReminder
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+from datetime import datetime, timezone
 import os
 from .forms import ProductForm
 
@@ -20,7 +21,6 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 ### ✅ Admin Dashboard Route
 @admin.route('/admin_dashboard')
-# @login_required
 def admin_dashboard():
     if not current_user.is_authenticated:
         flash('Unauthorized access', 'danger')
@@ -30,12 +30,22 @@ def admin_dashboard():
         return redirect(url_for('views.homepage'))
     
     total_users = User.query.count()
-    pending_approvals = User.query.filter_by(approved=False).count()
+    total_orders = Order.query.count()
+    total_products = Product.query.count()
+    pending_approvals = DeliveryApplication.query.filter_by(status='pending').count()
+    applications_open = AppSetting.get('delivery_applications_open', 'false') == 'true'
+    pending_applications = DeliveryApplication.query.filter_by(status='pending').all()
+    reminder_count = ApplicationReminder.query.count()
     
     return render_template(
         'admin_dashboard.html',
         total_users=total_users,
-        pending_approvals=pending_approvals
+        total_orders=total_orders,
+        total_products=total_products,
+        pending_approvals=pending_approvals,
+        applications_open=applications_open,
+        pending_applications=pending_applications,
+        reminder_count=reminder_count
     )
 
 ### ✅ Add Products Route
@@ -311,6 +321,45 @@ def reject_user(id):
     except Exception as e:
         print("Error rejecting user:", e)
         return {"error": "Failed to reject user"}, 500
+
+
+### Delivery Applications Management
+@admin.route('/toggle-applications', methods=['POST'])
+def toggle_applications():
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return redirect(url_for('auth.login'))
+    current_val = AppSetting.get('delivery_applications_open', 'false')
+    new_val = 'false' if current_val == 'true' else 'true'
+    AppSetting.set('delivery_applications_open', new_val)
+    status = 'opened' if new_val == 'true' else 'closed'
+    flash(f'Delivery applications {status}.', 'success')
+    return redirect(url_for('admin.admin_dashboard'))
+
+@admin.route('/approve-application/<int:app_id>', methods=['POST'])
+def approve_application(app_id):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return redirect(url_for('auth.login'))
+    application = DeliveryApplication.query.get_or_404(app_id)
+    application.status = 'approved'
+    application.reviewed_at = datetime.now(timezone.utc)
+    # Upgrade user role to delivery_agent
+    user = User.query.get(application.user_id)
+    user.role = 'delivery_agent'
+    user.approved = True
+    db.session.commit()
+    flash(f'{user.name} approved as delivery agent.', 'success')
+    return redirect(url_for('admin.admin_dashboard'))
+
+@admin.route('/reject-application/<int:app_id>', methods=['POST'])
+def reject_application(app_id):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return redirect(url_for('auth.login'))
+    application = DeliveryApplication.query.get_or_404(app_id)
+    application.status = 'rejected'
+    application.reviewed_at = datetime.now(timezone.utc)
+    db.session.commit()
+    flash('Application rejected.', 'info')
+    return redirect(url_for('admin.admin_dashboard'))
 
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\        graphs          \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\

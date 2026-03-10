@@ -1,29 +1,83 @@
 {% extends "base.html" %}
 {% block title %}Become a Delivery Partner - Fashion Finds{% endblock %}
 {% block content %}
-<div class="info-page">
-    <div class="info-page-header">
+<div class="delivery-apply-page">
+    <div class="delivery-apply-hero">
+        <i class="fas fa-truck-fast"></i>
         <h1>Become a Delivery Partner</h1>
-        <p>Join our delivery network and earn</p>
+        <p>Join our delivery network and earn on your schedule</p>
     </div>
-    <div class="info-page-body">
-        <div class="info-section">
-            <h2>Why Deliver with Fashion Finds?</h2>
-            <p><strong>Flexible Hours:</strong> Work on your own schedule.</p>
-            <p><strong>Competitive Pay:</strong> Earn per delivery with bonuses for peak hours.</p>
-            <p><strong>Growth:</strong> Build your career with us as we expand.</p>
+
+    <div class="delivery-apply-grid">
+        <!-- Left: Info -->
+        <div class="delivery-apply-info">
+            <div class="delivery-info-card">
+                <h3><i class="fas fa-clock"></i> Flexible Hours</h3>
+                <p>Work on your own schedule. Pick shifts that suit your lifestyle.</p>
+            </div>
+            <div class="delivery-info-card">
+                <h3><i class="fas fa-wallet"></i> Competitive Pay</h3>
+                <p>Earn per delivery with bonuses for peak hours and high ratings.</p>
+            </div>
+            <div class="delivery-info-card">
+                <h3><i class="fas fa-chart-line"></i> Growth Opportunities</h3>
+                <p>Build your career with us as we expand to new cities.</p>
+            </div>
+            <div class="delivery-info-card">
+                <h3><i class="fas fa-clipboard-list"></i> Requirements</h3>
+                <ul>
+                    <li>Must be 18 years or older</li>
+                    <li>Valid government ID</li>
+                    <li>Own a two-wheeler or four-wheeler</li>
+                    <li>Smartphone with internet access</li>
+                </ul>
+            </div>
         </div>
-        <div class="info-section">
-            <h2>Requirements</h2>
-            <p>1. Must be 18 years or older</p>
-            <p>2. Valid government ID</p>
-            <p>3. Own a two-wheeler or four-wheeler</p>
-            <p>4. Smartphone with internet access</p>
-        </div>
-        <div class="info-section">
-            <h2>How to Apply</h2>
-            <p>Register on Fashion Finds and select <strong>"Delivery Agent"</strong> as your role during sign-up. Once approved by our admin, you can start accepting deliveries from the delivery dashboard.</p>
-            <a href="{{ url_for('auth.register') }}" class="btn-amazon-primary" style="display:inline-block; margin-top:12px;">Register Now</a>
+
+        <!-- Right: Form or Status -->
+        <div class="delivery-apply-panel">
+            {% if applications_open %}
+                {% if existing_application and existing_application.status == 'pending' %}
+                    <div class="apply-status-card status-pending">
+                        <i class="fas fa-hourglass-half"></i>
+                        <h3>Application Under Review</h3>
+                        <p>Your application submitted on {{ existing_application.applied_at.strftime('%d %B %Y') }} is being reviewed by our team.</p>
+                        <p>We'll notify you once a decision is made.</p>
+                    </div>
+                {% elif existing_application and existing_application.status == 'approved' %}
+                    <div class="apply-status-card status-approved">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Application Approved!</h3>
+                        <p>Congratulations! You've been approved as a delivery partner.</p>
+                        <a href="{{ url_for('delivery.dashboard') }}" class="btn-amazon-primary" style="display:inline-block; margin-top:12px;">Go to Delivery Dashboard</a>
+                    </div>
+                {% elif existing_application and existing_application.status == 'rejected' %}
+                    <div class="apply-status-card status-rejected">
+                        <i class="fas fa-times-circle"></i>
+                        <h3>Application Not Approved</h3>
+                        <p>Unfortunately your previous application was not approved. You can submit a new application below.</p>
+                    </div>
+                    {% include "partials/_delivery_form.html" %}
+                {% else %}
+                    {% include "partials/_delivery_form.html" %}
+                {% endif %}
+            {% else %}
+                <div class="apply-status-card status-closed">
+                    <i class="fas fa-door-closed"></i>
+                    <h3>Applications Currently Closed</h3>
+                    <p>Fashion Finds is not accepting delivery partner applications at this time.</p>
+                    {% if has_reminder %}
+                        <div class="reminder-set">
+                            <i class="fas fa-bell"></i> You're on the reminder list. We'll notify you when applications reopen!
+                        </div>
+                    {% else %}
+                        <form method="POST">
+                            <input type="hidden" name="action" value="remind">
+                            <button type="submit" class="btn-remind"><i class="fas fa-bell"></i> Remind me when applications open</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

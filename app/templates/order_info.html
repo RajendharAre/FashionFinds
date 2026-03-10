@@ -1,11 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Order Info</h1>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Order Info - Fashion Finds{% endblock %}
+{% block content %}
+<div class="del-dash-page">
+    <div class="del-dash-header">
+        <h1><i class="fas fa-receipt"></i> Order Info</h1>
+    </div>
+    <div class="del-empty">
+        <i class="fas fa-inbox"></i>
+        <p>No order information available.</p>
+    </div>
+</div>
+{% endblock %}

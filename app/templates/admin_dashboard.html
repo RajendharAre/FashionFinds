@@ -1,11 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin-DashBoard</title>
-</head>
-<body>
-    <h1>Welcome Admin!!</h1>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - Fashion Finds{% endblock %}
+{% block content %}
+<div class="admin-page">
+    <div class="admin-header">
+        <h1><i class="fas fa-shield-halved"></i> Admin Dashboard</h1>
+        <p>Welcome back, {{ current_user.name }}</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="admin-stats">
+        <div class="admin-stat-card">
+            <i class="fas fa-users"></i>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="admin-stat-card">
+            <i class="fas fa-box"></i>
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="admin-stat-card">
+            <i class="fas fa-tags"></i>
+            <div class="stat-value">{{ total_products }}</div>
+            <div class="stat-label">Products</div>
+        </div>
+        <div class="admin-stat-card">
+            <i class="fas fa-clipboard-list"></i>
+            <div class="stat-value">{{ pending_approvals }}</div>
+            <div class="stat-label">Pending Applications</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-section">
+        <h2>Quick Actions</h2>
+        <div class="admin-actions-grid">
+            <a href="{{ url_for('admin.add_products') }}" class="admin-action-card">
+                <i class="fas fa-plus-circle"></i>
+                <span>Add Product</span>
+            </a>
+            <a href="{{ url_for('admin.view_products') }}" class="admin-action-card">
+                <i class="fas fa-eye"></i>
+                <span>View Products</span>
+            </a>
+            <a href="{{ url_for('admin.inventory') }}" class="admin-action-card">
+                <i class="fas fa-chart-bar"></i>
+                <span>Inventory</span>
+            </a>
+            <a href="{{ url_for('admin.order_status') }}" class="admin-action-card">
+                <i class="fas fa-chart-pie"></i>
+                <span>Order Stats</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Delivery Applications Toggle -->
+    <div class="admin-section">
+        <h2>Delivery Agent Applications</h2>
+        <div class="admin-toggle-card">
+            <div class="toggle-info">
+                <div class="toggle-status {% if applications_open %}toggle-open{% else %}toggle-closed{% endif %}">
+                    <i class="fas {% if applications_open %}fa-door-open{% else %}fa-door-closed{% endif %}"></i>
+                    Applications are currently <strong>{% if applications_open %}OPEN{% else %}CLOSED{% endif %}</strong>
+                </div>
+                {% if not applications_open and reminder_count > 0 %}
+                    <p class="reminder-count"><i class="fas fa-bell"></i> {{ reminder_count }} user{{ 's' if reminder_count != 1 else '' }} waiting to be notified</p>
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('admin.toggle_applications') }}">
+                <button type="submit" class="{% if applications_open %}btn-cancel{% else %}btn-amazon-primary{% endif %}">
+                    {% if applications_open %}Close Applications{% else %}Open Applications{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pending Applications -->
+    {% if pending_applications %}
+    <div class="admin-section">
+        <h2>Pending Applications ({{ pending_applications|length }})</h2>
+        <div class="admin-applications-list">
+            {% for app in pending_applications %}
+            <div class="application-card">
+                <div class="application-info">
+                    <div class="applicant-name">{{ app.user.name }}</div>
+                    <div class="applicant-email">{{ app.user.email }} &middot; {{ app.user.phone }}</div>
+                    <div class="applicant-details">
+                        <span><i class="fas fa-motorcycle"></i> {{ app.vehicle_type|title }}</span>
+                        <span><i class="fas fa-id-card"></i> {{ app.license_number }}</span>
+                        <span><i class="fas fa-clock"></i> {{ app.availability|title }}</span>
+                    </div>
+                    {% if app.experience %}
+                    <div class="applicant-experience">{{ app.experience }}</div>
+                    {% endif %}
+                    <div class="applicant-date">Applied {{ app.applied_at.strftime('%d %B %Y') }}</div>
+                </div>
+                <div class="application-actions">
+                    <form method="POST" action="{{ url_for('admin.approve_application', app_id=app.id) }}" style="display:inline">
+                        <button type="submit" class="btn-approve"><i class="fas fa-check"></i> Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.reject_application', app_id=app.id) }}" style="display:inline">
+                        <button type="submit" class="btn-reject"><i class="fas fa-times"></i> Reject</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

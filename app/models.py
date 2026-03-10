@@ -155,3 +155,59 @@ class OrderItem(db.Model):
 
     def __repr__(self):
         return f"<OrderItem Order: {self.order_id}, Product: {self.product_id}, Quantity: {self.quantity}>"
+
+
+# App Settings (singleton for global config like application open/close)
+class AppSetting(db.Model):
+    __tablename__ = 'app_settings'
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.String(500), nullable=False)
+
+    @staticmethod
+    def get(key, default=None):
+        setting = AppSetting.query.filter_by(key=key).first()
+        return setting.value if setting else default
+
+    @staticmethod
+    def set(key, value):
+        setting = AppSetting.query.filter_by(key=key).first()
+        if setting:
+            setting.value = str(value)
+        else:
+            setting = AppSetting(key=key, value=str(value))
+            db.session.add(setting)
+        db.session.commit()
+
+
+# Delivery Application
+class DeliveryApplication(db.Model):
+    __tablename__ = 'delivery_applications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    vehicle_type = db.Column(db.String(50), nullable=False)
+    license_number = db.Column(db.String(50), nullable=False)
+    experience = db.Column(db.String(200), nullable=True)
+    availability = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')  # pending, approved, rejected
+    applied_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    user = db.relationship('User', backref='delivery_applications')
+
+    def __repr__(self):
+        return f"<DeliveryApplication User:{self.user_id} Status:{self.status}>"
+
+
+# Remind me when applications open
+class ApplicationReminder(db.Model):
+    __tablename__ = 'application_reminders'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    user = db.relationship('User', backref='application_reminders')
+
+    def __repr__(self):
+        return f"<ApplicationReminder User:{self.user_id}>"

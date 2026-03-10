@@ -54,6 +54,10 @@ def login():
         if user and check_password_hash(user.password, password):
             login_user(user)
             flash("Login successful!", "success")
+            if user.role == 'admin':
+                return redirect(url_for("admin.admin_dashboard"))
+            elif user.role == 'delivery_agent':
+                return redirect(url_for("delivery.dashboard"))
             return redirect(url_for("views.homepage"))
         else:
             flash("Invalid email or password!", "danger")
@@ -73,7 +77,6 @@ def register():
         state = request.form["state"]
         city = request.form["city"]
         pincode = request.form["pincode"]
-        role = request.form["role"]
 
         # Validation
         if not all([name, phone, email, password, confirm_password, address, state, city, pincode]):
@@ -107,7 +110,7 @@ def register():
             state=state,
             city=city,
             pincode=pincode,
-            role=role
+            role='user'
         )
         
         try:

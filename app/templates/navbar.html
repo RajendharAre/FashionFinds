@@ -38,7 +38,7 @@
             <div class="dropdown">
                 <a href="{{ url_for('auth.account') }}" class="nav-action-item">
                     <span class="nav-action-label">Hello, {% if current_user.is_authenticated %}{{ current_user.name }}{% else %}sign in{% endif %}</span>
-                    <span class="nav-action-value">Account & Lists <i class="fas fa-caret-down" style="font-size:10px"></i></span>
+                    <span class="nav-action-value">Account & Lists <i class="fas fa-caret-down nav-dropdown-arrow"></i></span>
                 </a>
                 <div class="dropdown-content">
                     {% if current_user.is_authenticated %}

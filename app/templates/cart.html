@@ -4,10 +4,10 @@
 <div class="cart-page">
     {% if not current_user.is_authenticated %}
     <div class="cart-empty">
-        <i class="fas fa-shopping-cart" style="font-size:48px; color:var(--text-light); margin-bottom:16px"></i>
+        <i class="fas fa-shopping-cart"></i>
         <h3>Your Fashion Finds Cart is empty</h3>
         <p><a href="{{ url_for('auth.login') }}">Sign in</a> to see your cart or <a href="{{ url_for('auth.register') }}">create an account</a>.</p>
-        <a href="{{ url_for('views.homepage') }}" class="btn-amazon-primary" style="margin-top:16px">Continue Shopping</a>
+        <a href="{{ url_for('views.homepage') }}" class="btn-amazon-primary mt-3">Continue Shopping</a>
     </div>
     {% else %}
     <h1 class="cart-heading">Shopping Cart</h1>
@@ -38,11 +38,11 @@
                             <input type="number" class="quantity-input" value="{{ cart.quantity }}" min="1" data-product-id="{{ item.id }}">
                         </div>
                         <span class="action-divider">|</span>
-                        <form action="{{ url_for('views.remove_from_cart', product_id=item.id) }}" method="post" style="display:inline">
+                        <form action="{{ url_for('views.remove_from_cart', product_id=item.id) }}" method="post" class="d-inline">
                             <button type="submit" class="cart-action-link">Delete</button>
                         </form>
                         <span class="action-divider">|</span>
-                        <form action="{{ url_for('views.move_to_wishlist', product_id=item.id) }}" method="post" style="display:inline">
+                        <form action="{{ url_for('views.move_to_wishlist', product_id=item.id) }}" method="post" class="d-inline">
                             <button type="submit" class="cart-action-link">Move to Wishlist</button>
                         </form>
                     </div>
@@ -79,10 +79,10 @@
     </div>
     {% else %}
     <div class="cart-empty">
-        <i class="fas fa-shopping-cart" style="font-size:48px; color:var(--text-light); margin-bottom:16px"></i>
+        <i class="fas fa-shopping-cart"></i>
         <h3>Your Fashion Finds Cart is empty</h3>
         <p>Looks like you haven't added anything to your cart yet.</p>
-        <a href="{{ url_for('views.homepage') }}" class="btn-amazon-primary" style="margin-top:16px">Continue Shopping</a>
+        <a href="{{ url_for('views.homepage') }}" class="btn-amazon-primary mt-3">Continue Shopping</a>
     </div>
     {% endif %}
     {% endif %}

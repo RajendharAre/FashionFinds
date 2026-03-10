@@ -176,3 +176,16 @@
         grid-template-columns: 1fr;
     }
 }
+
+.auth-icon-block {
+    text-align: center;
+    margin-bottom: 16px;
+}
+.auth-icon-block i {
+    font-size: 48px;
+    color: #FF9900;
+}
+.auth-btn-block {
+    display: block;
+    text-align: center;
+}

@@ -1,64 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Profile - Fashion Finds</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-</head>
-<body class="auth-body">
-    <div class="auth-container">
-        <div class="auth-logo">
-            <a href="{{ url_for('views.homepage') }}">Fashion<span>.finds</span></a>
+{% extends "base.html" %}
+{% block title %}Update Profile - Fashion Finds{% endblock %}
+{% block content %}
+<div class="profile-page">
+    <div class="profile-card">
+        <div class="profile-card-header">
+            <h2><i class="fas fa-user-edit"></i> Update Profile</h2>
         </div>
-        <div class="auth-card">
-            <h2 class="auth-title">Update Profile</h2>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="auth-alert auth-alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-            <form id="updateProfileForm" method="POST">
-                <div class="auth-form-group">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
+        <form id="updateProfileForm" method="POST">
+            <div class="pf-row">
+                <div class="pf-group">
+                    <label class="pf-label" for="name">Full Name</label>
+                    <input class="pf-input" type="text" id="name" name="name" value="{{ current_user.name }}" required>
                 </div>
-                <div class="auth-form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" value="{{ current_user.phone }}" required>
+                <div class="pf-group">
+                    <label class="pf-label" for="phone">Phone Number</label>
+                    <input class="pf-input" type="tel" id="phone" name="phone" value="{{ current_user.phone }}" required>
                 </div>
-                <div class="auth-form-group">
-                    <label for="email">Email ID</label>
-                    <input type="email" id="email" name="email" value="{{ current_user.email }}" required readonly disabled>
-                </div>
-                <div class="auth-form-group">
-                    <label for="address">Address</label>
-                    <textarea id="address" name="address" rows="3" required>{{ current_user.address }}</textarea>
-                </div>
-                <div class="auth-form-row">
-                    <div class="auth-form-group">
-                        <label for="state">State</label>
-                        <select id="state" name="state" required><option value="">Select State</option></select>
-                    </div>
-                    <div class="auth-form-group">
-                        <label for="city">City</label>
-                        <select id="city" name="city" required><option value="">Select City</option></select>
-                    </div>
-                </div>
-                <div class="auth-form-group">
-                    <label for="pincode">Pincode</label>
-                    <input type="text" id="pincode" name="pincode" value="{{ current_user.pincode }}" required>
-                </div>
-                <button type="submit" class="auth-btn">Update Profile</button>
-            </form>
-            <div class="auth-footer">
-                <a href="{{ url_for('views.homepage') }}"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </div>
+            <div class="pf-group">
+                <label class="pf-label" for="email">Email Address</label>
+                <input class="pf-input" type="email" id="email" name="email" value="{{ current_user.email }}" readonly disabled>
+            </div>
+            <div class="pf-group">
+                <label class="pf-label" for="address">Address</label>
+                <textarea class="pf-input pf-textarea" id="address" name="address" rows="3" required>{{ current_user.address }}</textarea>
+            </div>
+            <div class="pf-row">
+                <div class="pf-group">
+                    <label class="pf-label" for="state">State</label>
+                    <select class="pf-input" id="state" name="state" required>
+                        <option value="">Select State</option>
+                    </select>
+                </div>
+                <div class="pf-group">
+                    <label class="pf-label" for="city">City</label>
+                    <select class="pf-input" id="city" name="city" required>
+                        <option value="">Select City</option>
+                    </select>
+                </div>
+            </div>
+            <div class="pf-group">
+                <label class="pf-label" for="pincode">Pincode</label>
+                <input class="pf-input" type="text" id="pincode" name="pincode" value="{{ current_user.pincode }}" required>
+            </div>
+            <button type="submit" class="btn-amazon-primary pf-submit">Update Profile</button>
+        </form>
+        <div class="profile-back">
+            <a href="{{ url_for('auth.account') }}"><i class="fas fa-arrow-left"></i> Back to Account</a>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/state_city.js') }}"></script>
-</body>
-</html>
+</div>
+<script src="{{ url_for('static', filename='js/state_city.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const savedState = "{{ current_user.state or '' }}";
+    const savedCity = "{{ current_user.city or '' }}";
+    const stateSelect = document.getElementById('state');
+    const citySelect = document.getElementById('city');
+
+    if (savedState) {
+        stateSelect.value = savedState;
+        // Trigger city population
+        const event = new Event('change');
+        stateSelect.dispatchEvent(event);
+        // Wait for cities to populate, then set saved city
+        setTimeout(function() {
+            if (savedCity) citySelect.value = savedCity;
+        }, 50);
+    }
+});
+</script>
+{% endblock %}

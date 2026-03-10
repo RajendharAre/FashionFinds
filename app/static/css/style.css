@@ -4036,6 +4036,9 @@ main {
 .mb-2 { margin-bottom: 8px; }
 .mb-4 { margin-bottom: 24px; }
 .py-5 { padding-top: 40px; padding-bottom: 40px; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.nav-dropdown-arrow { font-size: 10px; }
 
 html, body {
     overflow-x: hidden;
@@ -4594,6 +4597,49 @@ p {
     width: 100%;
     padding: 12px;
     font-size: 15px;
+}
+
+/* ============================================
+   UPDATE PROFILE PAGE
+   ============================================ */
+.profile-page {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+.profile-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+}
+.profile-card-header {
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--border-light);
+}
+.profile-card-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+}
+.profile-card-header h2 i {
+    color: var(--accent);
+    margin-right: 8px;
+}
+.profile-back {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+}
+.profile-back a {
+    color: var(--link);
+    text-decoration: none;
+}
+.profile-back a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
 }
 
 /* ============================================

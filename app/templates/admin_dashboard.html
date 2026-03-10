@@ -96,10 +96,10 @@
                     <div class="applicant-date">Applied {{ app.applied_at.strftime('%d %B %Y') }}</div>
                 </div>
                 <div class="application-actions">
-                    <form method="POST" action="{{ url_for('admin.approve_application', app_id=app.id) }}" style="display:inline">
+                    <form method="POST" action="{{ url_for('admin.approve_application', app_id=app.id) }}" class="d-inline">
                         <button type="submit" class="btn-approve"><i class="fas fa-check"></i> Approve</button>
                     </form>
-                    <form method="POST" action="{{ url_for('admin.reject_application', app_id=app.id) }}" style="display:inline">
+                    <form method="POST" action="{{ url_for('admin.reject_application', app_id=app.id) }}" class="d-inline">
                         <button type="submit" class="btn-reject"><i class="fas fa-times"></i> Reject</button>
                     </form>
                 </div>

@@ -49,7 +49,7 @@
                         <i class="fas fa-check-circle"></i>
                         <h3>Application Approved!</h3>
                         <p>Congratulations! You've been approved as a delivery partner.</p>
-                        <a href="{{ url_for('delivery.dashboard') }}" class="btn-amazon-primary" style="display:inline-block; margin-top:12px;">Go to Delivery Dashboard</a>
+                        <a href="{{ url_for('delivery.dashboard') }}" class="btn-amazon-primary d-inline-block mt-2">Go to Delivery Dashboard</a>
                     </div>
                 {% elif existing_application and existing_application.status == 'rejected' %}
                     <div class="apply-status-card status-rejected">

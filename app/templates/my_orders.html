@@ -1,120 +1,90 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">My Orders</h2>
-    
+<div class="orders-page">
+    <div class="orders-header">
+        <h1>Your Orders</h1>
+        <p class="orders-subtitle">{{ orders|length }} order{{ 's' if orders|length != 1 else '' }} placed</p>
+    </div>
+
     {% if orders %}
-        <div class="row">
-            {% for order in orders %}
-            <div class="col-lg-3 col-md-4 col-sm-6 col-12 d-flex justify-content-center">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Order #{{ order.id }}</h5>
-                        <p class="card-text"><strong>Status:</strong> {{ order.status }}</p>
-                        <p class="card-text"><strong>Total Price:</strong> Rs.{{ order.total_price }}</p>
-                        <ul class="list-group mb-3">
-                            {% for item in order.order_items %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ item.name }} (x{{ item.quantity }})
-                            </li>
-                            {% endfor %}
-                        </ul>
-                       
-                        <a href="{{ url_for('views.view_order_items', order_id=order.id) }}" class="btn btn-primary">View Order</a>
-                        {% if order.status == 'In Transit' %}
-                        <form action="{{ url_for('views.cancel_order', order_id=order.id) }}" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-danger">Cancel Order</button>
-                        </form>
-                        {% endif %}
-                    </div>
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-card-header">
+                <div class="order-header-col">
+                    <span class="order-header-label">ORDER PLACED</span>
+                    <span class="order-header-value">{{ order.order_date.strftime('%d %B %Y') }}</span>
+                </div>
+                <div class="order-header-col">
+                    <span class="order-header-label">TOTAL</span>
+                    <span class="order-header-value">Rs.{{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+                <div class="order-header-col">
+                    <span class="order-header-label">SHIP TO</span>
+                    <span class="order-header-value order-header-name">{{ order.customer_name }}</span>
+                </div>
+                <div class="order-header-col order-header-right">
+                    <span class="order-header-label">ORDER # {{ order.id }}</span>
+                    <a href="{{ url_for('views.view_order_items', order_id=order.id) }}" class="order-details-link">View order details</a>
                 </div>
             </div>
-            {% endfor %}
+
+            <div class="order-card-body">
+                <div class="order-status-row">
+                    <span class="order-status
+                        {% if order.status == 'Delivered' %} status-delivered
+                        {% elif order.status == 'Cancelled' %} status-cancelled
+                        {% elif order.status == 'In Transit' %} status-transit
+                        {% else %} status-pending
+                        {% endif %}">
+                        {% if order.status == 'Delivered' %}
+                            Delivered {{ order.delivery_date.strftime('%d %B %Y') if order.delivery_date else '' }}
+                        {% elif order.status == 'In Transit' %}
+                            In Transit
+                        {% elif order.status == 'Cancelled' %}
+                            Cancelled
+                        {% else %}
+                            Order Placed
+                        {% endif %}
+                    </span>
+                </div>
+
+                {% for item in order.order_items %}
+                <div class="order-item-row">
+                    <div class="order-item-image">
+                        <a href="{{ url_for('views.product_info', product_id=item.product_id) }}">
+                            <img src="{{ url_for('views.get_image', filename=item.image) }}" alt="{{ item.name }}" onerror="this.src='https://via.placeholder.com/100x120?text=No+Image'">
+                        </a>
+                    </div>
+                    <div class="order-item-info">
+                        <a href="{{ url_for('views.product_info', product_id=item.product_id) }}" class="order-item-name">{{ item.name }}</a>
+                        <div class="order-item-price">Rs.{{ "%.2f"|format(item.unit_price) }} x {{ item.quantity }}</div>
+                        <div class="order-item-subtotal">Subtotal: Rs.{{ "%.2f"|format(item.subtotal) }}</div>
+                    </div>
+                    <div class="order-item-actions">
+                        <a href="{{ url_for('views.product_info', product_id=item.product_id) }}" class="btn-amazon-secondary btn-sm">Buy it again</a>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="order-card-footer">
+                    <a href="{{ url_for('views.view_order_items', order_id=order.id) }}" class="btn-amazon-secondary btn-sm">View Order</a>
+                    {% if order.status == 'In Transit' or order.status == 'Pending' %}
+                    <form action="{{ url_for('views.cancel_order', order_id=order.id) }}" method="POST" class="order-cancel-form">
+                        <button type="submit" class="btn-cancel btn-sm" onclick="return confirm('Are you sure you want to cancel this order?')">Cancel Order</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
         </div>
+        {% endfor %}
     {% else %}
-        <p>No orders found.</p>
+        <div class="orders-empty">
+            <i class="fas fa-box-open"></i>
+            <h2>No orders yet</h2>
+            <p>Looks like you haven't placed any orders. Start shopping to see your orders here!</p>
+            <a href="{{ url_for('views.homepage') }}" class="btn-amazon-primary">Continue Shopping</a>
+        </div>
     {% endif %}
 </div>
-
-<style>
-/* General Page Styling */
-body {
-    font-family: 'Poppins', sans-serif;
-    background: #f3f4f6;
-}
-
-/* Center Title */
-h2 {
-    text-align: center;
-    font-size: 32px;
-    font-weight: bold;
-    color: #222;
-    margin-bottom: 20px;
-}
-
-/* Order Card Styling */
-.card {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    width: 100%;
-    min-height: 280px;
-    text-align: center;
-    position: relative;
-    backdrop-filter: blur(10px);
-}
-
-.card:hover {
-    transform: scale(1.05);
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* Responsive Grid Layout */
-@media (min-width: 1200px) {
-    .col-lg-3 { width: 25%; }
-}
-@media (max-width: 1199px) and (min-width: 992px) {
-    .col-md-4 { width: 33.33%; }
-}
-@media (max-width: 991px) and (min-width: 768px) {
-    .col-sm-6 { width: 50%; }
-}
-@media (max-width: 767px) {
-    .col-12 { width: 100%; }
-}
-
-/* Buttons */
-.btn-primary, .btn-danger {
-    font-size: 16px;
-    font-weight: bold;
-    padding: 12px;
-    border-radius: 10px;
-    width: 100%;
-    margin-top: 10px;
-    transition: 0.3s;
-}
-
-.btn-primary {
-    background: #007bff;
-    border: none;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #0056b3;
-}
-
-.btn-danger {
-    background: #dc3545;
-    border: none;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #b52b35;
-}
-</style>
 {% endblock %}
